@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json.schemastore.org/staticwebapp.config.json",
+  "routes": [
+    { "route": "/admin", "rewrite": "/admin/index.html", "allowedRoles": ["admin"] },
+    { "route": "/admin/", "rewrite": "/admin/index.html", "allowedRoles": ["admin"] },
+    { "route": "/admin/*", "allowedRoles": ["admin"] },
+    { "route": "/api/*", "allowedRoles": ["admin"] },
+    { "route": "/.auth/login/github", "allowedRoles": ["anonymous", "authenticated"] }
+  ],
+  "responseOverrides": {
+    "401": { "statusCode": 302, "redirect": "/.auth/login/github?post_login_redirect_uri=/admin/" },
+    "403": { "statusCode": 302, "redirect": "/.auth/login/github?post_login_redirect_uri=/admin/" },
+    "404": { "rewrite": "/404.html" }
+  },
+  "navigationFallback": {
+    "rewrite": "/404.html",
+    "exclude": [
+      "/api/*",
+      "/_next/*",
+      "/images/*",
+      "/*.{js,css,svg,png,jpg,jpeg,webp,gif,ico,txt,xml,json,woff,woff2}"
+    ]
+  },
+  "globalHeaders": {
+    "X-Content-Type-Options": "nosniff",
+    "Referrer-Policy": "strict-origin-when-cross-origin"
+  },
+  "mimeTypes": {
+    ".json": "application/json",
+    ".webp": "image/webp"
+  }
+}

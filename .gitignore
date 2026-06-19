@@ -2,6 +2,7 @@
 
 # dependencies
 /node_modules
+/api/node_modules
 /.pnp
 .pnp.*
 .yarn/*
@@ -35,6 +36,12 @@ yarn-error.log*
 
 # vercel
 .vercel
+
+# azure functions (admin api)
+/api/local.settings.json
+local.settings.json
+bin
+obj
 
 # typescript
 *.tsbuildinfo

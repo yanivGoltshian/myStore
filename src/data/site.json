@@ -1,0 +1,27 @@
+{
+  "name": "חשמל חנקין",
+  "nameEn": "Electro Hankin",
+  "legalName": "חשמל חנקין",
+  "tagline": "מוצרי חשמל ומכשירי חשמל לבית ולמטבח",
+  "url": "https://www.electrohankin.co.il",
+  "phone": "03-5562520",
+  "phoneRaw": "035562520",
+  "whatsapp": "972522503151",
+  "whatsappDisplay": "052-250-3151",
+  "email": "",
+  "facebook": "https://www.facebook.com/electroHankin",
+  "address": {
+    "street": "יהושע חנקין 71",
+    "streetEn": "Yehoshua Hankin 71",
+    "city": "חולון",
+    "cityEn": "Holon",
+    "postalCode": "58343",
+    "country": "IL",
+    "full": "יהושע חנקין 71, חולון"
+  },
+  "hours": "א׳–ה׳ 09:00–19:00 · ו׳ 09:00–14:00",
+  "openingHours": [
+    { "days": ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday"], "opens": "09:00", "closes": "19:00" },
+    { "days": ["Friday"], "opens": "09:00", "closes": "14:00" }
+  ]
+}

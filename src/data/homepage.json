@@ -1,0 +1,26 @@
+{
+  "announcement": "משלוח לכל הארץ · אחריות מלאה · שירות לקוחות 03-5562520",
+  "topbarPhone": "03-5562520",
+  "hero": {
+    "image": "/images/banners/hero-hankin.jpg",
+    "alt": "חשמל חנקין — חנות מוצרי חשמל ביתיים ושירותי חשמלאי בבית הלקוח",
+    "href": "/category/146/"
+  },
+  "promoTiles": [
+    { "id": "t-new",      "title": "מוצרים חדשים",        "image": "/images/banners/promo-new.jpg",      "categoryId": 146 },
+    { "id": "t-winter",   "title": "מוצרי חורף",          "image": "/images/banners/promo-winter.jpg",   "categoryId": 15 },
+    { "id": "t-choppers", "title": "קוצצי מזון",          "image": "/images/banners/promo-choppers.jpg", "categoryId": 120 },
+    { "id": "t-grills",   "title": "מנגלים וגרילים",      "image": "/images/banners/promo-grills.jpg",   "categoryId": 695 },
+    { "id": "t-cleaning", "title": "מוצרי ניקיון",        "image": "/images/banners/promo-cleaning.jpg", "categoryId": 762 },
+    { "id": "t-fan",      "title": "מאווררים ומצננים",    "image": "/images/banners/promo-fan.jpg",      "categoryId": 112 }
+  ],
+  "sections": [
+    { "id": "s-new",      "title": "מוצרים חדשים",     "icon": "✔️", "categoryId": 146, "limit": 12, "layout": "carousel" },
+    { "id": "s-summer",   "title": "מוצרי קיץ",        "icon": "🌀", "categoryId": 112, "limit": 12, "layout": "carousel" },
+    { "id": "s-kitchen",  "title": "מוצרים למטבח",     "icon": "🍳", "categoryId": 120, "limit": 12, "layout": "carousel" },
+    { "id": "s-cleaning", "title": "מוצרי ניקיון",     "icon": "🧺", "categoryId": 762, "limit": 12, "layout": "carousel" },
+    { "id": "s-care",     "title": "מוצרי טיפוח",      "icon": "💇", "categoryId": 140, "limit": 12, "layout": "carousel" },
+    { "id": "s-winter",   "title": "מוצרי חורף",       "icon": "🔥", "categoryId": 15,  "limit": 12, "layout": "carousel" },
+    { "id": "s-deals",    "title": "מוצרים עד 149 ₪",  "icon": "💰", "categoryId": 682, "limit": 12, "layout": "carousel" }
+  ]
+}
