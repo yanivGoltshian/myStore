@@ -86,13 +86,13 @@ export default function SiteHeader() {
             className="ms-auto flex items-center gap-2 rounded-md px-2 py-2 text-sm font-bold text-ink hover:text-brand-red md:ms-0"
           >
             <span className="relative grid h-9 w-9 place-items-center">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <svg className={count > 0 ? "cart-nudge" : undefined} width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                 <circle cx="9" cy="20" r="1.4" />
                 <circle cx="17" cy="20" r="1.4" />
                 <path d="M3 4h2l2.2 11.2a1 1 0 0 0 1 .8h7.9a1 1 0 0 0 1-.78L19.5 8H6.2" />
               </svg>
               {count > 0 && (
-                <span className="absolute -top-0.5 end-0 grid h-4 min-w-4 place-items-center rounded-full bg-brand-red px-1 text-[0.62rem] font-bold leading-none text-white">
+                <span className="cart-badge-pulse absolute -top-0.5 end-0 grid h-4 min-w-4 place-items-center rounded-full bg-brand-red px-1 text-[0.62rem] font-bold leading-none text-white">
                   {count}
                 </span>
               )}

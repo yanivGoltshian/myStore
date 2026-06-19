@@ -30,7 +30,10 @@ const NEXT_ORIGIN = process.env.NEXT_ORIGIN || "http://localhost:3000";
 // Web Apps serves in production — fully hydrated, no dev-server streaming/HMR).
 // Otherwise we fall back to proxying the Next dev server on :3000.
 const OUT_DIR = path.resolve(__dirname, "../out");
-const SERVE_STATIC = fs.existsSync(path.join(OUT_DIR, "index.html"));
+// ADMIN_FORCE_PROXY=1 forces proxy-to-Next mode (live hot reload) even when a
+// stale out/ build exists — used by `npm run dev:full`.
+const FORCE_PROXY = process.env.ADMIN_FORCE_PROXY === "1";
+const SERVE_STATIC = !FORCE_PROXY && fs.existsSync(path.join(OUT_DIR, "index.html"));
 
 const MIME = {
   ".html": "text/html; charset=utf-8",
@@ -135,9 +138,25 @@ async function handleApi(req, res, url) {
         return send(res, 200, { ok: true });
       }
     }
-    // /api/categories
-    if (seg[0] === "categories" && method === "GET") {
-      return send(res, 200, await store.getCategories());
+    // /api/categories  and  /api/categories/{id}
+    if (seg[0] === "categories") {
+      const id = seg[1];
+      if (!id) {
+        if (method === "GET") return send(res, 200, await store.getCategories());
+        if (method === "POST") {
+          const created = await store.createCategory(await readJsonBody(req));
+          return send(res, 201, created);
+        }
+      } else {
+        if (method === "PUT") {
+          const saved = await store.updateCategory(id, await readJsonBody(req));
+          return saved ? send(res, 200, saved) : send(res, 404, { error: "Not found" });
+        }
+        if (method === "DELETE") {
+          const r = await store.deleteCategory(id);
+          return r.ok ? send(res, 200, r) : send(res, 404, { error: "Not found" });
+        }
+      }
     }
     // /api/upload
     if (seg[0] === "upload" && method === "POST") {

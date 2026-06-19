@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { Product, Category } from "@/lib/types";
 import { apiGet, apiSend, uploadImage, formatPrice, type ProductList } from "./lib";
 import { Field, TextArea, Toggle, Button } from "./ui";
@@ -87,7 +87,115 @@ export default function ProductsTab({
     return m;
   }, [cats]);
 
+  // ----- main-site style autocomplete (grouped by category) -----
+  const [open, setOpen] = useState(false);
+  const [lineFilter, setLineFilter] = useState<{ id: number; name: string } | null>(null);
+  const searchRef = useRef<HTMLDivElement>(null);
+
+  const catById = useMemo(() => new Map(cats.map((c) => [c.id, c])), [cats]);
+  const childrenOf = useMemo(() => {
+    const m = new Map<number, number[]>();
+    cats.forEach((c) => {
+      if (c.parent) {
+        const a = m.get(c.parent) || [];
+        a.push(c.id);
+        m.set(c.parent, a);
+      }
+    });
+    return m;
+  }, [cats]);
+
+  const descendantsOf = useCallback(
+    (id: number): number[] => {
+      const out = [id];
+      const stack = [id];
+      while (stack.length) {
+        const cur = stack.pop() as number;
+        for (const k of childrenOf.get(cur) || []) {
+          out.push(k);
+          stack.push(k);
+        }
+      }
+      return out;
+    },
+    [childrenOf]
+  );
+
+  const topOf = useCallback(
+    (id: number): Category | undefined => {
+      let c = catById.get(id);
+      let guard = 0;
+      while (c && c.parent && guard++ < 20) c = catById.get(c.parent);
+      return c;
+    },
+    [catById]
+  );
+
+  useEffect(() => {
+    function onDown(e: MouseEvent) {
+      if (searchRef.current && !searchRef.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", onDown);
+    return () => document.removeEventListener("mousedown", onDown);
+  }, []);
+
+  // category "lines" matching the query
+  const suggestCats = useMemo(() => {
+    const q = query.trim();
+    if (!q) return [];
+    return cats.filter((c) => c.name.includes(q)).slice(0, 6);
+  }, [cats, query]);
+
+  // products matching the query, grouped by their top-level category
+  const suggestGroups = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    if (!q) return [] as { id: number; name: string; icon: string; items: Product[] }[];
+    const matched = products
+      .filter(
+        (p) =>
+          p.name.toLowerCase().includes(q) ||
+          String(p.model || "").toLowerCase().includes(q) ||
+          String(p.id).includes(q)
+      )
+      .slice(0, 60);
+    const groups = new Map<number, { id: number; name: string; icon: string; items: Product[] }>();
+    for (const p of matched) {
+      const top = topOf(p.categoryIds?.[0] ?? 0);
+      const gid = top?.id ?? 0;
+      let g = groups.get(gid);
+      if (!g) {
+        g = { id: gid, name: top?.name ?? "ללא קטגוריה", icon: top?.icon ?? "📦", items: [] };
+        groups.set(gid, g);
+      }
+      if (g.items.length < 4) g.items.push(p);
+    }
+    let total = 0;
+    const out: { id: number; name: string; icon: string; items: Product[] }[] = [];
+    for (const g of groups.values()) {
+      if (total >= 16) break;
+      out.push(g);
+      total += g.items.length;
+    }
+    return out;
+  }, [products, query, topOf]);
+
+  const hasSuggestions = suggestCats.length > 0 || suggestGroups.length > 0;
+
+  function pickLine(c: Category) {
+    setLineFilter({ id: c.id, name: c.name });
+    setQuery("");
+    setOpen(false);
+  }
+
   const filtered = useMemo(() => {
+    if (lineFilter) {
+      const set = new Set(descendantsOf(lineFilter.id));
+      return products.filter(
+        (p) => Array.isArray(p.categoryIds) && p.categoryIds.some((c) => set.has(c))
+      );
+    }
     const q = query.trim().toLowerCase();
     if (!q) return products;
     return products.filter(
@@ -96,7 +204,7 @@ export default function ProductsTab({
         String(p.model || "").toLowerCase().includes(q) ||
         String(p.id).includes(q)
     );
-  }, [products, query]);
+  }, [products, query, lineFilter, descendantsOf]);
 
   const shown = filtered.slice(0, 120);
 
@@ -195,13 +303,91 @@ export default function ProductsTab({
   return (
     <div className="space-y-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex items-center gap-2">
-          <input
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="חיפוש לפי שם, דגם או מק״ט…"
-            className="w-72 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm outline-none focus:border-red-500"
-          />
+        <div className="flex flex-wrap items-center gap-2">
+          <div ref={searchRef} className="relative">
+            <input
+              value={query}
+              onChange={(e) => {
+                setQuery(e.target.value);
+                setOpen(true);
+                if (lineFilter) setLineFilter(null);
+              }}
+              onFocus={() => setOpen(true)}
+              placeholder="חיפוש מוצר או קו מוצרים…"
+              className="w-80 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm outline-none focus:border-red-500"
+            />
+            {open && query.trim() && hasSuggestions ? (
+              <div className="absolute z-50 mt-1 max-h-96 w-[26rem] overflow-y-auto rounded-xl border border-gray-200 bg-white p-2 shadow-2xl">
+                {suggestCats.length ? (
+                  <div className="mb-1">
+                    <p className="px-2 pb-1 pt-1 text-[0.7rem] font-bold text-gray-400">
+                      קווי מוצרים
+                    </p>
+                    {suggestCats.map((c) => (
+                      <button
+                        key={`cat-${c.id}`}
+                        onClick={() => pickLine(c)}
+                        className="flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-right text-sm hover:bg-red-50"
+                      >
+                        <span className="text-base">{c.icon || "📦"}</span>
+                        <span className="font-semibold text-gray-700">{c.name}</span>
+                        {c.count ? (
+                          <span className="mr-auto text-xs text-gray-400">{c.count} מוצרים</span>
+                        ) : null}
+                      </button>
+                    ))}
+                  </div>
+                ) : null}
+                {suggestGroups.map((g) => (
+                  <div key={`grp-${g.id}`} className="mb-1">
+                    <p className="flex items-center gap-1 px-2 pb-1 pt-1 text-[0.7rem] font-bold text-gray-400">
+                      <span>{g.icon}</span>
+                      {g.name}
+                    </p>
+                    {g.items.map((p) => (
+                      <button
+                        key={`p-${p.id}`}
+                        onClick={() => {
+                          openEdit(p);
+                          setOpen(false);
+                          setQuery("");
+                        }}
+                        className="flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-right text-sm hover:bg-gray-50"
+                      >
+                        <span className="h-8 w-8 shrink-0 overflow-hidden rounded border border-gray-100 bg-gray-50">
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img src={p.image} alt="" loading="lazy" className="h-full w-full object-contain" />
+                        </span>
+                        <span className="min-w-0">
+                          <span className="line-clamp-1 text-gray-800">{p.name}</span>
+                          {p.model ? (
+                            <span className="text-xs text-gray-400" dir="ltr">
+                              {p.model}
+                            </span>
+                          ) : null}
+                        </span>
+                        <span className="mr-auto shrink-0 font-bold text-gray-700">
+                          {formatPrice(p.price)}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                ))}
+              </div>
+            ) : null}
+          </div>
+          {lineFilter ? (
+            <span className="inline-flex items-center gap-1 rounded-full bg-red-50 px-3 py-1.5 text-sm font-semibold text-red-700">
+              קו מוצרים: {lineFilter.name}
+              <button
+                onClick={() => setLineFilter(null)}
+                className="text-red-400 hover:text-red-700"
+                aria-label="ניקוי סינון"
+              >
+                ×
+              </button>
+            </span>
+          ) : null}
           <span className="text-sm text-gray-500">
             {filtered.length} מתוך {products.length}
           </span>

@@ -4,8 +4,11 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "dev:full": "node tools/dev-full.mjs",
+    "dev:api": "node tools/admin-local.mjs",
     "prebuild": "node scripts/gen-search-index.mjs",
     "build": "next build",
+    "preview": "node tools/admin-local.mjs",
     "start": "next start",
     "lint": "eslint"
   },

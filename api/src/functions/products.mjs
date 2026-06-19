@@ -8,7 +8,7 @@ app.http("products", {
   authLevel: "anonymous",
   route: "products",
   handler: async (request) => {
-    const denied = requireAdmin(request);
+    const denied = await requireAdmin(request);
     if (denied) return denied;
     try {
       if (request.method === "GET") {

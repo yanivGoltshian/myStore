@@ -21,9 +21,9 @@
     "country": "IL",
     "full": "יהושע חנקין 71, חולון"
   },
-  "hours": "א׳–ה׳ 09:00–19:00 · ו׳ 09:00–14:00",
+  "hours": "א׳–ה׳ 09:30–14:00 ו־16:30–19:30 · יום ג׳ אחה״צ סגור · ו׳ 09:30–14:00 · שבת סגור",
   "openingHours": [
-    { "days": ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday"], "opens": "09:00", "closes": "19:00" },
-    { "days": ["Friday"], "opens": "09:00", "closes": "14:00" }
+    { "days": ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday"], "opens": "09:30", "closes": "14:00" },
+    { "days": ["Sunday", "Monday", "Wednesday", "Thursday"], "opens": "16:30", "closes": "19:30" }
   ]
 }

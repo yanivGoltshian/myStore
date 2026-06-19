@@ -20,6 +20,11 @@ export default function LightingCard({
           src={product.image || "/images/placeholder.svg"}
           alt={product.name}
           loading="lazy"
+          onError={(e) => {
+            const img = e.currentTarget;
+            if (img.src.endsWith("/images/placeholder.svg")) return;
+            img.src = "/images/placeholder.svg";
+          }}
           className="mx-auto aspect-square w-full object-contain p-2 transition-transform duration-300 group-hover:scale-105"
         />
       </div>

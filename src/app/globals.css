@@ -90,6 +90,28 @@ body {
 }
 .fade-up { animation: fadeUp .45s ease both; }
 
+/* Cart attention animation — runs while items wait for checkout */
+@keyframes cartNudge {
+  0%, 45%, 100% { transform: translateY(0) rotate(0) scale(1); }
+  50% { transform: translateY(-1px) rotate(0) scale(1.12); }
+  56% { transform: translateY(-4px) rotate(-12deg) scale(1.12); }
+  64% { transform: translateY(-4px) rotate(12deg) scale(1.12); }
+  72% { transform: translateY(-3px) rotate(-8deg) scale(1.08); }
+  80% { transform: translateY(-2px) rotate(5deg) scale(1.04); }
+  88% { transform: translateY(0) rotate(0) scale(1); }
+}
+.cart-nudge { animation: cartNudge 2s ease-in-out infinite; transform-origin: 50% 65%; }
+
+@keyframes cartBadgePulse {
+  0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(196, 30, 58, .6); }
+  50% { transform: scale(1.25); box-shadow: 0 0 0 6px rgba(196, 30, 58, 0); }
+}
+.cart-badge-pulse { animation: cartBadgePulse 1.3s ease-in-out infinite; }
+
+@media (prefers-reduced-motion: reduce) {
+  .cart-nudge, .cart-badge-pulse { animation: none; }
+}
+
 /* Product description (WooCommerce HTML) */
 .prose-rtl img { max-width: 100%; height: auto; margin: .75rem auto; }
 .prose-rtl p { margin: .6rem 0; }

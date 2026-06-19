@@ -8,7 +8,7 @@ app.http("upload", {
   authLevel: "anonymous",
   route: "upload",
   handler: async (request) => {
-    const denied = requireAdmin(request);
+    const denied = await requireAdmin(request);
     if (denied) return denied;
     try {
       const body = await readBody(request);

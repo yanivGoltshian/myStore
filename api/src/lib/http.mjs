@@ -10,9 +10,9 @@ export function json(status, data) {
 }
 
 // Returns an error response if the caller is not an admin, otherwise null.
-export function requireAdmin(request) {
-  if (!isAdmin(request)) {
-    return json(403, { error: "Forbidden — admin role required." });
+export async function requireAdmin(request) {
+  if (!(await isAdmin(request))) {
+    return json(403, { error: "Forbidden — admin sign-in required." });
   }
   return null;
 }
