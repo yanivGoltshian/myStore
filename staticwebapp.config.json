@@ -17,7 +17,7 @@
       "/api/*",
       "/_next/*",
       "/images/*",
-      "/*.{js,css,svg,png,jpg,jpeg,webp,gif,ico,txt,xml,json,woff,woff2}"
+      "/*.{js,css,svg,png,jpg,jpeg,webp,gif,ico,txt,xml,json,webmanifest,woff,woff2}"
     ]
   },
   "globalHeaders": {
@@ -26,6 +26,7 @@
   },
   "mimeTypes": {
     ".json": "application/json",
+    ".webmanifest": "application/manifest+json",
     ".webp": "image/webp"
   }
 }

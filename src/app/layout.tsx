@@ -1,10 +1,11 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Heebo } from "next/font/google";
 import "./globals.css";
 import SiteHeader from "@/components/SiteHeader";
 import SiteFooter from "@/components/SiteFooter";
 import ConditionalChrome from "@/components/ConditionalChrome";
 import ScrollToTop from "@/components/ScrollToTop";
+import PWARegister from "@/components/PWARegister";
 import { CartProvider } from "@/lib/cart";
 import { site } from "@/lib/data";
 
@@ -26,6 +27,12 @@ export const metadata: Metadata = {
   },
   description,
   applicationName: site.name,
+  manifest: "/manifest.webmanifest",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: site.name,
+  },
   keywords: [
     "חשמל חנקין",
     "Electro Hankin",
@@ -81,6 +88,13 @@ export const metadata: Metadata = {
     follow: true,
     googleBot: { index: true, follow: true, "max-image-preview": "large" },
   },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#961a1a",
+  colorScheme: "light",
+  width: "device-width",
+  initialScale: 1,
 };
 
 function StructuredData() {
@@ -145,6 +159,7 @@ export default function RootLayout({
     <html lang="he" dir="rtl" className={heebo.variable}>
       <body>
         <ScrollToTop />
+        <PWARegister />
         <StructuredData />
         <CartProvider>
           <ConditionalChrome
