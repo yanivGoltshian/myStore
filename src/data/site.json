@@ -4,6 +4,8 @@
   "legalName": "חשמל חנקין",
   "tagline": "מוצרי חשמל ומכשירי חשמל לבית ולמטבח",
   "url": "https://www.electrohankin.co.il",
+  "deployUrl": "https://jolly-bush-07bb10a03.7.azurestaticapps.net",
+  "ogImage": "/og-image.jpg",
   "phone": "03-5562520",
   "phoneRaw": "035562520",
   "whatsapp": "972522503151",

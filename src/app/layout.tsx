@@ -19,7 +19,7 @@ const title = `${site.name} | ${site.tagline}`;
 const description = `${site.name} — חנות מוצרי החשמל והמכשירים החשמליים לבית ולמטבח. מוצרי מטבח, קיץ, חורף, טיפוח וניקיון במחירים משתלמים, באחריות מלאה ובשירות אישי. ${site.address.full}. טל׳ ${site.phone}.`;
 
 export const metadata: Metadata = {
-  metadataBase: new URL(site.url),
+  metadataBase: new URL(site.deployUrl),
   title: {
     default: title,
     template: `%s | ${site.name}`,
@@ -43,6 +43,13 @@ export const metadata: Metadata = {
   creator: site.name,
   publisher: site.name,
   formatDetection: { telephone: true, address: true, email: true },
+  icons: {
+    icon: [
+      { url: "/icon.svg", type: "image/svg+xml" },
+      { url: "/favicon.ico", sizes: "any" },
+    ],
+    apple: [{ url: "/apple-icon.png", sizes: "180x180" }],
+  },
   alternates: {
     canonical: "/",
     languages: { "he-IL": "/" },
@@ -56,10 +63,10 @@ export const metadata: Metadata = {
     type: "website",
     images: [
       {
-        url: "/images/banners/hero-flag.jpg",
+        url: site.ogImage,
         width: 1200,
         height: 630,
-        alt: site.name,
+        alt: `${site.name} — ${site.tagline}`,
       },
     ],
   },
@@ -67,7 +74,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title,
     description,
-    images: ["/images/banners/hero-flag.jpg"],
+    images: [site.ogImage],
   },
   robots: {
     index: true,
@@ -87,7 +94,7 @@ function StructuredData() {
         alternateName: site.nameEn,
         legalName: site.legalName,
         url: site.url,
-        image: `${site.url}/images/banners/hero-flag.jpg`,
+        image: `${site.deployUrl}${site.ogImage}`,
         description,
         telephone: site.phone,
         priceRange: "₪₪",

@@ -30,7 +30,7 @@
   "id": 765,
   "name": "גיהוץ",
   "slug": "cat-765",
-  "parent": 762,
+  "parent": 136,
   "count": 19,
   "icon": "",
   "isTop": false
@@ -468,20 +468,11 @@
   "isTop": false
  },
  {
-  "id": 762,
-  "name": "ניקיון וגיהוץ",
-  "slug": "cleaning",
-  "parent": 0,
-  "count": 40,
-  "icon": "🧺",
-  "isTop": true
- },
- {
   "id": 136,
   "name": "נקיון הבית",
   "slug": "home-cleaning",
   "parent": 0,
-  "count": 19,
+  "count": 40,
   "icon": "🧹",
   "isTop": true
  },
@@ -615,7 +606,7 @@
   "id": 764,
   "name": "שטיפה וניקוי",
   "slug": "cat-764",
-  "parent": 762,
+  "parent": 136,
   "count": 6,
   "icon": "",
   "isTop": false

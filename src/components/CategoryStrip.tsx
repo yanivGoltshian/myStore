@@ -35,14 +35,6 @@ const ICONS: Record<string, ReactNode> = {
       <path d="M8 8.6 20 16M8 15.4 20 8" />
     </>
   ),
-  // ניקיון וגיהוץ — iron
-  "762": (
-    <>
-      <path d="M3 15c.6-4 4-7 9-7h6a2 2 0 0 1 2 2v5H3Z" />
-      <path d="M3 18.5h17.5" />
-      <path d="M10 8V6h6" />
-    </>
-  ),
   // נקיון הבית — spray bottle
   "136": (
     <>

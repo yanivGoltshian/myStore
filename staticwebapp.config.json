@@ -1,7 +1,6 @@
 {
   "$schema": "https://json.schemastore.org/staticwebapp.config.json",
   "routes": [
-    { "route": "/admin", "rewrite": "/admin/index.html", "allowedRoles": ["admin"] },
     { "route": "/admin/", "rewrite": "/admin/index.html", "allowedRoles": ["admin"] },
     { "route": "/admin/*", "allowedRoles": ["admin"] },
     { "route": "/api/*", "allowedRoles": ["admin"] },

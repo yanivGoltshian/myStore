@@ -85,6 +85,8 @@ export type Site = {
   legalName: string;
   tagline: string;
   url: string;
+  deployUrl: string;
+  ogImage: string;
   phone: string;
   phoneRaw: string;
   whatsapp: string;
