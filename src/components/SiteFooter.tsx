@@ -73,7 +73,7 @@ export default function SiteFooter() {
           <ul className="space-y-1.5">
             {nav.slice(0, 7).map((c) => (
               <li key={c.id}>
-                <Link href={`/category/${c.id}/`} className="text-[0.82rem] text-white/85 hover:text-brand-gold">
+                <Link href={c.href ?? `/category/${c.id}/`} className="text-[0.82rem] text-white/85 hover:text-brand-gold">
                   {c.name}
                 </Link>
               </li>

@@ -4,6 +4,13 @@ import { nav, getProductsByCategory } from "@/lib/data";
 
 // Uniform mono-line icons per category (classic, consistent look — no emoji)
 const ICONS: Record<string, ReactNode> = {
+  // תאורה — light bulb
+  "9000": (
+    <>
+      <path d="M9 18h6M10 21h4" />
+      <path d="M12 3a6 6 0 0 0-3.6 10.8c.5.4.8.9.9 1.5l.1.7h5.2l.1-.7c.1-.6.4-1.1.9-1.5A6 6 0 0 0 12 3Z" />
+    </>
+  ),
   // מוצרים למטבח — chef hat
   "120": (
     <>
@@ -116,11 +123,11 @@ export default function CategoryStrip() {
       </div>
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-6">
         {nav.map((c) => {
-          const thumb = getProductsByCategory(c.id).find((p) => p.image)?.image;
+          const thumb = c.thumb ?? getProductsByCategory(c.id).find((p) => p.image)?.image;
           return (
             <Link
               key={c.id}
-              href={`/category/${c.id}/`}
+              href={c.href ?? `/category/${c.id}/`}
               className="card-hover group flex flex-col items-center rounded-xl border bg-white p-4 text-center shadow-card"
             >
               <span className="grid h-11 w-11 place-items-center text-brand-red">

@@ -22,7 +22,7 @@ export type Category = {
   isTop: boolean;
 };
 
-export type NavSub = { id: number; name: string; count: number };
+export type NavSub = { id: number; name: string; count: number; href?: string };
 
 export type NavItem = {
   id: number;
@@ -31,6 +31,8 @@ export type NavItem = {
   icon: string;
   count: number;
   subs: NavSub[];
+  href?: string;
+  thumb?: string;
 };
 
 export type PromoTile = {

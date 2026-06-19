@@ -1,0 +1,104 @@
+[
+ {
+  "id": 5,
+  "name": "מודרני",
+  "count": 1133,
+  "thumb": "/images/lighting/30229.jpg"
+ },
+ {
+  "id": 6,
+  "name": "קריסטלים",
+  "count": 180,
+  "thumb": "/images/lighting/27591.jpg"
+ },
+ {
+  "id": 7,
+  "name": "וינטאג׳ ועתיק",
+  "count": 672,
+  "thumb": "/images/lighting/30366.jpg"
+ },
+ {
+  "id": 8,
+  "name": "מאווררי תקרה",
+  "count": 25,
+  "thumb": "/images/lighting/28088.jpg"
+ },
+ {
+  "id": 9,
+  "name": "צמודי תקרה",
+  "count": 782,
+  "thumb": "/images/lighting/27595.jpg"
+ },
+ {
+  "id": 10,
+  "name": "מנורות קיר",
+  "count": 1160,
+  "thumb": "/images/lighting/30217.jpg"
+ },
+ {
+  "id": 11,
+  "name": "פסי צבירה וספוטים",
+  "count": 481,
+  "thumb": "/images/lighting/30457.jpg"
+ },
+ {
+  "id": 12,
+  "name": "חדרי ילדים",
+  "count": 36,
+  "thumb": "/images/lighting/29692.jpg"
+ },
+ {
+  "id": 13,
+  "name": "מנורות עמידה ושולחן",
+  "count": 414,
+  "thumb": "/images/lighting/30308.jpg"
+ },
+ {
+  "id": 14,
+  "name": "תאורת חוץ סולארית",
+  "count": 56,
+  "thumb": "/images/lighting/1893.jpg"
+ },
+ {
+  "id": 15,
+  "name": "תאורת חוץ מודרנית",
+  "count": 717,
+  "thumb": "/images/lighting/27546.jpg"
+ },
+ {
+  "id": 16,
+  "name": "תאורת חוץ קלאסית",
+  "count": 268,
+  "thumb": "/images/lighting/14864.jpg"
+ },
+ {
+  "id": 17,
+  "name": "גופי שקועים",
+  "count": 399,
+  "thumb": "/images/lighting/28742.jpg"
+ },
+ {
+  "id": 18,
+  "name": "טכני ופרופילים",
+  "count": 222,
+  "thumb": "/images/lighting/29927.jpg"
+ },
+ {
+  "id": 19,
+  "name": "נורות ותאורת חירום",
+  "count": 83,
+  "thumb": "/images/lighting/19166.jpg"
+ },
+ {
+  "id": 20,
+  "name": "אקססוריז",
+  "count": 231,
+  "thumb": "/images/lighting/28738.jpg"
+ },
+ {
+  "id": 21,
+  "name": "נוספים",
+  "count": 830,
+  "thumb": "/images/lighting/19477.jpg"
+ }
+]

@@ -6,6 +6,7 @@ import SiteFooter from "@/components/SiteFooter";
 import ConditionalChrome from "@/components/ConditionalChrome";
 import ScrollToTop from "@/components/ScrollToTop";
 import PWARegister from "@/components/PWARegister";
+import InstallPrompt from "@/components/InstallPrompt";
 import { CartProvider } from "@/lib/cart";
 import { site } from "@/lib/data";
 
@@ -168,6 +169,7 @@ export default function RootLayout({
           >
             {children}
           </ConditionalChrome>
+          <InstallPrompt />
         </CartProvider>
       </body>
     </html>

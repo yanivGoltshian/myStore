@@ -113,7 +113,7 @@ export default function SiteHeader() {
               <li key={cat.id} className="border-b">
                 <div className="flex items-center justify-between">
                   <Link
-                    href={`/category/${cat.id}/`}
+                    href={cat.href ?? `/category/${cat.id}/`}
                     onClick={() => setMobileOpen(false)}
                     className="flex flex-1 items-center gap-2 py-3 text-sm font-semibold text-ink"
                   >
@@ -135,7 +135,7 @@ export default function SiteHeader() {
                     {cat.subs.map((sub) => (
                       <li key={sub.id}>
                         <Link
-                          href={`/category/${sub.id}/`}
+                          href={sub.href ?? `/category/${sub.id}/`}
                           onClick={() => setMobileOpen(false)}
                           className="block py-1.5 text-[0.82rem] text-muted"
                         >

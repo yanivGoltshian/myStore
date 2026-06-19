@@ -1,7 +1,7 @@
 /* Service worker for חשמל חנקין PWA.
    Network-first for page navigations (fresh prices/content),
    cache-first for static assets (images, _next, icons). */
-const CACHE = "hankin-v1";
+const CACHE = "hankin-v2";
 const OFFLINE_FALLBACK = "/";
 const PRECACHE = ["/", "/manifest.webmanifest", "/icon-192.png", "/icon-512.png"];
 
