@@ -30,18 +30,35 @@ export function getPrincipal(request) {
 }
 
 export function getBearerToken(request) {
+  // Primary: custom header. Azure Static Web Apps overwrites the `Authorization`
+  // header on requests to managed functions with its own internal token, so the
+  // admin panel sends the Google ID token in `X-Admin-Token` instead.
+  const fromCustom = readHeader(request, "x-admin-token");
+  if (fromCustom && typeof fromCustom === "string" && fromCustom.trim()) {
+    return fromCustom.trim();
+  }
+  // Fallback: `Authorization: Bearer <token>` (used by the local dev harness,
+  // where SWA's header injection is not present).
+  const raw = readHeader(request, "authorization");
+  if (!raw || typeof raw !== "string") return null;
+  const m = /^Bearer\s+(.+)$/i.exec(raw.trim());
+  return m ? m[1].trim() : null;
+}
+
+function readHeader(request, name) {
   let raw;
   try {
-    raw = request.headers?.get?.("authorization");
+    raw = request.headers?.get?.(name);
   } catch {
     raw = undefined;
   }
   if (!raw && request.headers && typeof request.headers === "object") {
-    raw = request.headers["authorization"] || request.headers["Authorization"];
+    raw =
+      request.headers[name] ||
+      request.headers[name.toLowerCase()] ||
+      request.headers[name.toUpperCase()];
   }
-  if (!raw || typeof raw !== "string") return null;
-  const m = /^Bearer\s+(.+)$/i.exec(raw.trim());
-  return m ? m[1].trim() : null;
+  return raw;
 }
 
 export function adminEmails() {

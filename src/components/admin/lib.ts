@@ -2,8 +2,13 @@ import type { Product } from "@/lib/types";
 
 // --- Admin auth token (Google ID token) -----------------------------------
 // The admin panel signs in with Google and stores the returned ID token here.
-// Every API call carries it as `Authorization: Bearer <token>`; the Azure
+// Every API call carries it in the custom `X-Admin-Token` header; the Azure
 // Function verifies it against Google + the email allowlist on the server.
+//
+// NOTE: we deliberately do NOT use the `Authorization` header. Azure Static Web
+// Apps injects its OWN `Authorization: Bearer <HS256 token>` into requests to
+// managed functions, which overwrites the client's value — so the Google token
+// would never reach the verifier. A custom header passes through untouched.
 const TOKEN_KEY = "hankin-admin-token";
 let authToken: string | null = null;
 
@@ -29,7 +34,7 @@ export function getAuthToken(): string | null {
 
 function withAuth(headers: Record<string, string>): Record<string, string> {
   const t = getAuthToken();
-  return t ? { ...headers, authorization: `Bearer ${t}` } : headers;
+  return t ? { ...headers, "x-admin-token": t } : headers;
 }
 
 export type AdminAuthConfig = { googleClientId: string };
