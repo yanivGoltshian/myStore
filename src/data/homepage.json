@@ -9,14 +9,6 @@
   "promoTiles": [],
   "sections": [
     {
-      "id": "s-new",
-      "title": "מוצרים חדשים",
-      "icon": "✔️",
-      "categoryId": 146,
-      "limit": 12,
-      "layout": "carousel"
-    },
-    {
       "id": "s-summer",
       "title": "מוצרי קיץ",
       "icon": "🌀",
