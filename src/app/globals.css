@@ -184,3 +184,15 @@ body {
 .prose-rtl table { width: 100%; border-collapse: collapse; margin: .8rem 0; }
 .prose-rtl td, .prose-rtl th { border: 1px solid var(--color-line); padding: .4rem .6rem; }
 .prose-rtl a { color: var(--color-brand-red); }
+
+/* Global keyboard-focus visibility (accessibility) */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+[tabindex]:focus-visible {
+  outline: 2px solid #00509e;
+  outline-offset: 2px;
+  border-radius: 2px;
+}

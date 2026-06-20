@@ -14,8 +14,6 @@ const legal = [
   { label: "מדיניות פרטיות", href: "/privacy/" },
 ];
 
-const pay = ["VISA", "MasterCard", "Diners", "Cal", "American Express", "Bit"];
-
 export default function SiteFooter() {
   return (
     <footer className="mt-16 stars-bg text-white">
@@ -105,17 +103,13 @@ export default function SiteFooter() {
               </li>
             ))}
           </ul>
-          <h4 className="mb-2 mt-5 text-[0.72rem] font-bold text-white/70">קנייה מאובטחת</h4>
-          <div className="flex flex-wrap gap-1.5">
-            {pay.map((p) => (
-              <span key={p} className="rounded bg-white px-2 py-1 text-[0.58rem] font-bold text-brand-red">
-                {p}
-              </span>
-            ))}
-          </div>
+          <h4 className="mb-2 mt-5 text-[0.72rem] font-bold text-white/70">הזמנה ותשלום</h4>
+          <p className="text-[0.7rem] leading-relaxed text-white/75">
+            ההזמנה מתבצעת בוואטסאפ או בטלפון, ותיאום התשלום נעשה מולנו ישירות.
+            פרטי אשראי אינם נמסרים באתר.
+          </p>
           <div className="mt-2 flex flex-wrap gap-1.5">
-            <span className="rounded border border-white/40 px-2 py-1 text-[0.58rem] font-semibold">🔒 SSL</span>
-            <span className="rounded border border-white/40 px-2 py-1 text-[0.58rem] font-semibold">PCI DSS</span>
+            <span className="rounded border border-white/40 px-2 py-1 text-[0.58rem] font-semibold">🔒 אתר מאובטח SSL</span>
           </div>
         </div>
       </div>
