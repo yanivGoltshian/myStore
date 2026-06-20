@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import AddToCartButton from "@/components/AddToCartButton";
+import ShareBar from "@/components/ShareBar";
 import siteData from "@/data/site.json";
 import {
   LIGHTING_TOP,
@@ -191,6 +192,21 @@ export default function LightingDetailClient() {
               </svg>
               ייעוץ
             </a>
+          </div>
+
+          <div className="mt-5 border-t pt-5">
+            <ShareBar
+              shareUrl={`${siteData.deployUrl}/lighting/p?c=${catId ?? ""}&id=${product.id}`}
+              message={
+                `😍 מצאתי משהו מושלם ב${siteData.name}!\n` +
+                `${product.name}${product.model ? ` (דגם ${product.model})` : ""}` +
+                `${product.price > 0 ? ` — ${formatLightingPrice(product.price)}` : ""}\n` +
+                `שווה הצצה 👈\n${siteData.deployUrl}/lighting/p?c=${catId ?? ""}&id=${product.id}`
+              }
+              instagramUrl={siteData.instagram}
+              shareTitle={`${product.name} | ${siteData.name}`}
+              label="שתפו את המוצר"
+            />
           </div>
 
           <ul className="mt-6 space-y-2 border-t pt-5 text-[0.82rem] text-muted">

@@ -3,6 +3,7 @@ import CategoryStrip from "@/components/CategoryStrip";
 import PromoTiles from "@/components/PromoTiles";
 import ValueProps from "@/components/ValueProps";
 import ProductCarousel from "@/components/ProductCarousel";
+import ShareBar from "@/components/ShareBar";
 import { homepage, getProductsByCategory, site } from "@/lib/data";
 
 export default function Home() {
@@ -27,6 +28,27 @@ export default function Home() {
           />
         );
       })}
+
+      <section className="container-x mt-14">
+        <div className="share-band">
+          <h3 className="text-xl font-extrabold text-brand-red md:text-2xl">
+            <span className="text-brand-gold">✦</span> אוהבים את {site.name}? ספרו לחברים
+          </h3>
+          <p className="mt-1.5 mb-5 text-sm font-light text-muted">
+            שיתוף קטן ממכם — עזרה גדולה לעסק משפחתי 🙏
+          </p>
+          <ShareBar
+            center
+            shareUrl={`${site.deployUrl}/`}
+            message={
+              `⚡ ממליץ בחום על ${site.name} — מוצרי חשמל לבית, מטבח ותאורה ` +
+              `במחירים משתלמים ושירות אישי 🏠\nשווה ביקור 👇\n${site.deployUrl}/`
+            }
+            instagramUrl={site.instagram}
+            shareTitle={`${site.name} — ${site.tagline}`}
+          />
+        </div>
+      </section>
 
       <section className="mt-14 stars-bg border-y-2 border-brand-gold text-white">
         <div className="container-x flex flex-wrap items-center justify-center gap-x-3 gap-y-1 py-5 text-center">

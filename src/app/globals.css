@@ -112,6 +112,69 @@ body {
   .cart-nudge, .cart-badge-pulse { animation: none; }
 }
 
+/* Share bar — elegant outline icon buttons */
+.share-ico {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 9999px;
+  display: grid;
+  place-items: center;
+  background: #fff;
+  border: 1.5px solid #e6e9ee;
+  color: #8a9099;
+  cursor: pointer;
+  transition: transform .18s cubic-bezier(.34, 1.56, .64, 1), border-color .18s, color .18s, box-shadow .18s;
+}
+.share-ico svg { width: 1.18rem; height: 1.18rem; }
+.share-ico:hover { transform: translateY(-3px) scale(1.05); box-shadow: 0 6px 16px rgba(20, 30, 50, .12); }
+.share-ico--wa:hover { border-color: #25D366; color: #25D366; }
+.share-ico--fb:hover { border-color: #1877F2; color: #1877F2; }
+.share-ico--ig:hover { border-color: #E1306C; color: #E1306C; }
+.share-ico--cp:hover { border-color: #00509e; color: #00509e; }
+.share-ico:focus-visible { outline: 2px solid #00509e; outline-offset: 2px; }
+
+/* Homepage share band — soft cream card with a thin gold top line */
+.share-band {
+  position: relative;
+  border-radius: 1.1rem;
+  padding: 1.9rem 1.75rem;
+  text-align: center;
+  overflow: hidden;
+  background: linear-gradient(180deg, #fffdf8 0%, #fbf6ec 100%);
+  border: 1px solid #efe6cf;
+  box-shadow: 0 6px 24px rgba(134, 36, 33, .06);
+}
+.share-band::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, #d4af37, transparent);
+}
+
+/* Copy / share confirmation toast */
+.share-toast {
+  position: fixed;
+  bottom: 1.25rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 60;
+  background: #2f3338;
+  color: #fff;
+  font-size: .85rem;
+  font-weight: 600;
+  padding: .6rem 1.1rem;
+  border-radius: .7rem;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, .25);
+  animation: fadeUp .25s ease both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .share-ico:hover { transform: none; }
+}
+
 /* Product description (WooCommerce HTML) */
 .prose-rtl img { max-width: 100%; height: auto; margin: .75rem auto; }
 .prose-rtl p { margin: .6rem 0; }

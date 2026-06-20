@@ -95,6 +95,7 @@ export type Site = {
   whatsappDisplay: string;
   email: string;
   facebook: string;
+  instagram: string;
   address: SiteAddress;
   hours: string;
   openingHours: OpeningHours[];

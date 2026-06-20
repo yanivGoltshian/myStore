@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import ProductCarousel from "@/components/ProductCarousel";
 import AddToCartButton from "@/components/AddToCartButton";
+import ShareBar from "@/components/ShareBar";
 import { products, site, getProduct, getCategory, getProductsByCategory, formatPrice } from "@/lib/data";
 
 export function generateStaticParams() {
@@ -52,6 +53,13 @@ export default async function ProductPage({
     ? getProductsByCategory(primaryCat.id).filter((p) => p.id !== product.id).slice(0, 12)
     : [];
   const showSale = product.onSale && product.regularPrice > product.price;
+
+  const shareUrl = `${site.deployUrl}/product/${product.id}/`;
+  const shareMessage =
+    `😍 מצאתי משהו מושלם ב${site.name}!\n` +
+    `${product.name}${product.model ? ` (דגם ${product.model})` : ""}` +
+    `${product.price > 0 ? ` — ${formatPrice(product.price)}` : ""}\n` +
+    `שווה הצצה 👈\n${shareUrl}`;
 
   const productLd = {
     "@context": "https://schema.org",
@@ -160,6 +168,16 @@ export default async function ProductPage({
               </svg>
               ייעוץ
             </a>
+          </div>
+
+          <div className="mt-5 border-t pt-5">
+            <ShareBar
+              shareUrl={shareUrl}
+              message={shareMessage}
+              instagramUrl={site.instagram}
+              shareTitle={`${product.name} | ${site.name}`}
+              label="שתפו את המוצר"
+            />
           </div>
 
           <ul className="mt-6 space-y-2 border-t pt-5 text-[0.82rem] text-muted">
