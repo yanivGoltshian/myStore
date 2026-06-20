@@ -1,11 +1,24 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import ProductGrid from "@/components/ProductGrid";
 import { categories, site, getCategory, getProductsByCategory } from "@/lib/data";
 
+type LightingCategory = {
+  id: number;
+  parent?: number;
+};
+
+function lightingHref(category: LightingCategory): string | null {
+  if (category.id === 9000) return "/lighting/";
+  if (category.parent === 9000) return `/lighting/c/${category.id - 9000}/`;
+  return null;
+}
+
 export function generateStaticParams() {
-  return categories.map((c) => ({ id: String(c.id) }));
+  return categories
+    .filter((c) => c.parent !== 9000)
+    .map((c) => ({ id: String(c.id) }));
 }
 
 export async function generateMetadata({
@@ -16,6 +29,14 @@ export async function generateMetadata({
   const id = Number((await params).id);
   const category = getCategory(id);
   if (!category) return { title: "קטגוריה לא נמצאה" };
+  const href = lightingHref(category as LightingCategory);
+  if (href) {
+    return {
+      title: category.name,
+      description: `${category.name} ב${site.name} — מחלקת התאורה.`,
+      alternates: { canonical: href },
+    };
+  }
   const count = getProductsByCategory(id).length;
   const description = `${category.name} ב${site.name} — מבחר של ${count} מוצרים במחירים משתלמים, אחריות מלאה ושירות אישי. משלוח לכל הארץ.`;
   return {
@@ -39,6 +60,8 @@ export default async function CategoryPage({
   const id = Number((await params).id);
   const category = getCategory(id);
   if (!category) notFound();
+  const href = lightingHref(category as LightingCategory);
+  if (href) redirect(href);
 
   const products = getProductsByCategory(id);
   const subs = categories.filter((c) => c.parent === id);

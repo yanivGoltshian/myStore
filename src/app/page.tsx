@@ -3,7 +3,6 @@ import CategoryStrip from "@/components/CategoryStrip";
 import DealsCube from "@/components/DealsCube";
 import PromoTiles from "@/components/PromoTiles";
 import ValueProps from "@/components/ValueProps";
-import LightingShowcase from "@/components/LightingShowcase";
 import ProductCarousel from "@/components/ProductCarousel";
 import ShareBar from "@/components/ShareBar";
 import { homepage, getProductsByCategory, site } from "@/lib/data";
@@ -22,9 +21,6 @@ export default function Home() {
       )}
       <PromoTiles tiles={homepage.promoTiles} />
       <ValueProps />
-      {homepage.lightingShowcase?.enabled ? (
-        <LightingShowcase config={homepage.lightingShowcase} />
-      ) : null}
 
       {homepage.sections.map((s) => {
         const products = getProductsByCategory(s.categoryId).slice(0, s.limit);

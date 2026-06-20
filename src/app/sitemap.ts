@@ -14,12 +14,20 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${base}/contact/`, lastModified: now, changeFrequency: "monthly", priority: 0.6 },
   ];
 
-  const categoryRoutes: MetadataRoute.Sitemap = categories.map((c) => ({
-    url: `${base}/category/${c.id}/`,
-    lastModified: now,
-    changeFrequency: "weekly",
-    priority: 0.7,
-  }));
+  const categoryRoutes: MetadataRoute.Sitemap = categories.map((c) => {
+    const path =
+      c.id === 9000
+        ? "/lighting/"
+        : c.parent === 9000
+          ? `/lighting/c/${c.id - 9000}/`
+          : `/category/${c.id}/`;
+    return {
+      url: `${base}${path}`,
+      lastModified: now,
+      changeFrequency: "weekly",
+      priority: 0.7,
+    };
+  });
 
   const productRoutes: MetadataRoute.Sitemap = products.map((p) => ({
     url: `${base}/product/${p.id}/`,

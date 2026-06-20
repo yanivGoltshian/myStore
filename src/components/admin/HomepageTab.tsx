@@ -9,9 +9,7 @@ import type {
   DealsCube,
   DealFace,
   Product,
-  LightingShowcase,
 } from "@/lib/types";
-import { lightingSubcats } from "@/lib/lighting";
 import { apiGet, apiSend, uploadImage, adminPreviewSrc, formatPrice, type ProductList } from "./lib";
 import { Field, TextArea, Button, Toggle } from "./ui";
 
@@ -278,41 +276,6 @@ export default function HomepageTab({
     setHp((s) => (s ? { ...s, sections: s.sections.filter((_, j) => j !== i) } : s));
   }
 
-  // --- Lighting showcase helpers ---
-  const lightingShowcase: LightingShowcase = hp.lightingShowcase ?? {
-    enabled: false,
-    title: "✦ מחלקת התאורה",
-    subtitle: "",
-    subcatIds: [],
-  };
-  const pickedLightingSubcats = lightingShowcase.subcatIds
-    .map((id) => lightingSubcats.find((c) => c.id === id))
-    .filter((c): c is (typeof lightingSubcats)[number] => Boolean(c));
-  const availableLightingSubcats = lightingSubcats.filter(
-    (c) => !lightingShowcase.subcatIds.includes(c.id)
-  );
-  function setLightingShowcase(patch: Partial<LightingShowcase>) {
-    setHp((s) =>
-      s ? { ...s, lightingShowcase: { ...lightingShowcase, ...patch } } : s
-    );
-  }
-  function addLightingSubcat(id: number) {
-    if (!id || lightingShowcase.subcatIds.includes(id)) return;
-    setLightingShowcase({ subcatIds: [...lightingShowcase.subcatIds, id] });
-  }
-  function removeLightingSubcat(id: number) {
-    setLightingShowcase({
-      subcatIds: lightingShowcase.subcatIds.filter((x) => x !== id),
-    });
-  }
-  function moveLightingSubcat(i: number, dir: -1 | 1) {
-    const j = i + dir;
-    if (j < 0 || j >= lightingShowcase.subcatIds.length) return;
-    const next = lightingShowcase.subcatIds.slice();
-    [next[i], next[j]] = [next[j], next[i]];
-    setLightingShowcase({ subcatIds: next });
-  }
-
   // --- Deals cube helpers ---
   const cube: DealsCube = hp.dealsCube ?? { enabled: false, intervalMs: 4500, faces: [] };
   function setCube(patch: Partial<DealsCube>) {
@@ -556,90 +519,6 @@ export default function HomepageTab({
               <Button variant="danger" onClick={() => removeTile(i)}>מחיקה</Button>
             </div>
           ))}
-        </div>
-      </section>
-
-      <section className="rounded-2xl border border-line bg-white p-5 shadow-card">
-        <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <h2 className="text-lg font-extrabold text-heading">✦ מחלקת תאורה בעמוד הבית</h2>
-            <p className="mt-1 text-sm text-gray-500">
-              מקטע ייעודי שמוביל לקטגוריות התאורה ולמוצרי התאורה באתר.
-            </p>
-          </div>
-          <Toggle
-            label="מוצג באתר"
-            checked={!!lightingShowcase.enabled}
-            onChange={(v) => setLightingShowcase({ enabled: v })}
-          />
-        </div>
-
-        <div className="grid gap-4 sm:grid-cols-2">
-          <Field
-            label="כותרת"
-            value={lightingShowcase.title}
-            onChange={(v) => setLightingShowcase({ title: v })}
-          />
-          <Field
-            label="תיאור קצר"
-            value={lightingShowcase.subtitle || ""}
-            onChange={(v) => setLightingShowcase({ subtitle: v })}
-          />
-        </div>
-
-        <div className="mt-4 rounded-xl border border-line bg-gray-50 p-3">
-          <div className="mb-3 flex flex-wrap items-end justify-between gap-3">
-            <div>
-              <h3 className="text-sm font-extrabold text-heading">קטגוריות תאורה מוצגות</h3>
-              <p className="text-xs text-gray-500">הסדר כאן הוא הסדר באתר. מומלץ להציג 6–8 קטגוריות.</p>
-            </div>
-            <select
-              value=""
-              onChange={(e) => {
-                addLightingSubcat(Number(e.target.value));
-                e.currentTarget.value = "";
-              }}
-              className="min-w-52 rounded-lg border border-line bg-white px-3 py-2 text-base sm:text-sm text-gray-900 shadow-sm outline-none focus:border-brand-red"
-            >
-              <option value="">+ הוספת קטגוריית תאורה</option>
-              {availableLightingSubcats.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.name} ({c.count.toLocaleString("he-IL")})
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {pickedLightingSubcats.length === 0 ? (
-            <p className="rounded-lg border border-dashed border-line bg-white p-4 text-center text-sm text-gray-500">
-              לא נבחרו קטגוריות. אם המקטע פעיל, האתר ישתמש בברירת מחדל.
-            </p>
-          ) : (
-            <div className="space-y-2">
-              {pickedLightingSubcats.map((c, i) => (
-                <div
-                  key={c.id}
-                  className="flex flex-wrap items-center gap-3 rounded-lg border border-line bg-white p-2"
-                >
-                  <span className="grid h-12 w-12 shrink-0 place-items-center overflow-hidden rounded border border-line bg-soft">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={adminPreviewSrc(c.thumb)} alt="" className="h-full w-full object-contain" />
-                  </span>
-                  <span className="min-w-0 flex-1">
-                    <span className="block truncate text-sm font-extrabold text-heading">{c.name}</span>
-                    <span className="text-xs text-gray-500">
-                      #{c.id} · {c.count.toLocaleString("he-IL")} מוצרים
-                    </span>
-                  </span>
-                  <div className="flex items-center gap-1">
-                    <Button variant="ghost" onClick={() => moveLightingSubcat(i, -1)} disabled={i === 0}>↑</Button>
-                    <Button variant="ghost" onClick={() => moveLightingSubcat(i, 1)} disabled={i === pickedLightingSubcats.length - 1}>↓</Button>
-                    <Button variant="danger" onClick={() => removeLightingSubcat(c.id)}>מחיקה</Button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
         </div>
       </section>
 

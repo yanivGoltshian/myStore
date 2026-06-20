@@ -432,7 +432,7 @@ function normalizeLighting(input, id) {
 // GET list. opts: { subId, q, page=1, pageSize=60 }.
 //  - subId only    → that subcat's file (paginated)
 //  - q             → union across all cats (or the chosen one), deduped by id
-//  - neither       → empty page (the UI shows the subcat chips instead)
+//  - neither       → union across all cats (paginated), used by the unified Products admin
 export async function listLightingProducts(opts = {}) {
   const subId = toNumber(opts.subId, 0);
   const q = String(opts.q ?? "").trim().toLowerCase();
@@ -458,7 +458,14 @@ export async function listLightingProducts(opts = {}) {
   } else if (subId) {
     items = (await readLightingCat(subId)).map((it) => ({ ...it, subId }));
   } else {
-    return { count: 0, page, pageSize, products: [] };
+    const seen = new Set();
+    for (const c of await readAllLightingCats()) {
+      for (const it of c.items) {
+        if (seen.has(it.id)) continue;
+        seen.add(it.id);
+        items.push({ ...it, subId: c.subId });
+      }
+    }
   }
 
   const count = items.length;

@@ -6,59 +6,7 @@
     "alt": "חשמל חנקין — חנות מוצרי חשמל ביתיים ושירותי חשמלאי בבית הלקוח",
     "href": "/category/146/"
   },
-  "promoTiles": [
-    {
-      "id": "t-new",
-      "title": "מוצרים חדשים",
-      "image": "/images/banners/promo-new.jpg",
-      "categoryId": 146
-    },
-    {
-      "id": "t-winter",
-      "title": "מוצרי חורף",
-      "image": "/images/banners/promo-winter.jpg",
-      "categoryId": 15
-    },
-    {
-      "id": "t-choppers",
-      "title": "קוצצי מזון",
-      "image": "/images/banners/promo-choppers.jpg",
-      "categoryId": 120
-    },
-    {
-      "id": "t-grills",
-      "title": "מנגלים וגרילים",
-      "image": "/images/banners/promo-grills.jpg",
-      "categoryId": 695
-    },
-    {
-      "id": "t-cleaning",
-      "title": "מוצרי ניקיון",
-      "image": "/images/banners/promo-cleaning.jpg",
-      "categoryId": 136
-    },
-    {
-      "id": "t-fan",
-      "title": "מאווררים ומצננים",
-      "image": "/images/banners/promo-fan.jpg",
-      "categoryId": 112
-    }
-  ],
-  "lightingShowcase": {
-    "enabled": true,
-    "title": "✦ מחלקת התאורה",
-    "subtitle": "מבחר גופי תאורה לבית, לגינה ולעסק — בחרו סגנון והמשיכו למוצרים",
-    "subcatIds": [
-      5,
-      10,
-      9,
-      15,
-      7,
-      11,
-      13,
-      17
-    ]
-  },
+  "promoTiles": [],
   "sections": [
     {
       "id": "s-new",
