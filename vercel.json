@@ -1,4 +1,16 @@
 {
+  "redirects": [
+    {
+      "source": "/admin",
+      "destination": "https://jolly-bush-07bb10a03.7.azurestaticapps.net/admin/",
+      "permanent": false
+    },
+    {
+      "source": "/admin/:path*",
+      "destination": "https://jolly-bush-07bb10a03.7.azurestaticapps.net/admin/",
+      "permanent": false
+    }
+  ],
   "rewrites": [
     {
       "source": "/google0fef50a0bb5ecec4.html",
