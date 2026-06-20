@@ -29,10 +29,22 @@ function headers() {
 }
 
 async function getMeta(p) {
-  const r = await fetch(
-    `${API}/repos/${repo()}/contents/${p}?ref=${encodeURIComponent(branch())}`,
-    { headers: headers() }
-  );
+  // The GitHub Contents API is edge-cached (`Cache-Control: private, max-age=60,
+  // s-maxage=60`) and can lag a fresh commit by up to a minute or two. Without
+  // busting that cache the admin reads a STALE copy right after a save — the edit
+  // looks like it "reverted" on reload (while the public site, built by Vercel
+  // from a real git clone, is already correct). Worse, a stale read followed by a
+  // save would silently overwrite the newer data. A unique `t=` query param makes
+  // each request a distinct cache key (guaranteed MISS) and `Cache-Control:
+  // no-cache` tells the CDN to revalidate against origin, so the admin always
+  // reads (and writes against) the very latest commit.
+  const url =
+    `${API}/repos/${repo()}/contents/${p}` +
+    `?ref=${encodeURIComponent(branch())}&t=${Date.now()}`;
+  const r = await fetch(url, {
+    headers: { ...headers(), "Cache-Control": "no-cache" },
+    cache: "no-store",
+  });
   if (r.status === 404) return null;
   if (!r.ok) throw new Error(`GitHub read ${p}: ${r.status} ${await r.text()}`);
   return r.json();

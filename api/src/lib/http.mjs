@@ -4,7 +4,12 @@ import { isAdmin } from "./auth.mjs";
 export function json(status, data) {
   return {
     status,
-    headers: { "Content-Type": "application/json; charset=utf-8" },
+    headers: {
+      "Content-Type": "application/json; charset=utf-8",
+      // Admin API responses are always live data — never let the browser or any
+      // proxy serve a cached copy, or an edit can appear to "revert" on reload.
+      "Cache-Control": "no-store, no-cache, must-revalidate",
+    },
     body: JSON.stringify(data),
   };
 }

@@ -62,7 +62,12 @@ async function safeErr(r: Response): Promise<string> {
 }
 
 export async function apiGet<T>(path: string): Promise<T> {
-  const r = await fetch(path, { headers: withAuth({ accept: "application/json" }) });
+  // `no-store` so a reopened admin always refetches live data instead of a
+  // browser-cached response (defends against showing a stale edit on reload).
+  const r = await fetch(path, {
+    headers: withAuth({ accept: "application/json" }),
+    cache: "no-store",
+  });
   if (!r.ok) throw new Error(`(${r.status}) ${await safeErr(r)}`);
   return (await r.json()) as T;
 }
