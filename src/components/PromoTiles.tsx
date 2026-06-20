@@ -7,7 +7,7 @@ export default function PromoTiles({ tiles }: { tiles: PromoTile[] }) {
       <div className="grid grid-cols-3 gap-3 md:grid-cols-6">
         {tiles.map((t) => (
           <Link key={t.id} href={`/category/${t.categoryId}/`} className="card-hover group block">
-            <div className="overflow-hidden rounded-lg border bg-white">
+            <div className="overflow-hidden rounded-lg">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={t.image}

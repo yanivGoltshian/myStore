@@ -18,28 +18,50 @@ function ImageUpload({
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(false);
+  // Local object-URL preview of the just-picked file. Shown immediately so the
+  // thumbnail isn't a broken 404 during the ~2–3 min CI publish window (the
+  // committed path isn't served from this origin until the rebuild finishes).
+  const [localPreview, setLocalPreview] = useState<string | null>(null);
+  const [justUploaded, setJustUploaded] = useState(false);
+
+  useEffect(() => {
+    return () => {
+      if (localPreview) URL.revokeObjectURL(localPreview);
+    };
+  }, [localPreview]);
 
   async function pick(file: File | undefined) {
     if (!file) return;
     setBusy(true);
+    setJustUploaded(false);
+    const preview = URL.createObjectURL(file);
+    setLocalPreview((prev) => {
+      if (prev) URL.revokeObjectURL(prev);
+      return preview;
+    });
     try {
       const path = await uploadImage("banner", file);
       onUploaded(path);
+      setJustUploaded(true);
     } catch (e) {
       onError((e as Error).message);
+      URL.revokeObjectURL(preview);
+      setLocalPreview(null);
     } finally {
       setBusy(false);
     }
   }
+
+  const previewSrc = localPreview || value;
 
   return (
     <div>
       <span className="mb-1 block text-sm font-semibold text-gray-700">{label}</span>
       <div className="flex items-center gap-3">
         <div className="h-16 w-28 shrink-0 overflow-hidden rounded-md border border-gray-200 bg-gray-50">
-          {value ? (
+          {previewSrc ? (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={value} alt="" className="h-full w-full object-contain" />
+            <img src={previewSrc} alt="" className="h-full w-full object-contain" />
           ) : null}
         </div>
         <input
@@ -53,6 +75,11 @@ function ImageUpload({
           {busy ? "מעלה…" : "העלאת תמונה"}
         </Button>
       </div>
+      {justUploaded ? (
+        <p className="mt-1 text-xs text-emerald-700">
+          ✓ התמונה נשמרה. שמרו ופרסמו — היא תופיע באתר תוך 2–3 דקות (זמן פרסום).
+        </p>
+      ) : null}
       <Field label="" value={value} onChange={() => {}} dir="ltr" hint="נתיב התמונה (מתעדכן אוטומטית לאחר העלאה)" />
     </div>
   );
