@@ -16,6 +16,8 @@ type Props = {
 export default function DealsCube({ faces, intervalMs = 4500 }: Props) {
   const n = faces.length;
   const sceneRef = useRef<HTMLDivElement>(null);
+  const swipeStartRef = useRef<{ x: number; y: number; pointerId: number } | null>(null);
+  const resumePauseTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [radius, setRadius] = useState(0);
   const [turn, setTurn] = useState(0);
   const [paused, setPaused] = useState(false);
@@ -75,6 +77,30 @@ export default function DealsCube({ faces, intervalMs = 4500 }: Props) {
     return () => clearInterval(t);
   }, [n, reduced, paused, visible, intervalMs]);
 
+  useEffect(() => {
+    return () => {
+      if (resumePauseTimerRef.current) clearTimeout(resumePauseTimerRef.current);
+    };
+  }, []);
+
+  const resumeAfterSwipe = useCallback(() => {
+    if (resumePauseTimerRef.current) clearTimeout(resumePauseTimerRef.current);
+    resumePauseTimerRef.current = setTimeout(() => {
+      setPaused(false);
+      resumePauseTimerRef.current = null;
+    }, 300);
+  }, []);
+
+  const goNext = useCallback(() => {
+    if (n < 2) return;
+    setTurn((x) => x + 1);
+  }, [n]);
+
+  const goPrev = useCallback(() => {
+    if (n < 2) return;
+    setTurn((x) => x - 1);
+  }, [n]);
+
   const goTo = useCallback(
     (i: number) => {
       if (n < 2) return;
@@ -85,6 +111,43 @@ export default function DealsCube({ faces, intervalMs = 4500 }: Props) {
       });
     },
     [n]
+  );
+
+  const onSwipePointerDown = useCallback(
+    (e: React.PointerEvent<HTMLDivElement>) => {
+      if (n < 2 || (e.pointerType !== "touch" && e.pointerType !== "pen")) return;
+      if (resumePauseTimerRef.current) clearTimeout(resumePauseTimerRef.current);
+      swipeStartRef.current = { x: e.clientX, y: e.clientY, pointerId: e.pointerId };
+      setPaused(true);
+    },
+    [n]
+  );
+
+  const onSwipePointerUp = useCallback(
+    (e: React.PointerEvent<HTMLDivElement>) => {
+      const start = swipeStartRef.current;
+      if (!start || start.pointerId !== e.pointerId) return;
+      swipeStartRef.current = null;
+
+      const deltaX = e.clientX - start.x;
+      const deltaY = e.clientY - start.y;
+      if (Math.abs(deltaX) >= 40 && Math.abs(deltaX) > Math.abs(deltaY)) {
+        if (deltaX < 0) goNext();
+        else goPrev();
+      }
+      resumeAfterSwipe();
+    },
+    [goNext, goPrev, resumeAfterSwipe]
+  );
+
+  const onSwipePointerCancel = useCallback(
+    (e: React.PointerEvent<HTMLDivElement>) => {
+      const start = swipeStartRef.current;
+      if (!start || start.pointerId !== e.pointerId) return;
+      swipeStartRef.current = null;
+      resumeAfterSwipe();
+    },
+    [resumeAfterSwipe]
   );
 
   if (n === 0) return null;
@@ -103,12 +166,15 @@ export default function DealsCube({ faces, intervalMs = 4500 }: Props) {
       <div className="relative mx-auto max-w-3xl">
         <div
           ref={sceneRef}
-          className="relative h-[300px] sm:h-[360px] lg:h-[400px]"
+          className="relative h-[300px] touch-pan-y sm:h-[360px] lg:h-[400px]"
           style={{ perspective: single ? undefined : "1500px" }}
           onMouseEnter={() => setPaused(true)}
           onMouseLeave={() => setPaused(false)}
           onFocusCapture={() => setPaused(true)}
           onBlurCapture={() => setPaused(false)}
+          onPointerDown={onSwipePointerDown}
+          onPointerUp={onSwipePointerUp}
+          onPointerCancel={onSwipePointerCancel}
         >
           <div
             className="absolute inset-0"
@@ -156,17 +222,17 @@ export default function DealsCube({ faces, intervalMs = 4500 }: Props) {
           <>
             <button
               type="button"
-              onClick={() => setTurn((x) => x + 1)}
+              onClick={goNext}
               aria-label="המבצע הבא"
-              className="absolute right-1 top-1/2 z-10 -translate-y-1/2 grid h-10 w-10 place-items-center rounded-full border border-black/10 bg-white/90 text-brand-red shadow-md transition hover:bg-white sm:-right-3"
+              className="absolute right-1 top-1/2 z-10 hidden h-10 w-10 -translate-y-1/2 place-items-center rounded-full border border-black/10 bg-white/90 text-brand-red shadow-md transition hover:bg-white sm:-right-3 sm:grid"
             >
               <span className="text-2xl leading-none">‹</span>
             </button>
             <button
               type="button"
-              onClick={() => setTurn((x) => x - 1)}
+              onClick={goPrev}
               aria-label="המבצע הקודם"
-              className="absolute left-1 top-1/2 z-10 -translate-y-1/2 grid h-10 w-10 place-items-center rounded-full border border-black/10 bg-white/90 text-brand-red shadow-md transition hover:bg-white sm:-left-3"
+              className="absolute left-1 top-1/2 z-10 hidden h-10 w-10 -translate-y-1/2 place-items-center rounded-full border border-black/10 bg-white/90 text-brand-red shadow-md transition hover:bg-white sm:-left-3 sm:grid"
             >
               <span className="text-2xl leading-none">›</span>
             </button>
