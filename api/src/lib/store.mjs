@@ -6,6 +6,7 @@ import { getBackend } from "./backend.mjs";
 const PATHS = {
   site: "src/data/site.json",
   homepage: "src/data/homepage.json",
+  pages: "src/data/pages.json",
   products: "src/data/products.json",
   categories: "src/data/categories.json",
   nav: "src/data/nav.json",
@@ -14,6 +15,15 @@ const PATHS = {
 
 const PRODUCTS_DIR = "public/images/products";
 const BANNERS_DIR = "public/images/banners";
+const LIGHTING_DIR = "public/images/lighting";
+
+// Lighting catalog (thousands of items) — stored separately from products.json:
+// one JSON array per subcategory, an id→primary-subcat map, and subcat metadata.
+const LIGHTING_SUBCATS = "src/data/lighting-subcats.json";
+const LIGHTING_INDEX = "public/lighting/index.json";
+function lightingCatPath(subId) {
+  return `public/lighting/cat-${Number(subId)}.json`;
+}
 
 // ---------- site & homepage ----------
 export async function getSite() {
@@ -50,6 +60,27 @@ export async function putHomepageMerge(incoming, changedKeys) {
     }
   }
   return be.writeJSON(PATHS.homepage, merged, "admin: update homepage");
+}
+
+export async function getPages() {
+  return getBackend().readJSON(PATHS.pages);
+}
+export async function putPages(obj) {
+  return getBackend().writeJSON(PATHS.pages, obj, "admin: update content pages");
+}
+
+export async function putPagesMerge(incoming, changedKeys) {
+  const be = getBackend();
+  const fresh = await be.readJSON(PATHS.pages).catch(() => null);
+  const base = fresh && typeof fresh === "object" && !Array.isArray(fresh) ? fresh : {};
+  const merged = { ...base };
+  const keys = Array.isArray(changedKeys) ? changedKeys : [];
+  for (const k of keys) {
+    if (incoming && Object.prototype.hasOwnProperty.call(incoming, k)) {
+      merged[k] = incoming[k];
+    }
+  }
+  return be.writeJSON(PATHS.pages, merged, "admin: update content pages");
 }
 
 // ---------- categories ----------
@@ -341,10 +372,249 @@ export async function uploadImage(payload) {
     const fname = base.includes(".") ? base : `${base}.${ext}`;
     publicPath = `/images/banners/${fname}`;
     repoPath = `${BANNERS_DIR}/${fname}`;
+  } else if (kind === "lighting") {
+    const id = toNumber(payload.id);
+    if (!id) throw new Error("Lighting upload requires an id.");
+    publicPath = `/images/lighting/${id}.${ext}`;
+    repoPath = `${LIGHTING_DIR}/${id}.${ext}`;
   } else {
     throw new Error(`Unknown upload kind: ${kind}`);
   }
 
   await getBackend().writeBinary(repoPath, buffer, `admin: upload ${repoPath}`);
   return { path: publicPath, repoPath };
+}
+
+// ===================== lighting catalog =====================
+// The lighting department (thousands of items) is NOT in products.json. It lives
+// in public/lighting/cat-{subId}.json (one array per subcategory), with an
+// id→primary-subcat map in index.json and subcat metadata (incl. counts) in
+// src/data/lighting-subcats.json. A single product can appear in more than one
+// cat file, so edits/deletes scan every file and patch each one that holds the
+// id — keeping the duplicate copies consistent.
+
+export async function getLightingSubcats() {
+  return getBackend().readJSON(LIGHTING_SUBCATS);
+}
+
+async function readLightingCat(subId) {
+  try {
+    const arr = await getBackend().readJSON(lightingCatPath(subId));
+    return Array.isArray(arr) ? arr : [];
+  } catch {
+    return [];
+  }
+}
+
+// Read every cat file once → [{ subId, items }]. Backs global search and the
+// membership scan used by save/delete.
+async function readAllLightingCats() {
+  const subs = await getLightingSubcats();
+  const out = [];
+  for (const s of subs) {
+    out.push({ subId: toNumber(s.id), items: await readLightingCat(s.id) });
+  }
+  return out;
+}
+
+function normalizeLighting(input, id) {
+  return {
+    id,
+    name: String(input.name ?? "").trim(),
+    model: String(input.model ?? "").trim(),
+    price: toNumber(input.price, 0),
+    image: String(input.image ?? `/images/lighting/${id}.jpg`),
+    inStock: input.inStock === undefined ? true : Boolean(input.inStock),
+    description: String(input.description ?? ""),
+  };
+}
+
+// GET list. opts: { subId, q, page=1, pageSize=60 }.
+//  - subId only    → that subcat's file (paginated)
+//  - q             → union across all cats (or the chosen one), deduped by id
+//  - neither       → empty page (the UI shows the subcat chips instead)
+export async function listLightingProducts(opts = {}) {
+  const subId = toNumber(opts.subId, 0);
+  const q = String(opts.q ?? "").trim().toLowerCase();
+  const page = Math.max(1, toNumber(opts.page, 1));
+  const pageSize = Math.min(200, Math.max(1, toNumber(opts.pageSize, 60)));
+
+  let items = [];
+  if (q) {
+    const cats = subId
+      ? [{ subId, items: await readLightingCat(subId) }]
+      : await readAllLightingCats();
+    const seen = new Set();
+    for (const c of cats) {
+      for (const it of c.items) {
+        if (seen.has(it.id)) continue;
+        const hay = `${it.name} ${it.model ?? ""} ${it.id}`.toLowerCase();
+        if (hay.includes(q)) {
+          seen.add(it.id);
+          items.push({ ...it, subId: c.subId });
+        }
+      }
+    }
+  } else if (subId) {
+    items = (await readLightingCat(subId)).map((it) => ({ ...it, subId }));
+  } else {
+    return { count: 0, page, pageSize, products: [] };
+  }
+
+  const count = items.length;
+  const start = (page - 1) * pageSize;
+  return { count, page, pageSize, products: items.slice(start, start + pageSize) };
+}
+
+export async function getLightingProduct(id) {
+  const wantId = toNumber(id);
+  let index = null;
+  try {
+    index = await getBackend().readJSON(LIGHTING_INDEX);
+  } catch {
+    index = null;
+  }
+  const primary = index?.primary?.[String(wantId)];
+  if (primary) {
+    const found = (await readLightingCat(primary)).find(
+      (p) => toNumber(p.id) === wantId
+    );
+    if (found) return { ...found, subId: toNumber(primary) };
+  }
+  for (const c of await readAllLightingCats()) {
+    const found = c.items.find((p) => toNumber(p.id) === wantId);
+    if (found) return { ...found, subId: c.subId };
+  }
+  return null;
+}
+
+async function maxStoreId() {
+  try {
+    const products = await getProducts();
+    return products.reduce((m, p) => Math.max(m, toNumber(p.id)), 0);
+  } catch {
+    return 0;
+  }
+}
+
+async function adjustLightingCount(subId, delta) {
+  try {
+    const subs = await getLightingSubcats();
+    const s = subs.find((x) => toNumber(x.id) === toNumber(subId));
+    if (!s) return;
+    s.count = Math.max(0, toNumber(s.count) + delta);
+    await getBackend().writeJSON(
+      LIGHTING_SUBCATS,
+      subs,
+      `admin: lighting count ${subId} (${delta > 0 ? "+" : ""}${delta})`
+    );
+  } catch {
+    /* best effort */
+  }
+}
+
+// Create or update a lighting product. For create, input.subId chooses the
+// target subcategory. For update, the product is patched in EVERY cat file that
+// already contains it (image preserved when the caller sends none).
+export async function saveLightingProduct(input) {
+  const cats = await readAllLightingCats();
+  const id = toNumber(input.id, 0);
+
+  let exists = false;
+  if (id) {
+    for (const c of cats) {
+      if (c.items.some((p) => toNumber(p.id) === id)) {
+        exists = true;
+        break;
+      }
+    }
+  }
+
+  if (id && exists) {
+    let merged = null;
+    let firstSub = 0;
+    for (const c of cats) {
+      const idx = c.items.findIndex((p) => toNumber(p.id) === id);
+      if (idx === -1) continue;
+      const existing = c.items[idx];
+      const next = normalizeLighting(
+        { ...existing, ...input, image: input.image ?? existing.image },
+        id
+      );
+      c.items[idx] = next;
+      merged = next;
+      if (!firstSub) firstSub = c.subId;
+      await getBackend().writeJSON(
+        lightingCatPath(c.subId),
+        c.items,
+        `admin: update lighting ${id} (${next.name})`
+      );
+    }
+    return { ...merged, subId: firstSub };
+  }
+
+  // CREATE
+  const targetSub = toNumber(input.subId ?? input.subcatId, 0);
+  if (!targetSub) throw new Error("Lighting create requires a subId (subcategory).");
+  const cat = cats.find((c) => c.subId === targetSub);
+  if (!cat) throw new Error(`Unknown lighting subcategory ${targetSub}.`);
+
+  const maxLight = cats.reduce(
+    (m, c) => c.items.reduce((mm, p) => Math.max(mm, toNumber(p.id)), m),
+    0
+  );
+  const newId = id && !exists ? id : Math.max(maxLight, await maxStoreId()) + 1;
+  const product = normalizeLighting({ ...input, id: newId }, newId);
+  cat.items.unshift(product);
+  await getBackend().writeJSON(
+    lightingCatPath(targetSub),
+    cat.items,
+    `admin: add lighting ${newId} (${product.name})`
+  );
+
+  try {
+    const index = (await getBackend().readJSON(LIGHTING_INDEX)) || { primary: {} };
+    index.primary = index.primary || {};
+    index.primary[String(newId)] = targetSub;
+    await getBackend().writeJSON(LIGHTING_INDEX, index, `admin: index lighting ${newId}`);
+  } catch {
+    /* index optional */
+  }
+
+  await adjustLightingCount(targetSub, +1);
+  return { ...product, subId: targetSub };
+}
+
+export async function deleteLightingProduct(id) {
+  const wantId = toNumber(id);
+  const cats = await readAllLightingCats();
+  const affected = [];
+  let removedName = "";
+  for (const c of cats) {
+    const idx = c.items.findIndex((p) => toNumber(p.id) === wantId);
+    if (idx === -1) continue;
+    removedName = c.items[idx].name || removedName;
+    c.items.splice(idx, 1);
+    affected.push(c.subId);
+    await getBackend().writeJSON(
+      lightingCatPath(c.subId),
+      c.items,
+      `admin: delete lighting ${wantId}`
+    );
+  }
+  if (!affected.length) return { ok: false, reason: "not_found" };
+
+  try {
+    const index = await getBackend().readJSON(LIGHTING_INDEX);
+    if (index?.primary && index.primary[String(wantId)] !== undefined) {
+      delete index.primary[String(wantId)];
+      await getBackend().writeJSON(LIGHTING_INDEX, index, `admin: deindex lighting ${wantId}`);
+    }
+  } catch {
+    /* optional */
+  }
+
+  for (const sub of affected) await adjustLightingCount(sub, -1);
+  await getBackend().deleteFile(`${LIGHTING_DIR}/${wantId}.jpg`).catch(() => {});
+  return { ok: true, id: wantId, removedFrom: affected, name: removedName };
 }

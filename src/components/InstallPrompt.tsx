@@ -1,13 +1,15 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
 
 type BIPEvent = Event & {
   prompt: () => Promise<void>;
   userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
 };
 
-const SHOWN_KEY = "hankin-a2hs-v2"; // one-time per browser
+const SHOWN_KEY_SITE = "hankin-a2hs-v2"; // one-time per browser (storefront)
+const SHOWN_KEY_ADMIN = "hankin-a2hs-admin-v1"; // one-time per browser (admin)
 
 function isStandalone(): boolean {
   if (typeof window === "undefined") return false;
@@ -28,6 +30,10 @@ function isiOS(): boolean {
 }
 
 export default function InstallPrompt() {
+  const pathname = usePathname();
+  const isAdmin = pathname?.startsWith("/admin") ?? false;
+  const SHOWN_KEY = isAdmin ? SHOWN_KEY_ADMIN : SHOWN_KEY_SITE;
+
   const [deferred, setDeferred] = useState<BIPEvent | null>(null);
   const [show, setShow] = useState(false);
   const [iosHint, setIosHint] = useState(false);
@@ -74,7 +80,7 @@ export default function InstallPrompt() {
       window.removeEventListener("appinstalled", onInstalled);
       if (iosTimer) clearTimeout(iosTimer);
     };
-  }, []);
+  }, [SHOWN_KEY]);
 
   function markDone() {
     try {
@@ -112,13 +118,13 @@ export default function InstallPrompt() {
       <div className="mx-auto flex max-w-md items-center gap-3 rounded-2xl border border-line bg-white p-3 shadow-2xl">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          src="/icon-192.png"
-          alt="חשמל חנקין"
+          src={isAdmin ? "/admin-icon-192.png" : "/icon-192.png"}
+          alt={isAdmin ? "ניהול חשמל חנקין" : "חשמל חנקין"}
           className="h-12 w-12 shrink-0 rounded-xl"
         />
         <div className="min-w-0 flex-1">
           <p className="text-[0.9rem] font-extrabold leading-tight text-heading">
-            התקינו את חשמל חנקין
+            {isAdmin ? "התקינו את מערכת הניהול" : "התקינו את חשמל חנקין"}
           </p>
           {iosHint ? (
             <p className="mt-0.5 text-[0.74rem] leading-snug text-muted">
@@ -127,7 +133,9 @@ export default function InstallPrompt() {
             </p>
           ) : (
             <p className="mt-0.5 text-[0.74rem] leading-snug text-muted">
-              גישה מהירה מהמסך הראשי — בלי להוריד מחנות
+              {isAdmin
+                ? "גישה מהירה לניהול מהמסך הראשי"
+                : "גישה מהירה מהמסך הראשי — בלי להוריד מחנות"}
             </p>
           )}
         </div>

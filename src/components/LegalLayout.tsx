@@ -1,11 +1,8 @@
 import Link from "next/link";
 import { site } from "@/lib/data";
+import type { LegalSection as ContentLegalSection } from "@/lib/types";
 
-export type LegalSection = {
-  heading: string;
-  paragraphs?: string[];
-  bullets?: string[];
-};
+export type LegalSection = ContentLegalSection;
 
 export default function LegalLayout({
   title,

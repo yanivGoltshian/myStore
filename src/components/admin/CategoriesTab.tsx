@@ -140,10 +140,10 @@ export default function CategoriesTab({
                 if (e.key === "Enter") rename(c);
                 if (e.key === "Escape") setEditId(null);
               }}
-              className="w-56 rounded border border-red-300 px-2 py-1 text-sm outline-none focus:border-red-500"
+              className="w-56 rounded border border-line px-2 py-1 text-sm outline-none focus:border-brand-red"
             />
           ) : (
-            <span className={`truncate ${isSub ? "text-gray-600" : "font-bold text-gray-800"}`}>
+            <span className={`truncate ${isSub ? "text-gray-600" : "font-bold text-heading"}`}>
               {c.name}
             </span>
           )}
@@ -171,7 +171,7 @@ export default function CategoriesTab({
                   setEditId(c.id);
                   setEditName(c.name);
                 }}
-                className="rounded px-2 py-1 text-xs font-bold text-gray-500 hover:bg-gray-100 hover:text-gray-800"
+                className="rounded px-2 py-1 text-xs font-bold text-gray-500 hover:bg-gray-100 hover:text-heading"
               >
                 שינוי שם
               </button>
@@ -191,8 +191,8 @@ export default function CategoriesTab({
   return (
     <div className="space-y-6">
       {/* create */}
-      <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
-        <h3 className="mb-3 text-base font-extrabold text-gray-800">קטגוריה חדשה</h3>
+      <div className="rounded-2xl border border-line bg-white p-5 shadow-card">
+        <h3 className="mb-3 text-base font-extrabold text-heading">קטגוריה חדשה</h3>
         <div className="grid items-end gap-3 sm:grid-cols-[1fr_1fr_auto]">
           <Field
             label="שם הקטגוריה"
@@ -207,7 +207,7 @@ export default function CategoriesTab({
             <select
               value={String(draft.parent)}
               onChange={(e) => setDraft({ ...draft, parent: Number(e.target.value) })}
-              className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm outline-none focus:border-red-500"
+              className="w-full rounded-lg border border-line bg-white px-3 py-2 text-base sm:text-sm text-gray-900 shadow-sm outline-none focus:border-brand-red"
             >
               <option value="0">קטגוריה ראשית (בתפריט)</option>
               {tops.map((t) => (
@@ -243,7 +243,7 @@ export default function CategoriesTab({
           value={filter}
           onChange={(e) => setFilter(e.target.value)}
           placeholder="חיפוש קטגוריה…"
-          className="w-72 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm outline-none focus:border-red-500"
+          className="w-full sm:w-72 rounded-lg border border-line bg-white px-3 py-2 text-base sm:text-sm shadow-sm outline-none focus:border-brand-red"
         />
         <span className="text-sm text-gray-500">{cats.length} קטגוריות</span>
       </div>
@@ -255,7 +255,7 @@ export default function CategoriesTab({
           {visibleTops.map((t) => (
             <div
               key={t.id}
-              className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm"
+              className="overflow-hidden rounded-2xl border border-line bg-white shadow-card"
             >
               <Row c={t} />
               {(subsByParent.get(t.id) || []).length ? (

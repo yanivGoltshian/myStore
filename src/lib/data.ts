@@ -4,13 +4,15 @@ import navData from "@/data/nav.json";
 import descendantsData from "@/data/descendants.json";
 import homepageData from "@/data/homepage.json";
 import siteData from "@/data/site.json";
-import type { Product, Category, NavItem, Homepage, Site } from "./types";
+import pagesData from "@/data/pages.json";
+import type { Product, Category, NavItem, Homepage, Site, ContentPages } from "./types";
 
 export const products = productsData as Product[];
 export const categories = categoriesData as Category[];
 export const nav = navData as NavItem[];
 export const homepage = homepageData as Homepage;
 export const site = siteData as Site;
+export const pages = pagesData as ContentPages;
 
 export const waLink = `https://wa.me/${site.whatsapp}`;
 export const telLink = `tel:${site.phoneRaw}`;

@@ -2,7 +2,7 @@
   "announcement": "משלוח לכל הארץ · אחריות מלאה · שירות לקוחות 03-5562520",
   "topbarPhone": "03-5562520",
   "hero": {
-    "image": "/images/banners/1000277133.jpg",
+    "image": "/images/banners/hero-electro-hankin.jpg",
     "alt": "חשמל חנקין — חנות מוצרי חשמל ביתיים ושירותי חשמלאי בבית הלקוח",
     "href": "/category/146/"
   },
@@ -44,6 +44,21 @@
       "categoryId": 112
     }
   ],
+  "lightingShowcase": {
+    "enabled": true,
+    "title": "✦ מחלקת התאורה",
+    "subtitle": "מבחר גופי תאורה לבית, לגינה ולעסק — בחרו סגנון והמשיכו למוצרים",
+    "subcatIds": [
+      5,
+      10,
+      9,
+      15,
+      7,
+      11,
+      13,
+      17
+    ]
+  },
   "sections": [
     {
       "id": "s-new",
@@ -101,5 +116,44 @@
       "limit": 12,
       "layout": "carousel"
     }
-  ]
+  ],
+  "dealsCube": {
+    "enabled": true,
+    "intervalMs": 5000,
+    "faces": [
+      {
+        "id": "deal-34827",
+        "productId": 34827,
+        "title": "קוצץ מזון מהיר 4 להבים / ATL-806",
+        "image": "/images/products/34827.jpg",
+        "originalPrice": 129,
+        "dealPrice": 99,
+        "href": "/product/34827/"
+      },
+      {
+        "id": "deal-36227",
+        "productId": 36227,
+        "title": "מיקרוגל 20 ליטר מכני לבן / ATL-1320W",
+        "image": "/images/products/36227.jpg",
+        "dealPrice": 329,
+        "href": "/product/36227/"
+      },
+      {
+        "id": "deal-37038",
+        "productId": 37038,
+        "title": "כירה חשמלית קרמית כפולה / PU-52",
+        "image": "/images/products/37038.jpg",
+        "dealPrice": 289,
+        "href": "/product/37038/"
+      },
+      {
+        "id": "deal-35869",
+        "productId": 35869,
+        "title": "מצנן אוויר נייד / ATL-485",
+        "image": "/images/products/35869.jpg",
+        "dealPrice": 239,
+        "href": "/product/35869/"
+      }
+    ]
+  }
 }

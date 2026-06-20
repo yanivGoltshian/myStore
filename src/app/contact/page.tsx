@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { site, waLink, telLink } from "@/lib/data";
+import { pages, site, waLink, telLink } from "@/lib/data";
 
 export const metadata: Metadata = {
   title: "צור קשר",
@@ -12,6 +12,7 @@ const mapQuery = encodeURIComponent(
 );
 
 export default function ContactPage() {
+  const page = pages.contact;
   const cards = [
     { icon: "☎️", title: "טלפון ושירות לקוחות", value: site.phone, href: telLink, dir: "ltr" as const },
     { icon: "💬", title: "וואטסאפ", value: site.whatsappDisplay, href: waLink, dir: "ltr" as const },
@@ -22,8 +23,8 @@ export default function ContactPage() {
     <div className="bg-soft pb-16">
       <div className="stars-bg text-white">
         <div className="container-x py-10 text-center">
-          <h1 className="text-3xl font-extrabold md:text-4xl">צור קשר</h1>
-          <p className="mt-2 text-white/80">נשמח לעמוד לשירותכם — {site.name}</p>
+          <h1 className="text-3xl font-extrabold md:text-4xl">{page.title}</h1>
+          <p className="mt-2 text-white/80">{page.lead} — {site.name}</p>
         </div>
       </div>
 

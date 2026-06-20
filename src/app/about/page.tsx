@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { site, telLink, waLink } from "@/lib/data";
+import { pages, site, telLink, waLink } from "@/lib/data";
 
 export const metadata: Metadata = {
   title: "אודותינו",
@@ -8,18 +8,14 @@ export const metadata: Metadata = {
   alternates: { canonical: "/about/" },
 };
 
-const values = [
-  { icon: "🏷️", title: "מחירים משתלמים", text: "מבחר ענק של מוצרי חשמל במחירים הוגנים, עם מבצעים מתחלפים לאורך כל השנה." },
-  { icon: "🛡️", title: "אחריות ושירות", text: "כל המוצרים מגיעים עם אחריות מלאה ושירות אישי ומקצועי לפני ואחרי הרכישה." },
-  { icon: "🤝", title: "יחס אישי", text: "אנחנו כאן כדי לעזור לכם לבחור נכון — בטלפון, בוואטסאפ או בחנות." },
-];
-
 export default function AboutPage() {
+  const page = pages.about;
+
   return (
     <div className="bg-soft pb-16">
       <div className="stars-bg text-white">
         <div className="container-x py-12 text-center">
-          <h1 className="text-3xl font-extrabold md:text-4xl">אודות {site.name}</h1>
+          <h1 className="text-3xl font-extrabold md:text-4xl">{page.title}</h1>
           <p className="mx-auto mt-3 max-w-2xl text-white/85">{site.tagline}</p>
         </div>
       </div>
@@ -27,23 +23,24 @@ export default function AboutPage() {
       <div className="container-x pt-10">
         <div className="mx-auto max-w-3xl rounded-lg border bg-white p-6 text-[0.95rem] leading-8 text-ink">
           <p>
-            <strong>{site.name}</strong> היא חנות מוצרי החשמל והמכשירים החשמליים לבית ולמטבח,
-            המציעה מבחר עשיר של מוצרים איכותיים במחירים משתלמים. אנו מתמחים במוצרי מטבח, מוצרי
-            קיץ וחורף, מוצרי טיפוח, ניקיון ועוד — הכל תחת קורת גג אחת.
+            <strong>{site.name}</strong> {page.intro[0]}
           </p>
+          {page.intro.slice(1).map((paragraph, index) => (
+            <p key={index} className="mt-4">
+              {paragraph}
+            </p>
+          ))}
           <p className="mt-4">
-            לאורך השנים צברנו ניסיון רב ולקוחות מרוצים, מתוך מחויבות לשירות אישי, אמין ומקצועי.
-            הצוות שלנו ישמח לסייע לכם לבחור את המוצר המתאים ביותר עבורכם, ולספק לכם חוויית קנייה
-            נעימה ובטוחה.
-          </p>
-          <p className="mt-4">
-            מוזמנים לבקר אותנו בחנות בכתובת <strong>{site.address.full}</strong>, או ליצור קשר
-            בטלפון <a href={telLink} className="font-semibold text-brand-red" dir="ltr">{site.phone}</a>.
+            {page.visit.addressLead} <strong>{site.address.full}</strong>, {page.visit.phoneLead}{" "}
+            <a href={telLink} className="font-semibold text-brand-red" dir="ltr">
+              {site.phone}
+            </a>
+            .
           </p>
         </div>
 
         <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {values.map((v) => (
+          {page.values.map((v) => (
             <div key={v.title} className="rounded-lg border bg-white p-5 text-center">
               <div className="text-3xl">{v.icon}</div>
               <h3 className="mt-2 font-bold text-heading">{v.title}</h3>

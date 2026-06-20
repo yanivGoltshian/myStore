@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { Product } from "@/lib/types";
 import { formatPrice } from "@/lib/data";
+import FallbackImage from "@/components/FallbackImage";
 
 export default function ProductCard({ product }: { product: Product }) {
   const showSale = product.onSale && product.regularPrice > product.price;
@@ -15,8 +16,7 @@ export default function ProductCard({ product }: { product: Product }) {
             מבצע
           </span>
         )}
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
+        <FallbackImage
           src={product.image || "/images/placeholder.svg"}
           alt={product.name}
           loading="lazy"

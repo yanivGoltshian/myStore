@@ -113,11 +113,13 @@ export function fileToData(
 // or cold-start) and shrinks the upload payload + the committed asset.
 type ImageSpec = { maxW: number; maxH: number; quality: number };
 
-const IMAGE_SPECS: Record<"product" | "banner", ImageSpec> = {
+const IMAGE_SPECS: Record<"product" | "banner" | "lighting", ImageSpec> = {
   // Matches the existing 700px product thumbnails (aspect preserved, white bg).
   product: { maxW: 700, maxH: 700, quality: 0.82 },
   // Promo tiles (~600–800px) and the hero (~2000px) all fit under this cap.
   banner: { maxW: 2000, maxH: 2000, quality: 0.85 },
+  // Lighting photos use the same 700px white-background normalisation as products.
+  lighting: { maxW: 700, maxH: 700, quality: 0.82 },
 };
 
 function blobToBase64(blob: Blob): Promise<string> {
@@ -224,7 +226,7 @@ export function adminPreviewSrc(path: string): string {
 }
 
 export async function uploadImage(
-  kind: "product" | "banner",
+  kind: "product" | "banner" | "lighting",
   file: File,
   opts: Record<string, unknown> = {}
 ): Promise<string> {
@@ -259,6 +261,29 @@ export function formatPrice(n: number): string {
 }
 
 export type ProductList = { count: number; products: Product[] };
+
+// --- Lighting (תאורה) admin types ---------------------------------------
+// Lighting items have a simpler shape than store products: just the basics,
+// no categoryIds / sale fields. `subId` is the primary subcategory.
+export type LightingAdminProduct = {
+  id: number;
+  name: string;
+  model: string;
+  price: number;
+  image: string;
+  inStock: boolean;
+  description: string;
+  subId?: number;
+};
+
+export type LightingSubcat = { id: number; name: string; count: number; thumb?: string };
+
+export type LightingList = {
+  count: number;
+  page: number;
+  pageSize: number;
+  products: LightingAdminProduct[];
+};
 
 export type Principal = {
   clientPrincipal: {

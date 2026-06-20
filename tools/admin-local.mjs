@@ -134,7 +134,28 @@ async function handleApi(req, res, url) {
     if (seg[0] === "homepage") {
       if (method === "GET") return send(res, 200, await store.getHomepage());
       if (method === "PUT") {
-        await store.putHomepage(await readJsonBody(req));
+        // Mirror the deployed Function: when the admin sends { homepage,
+        // changedKeys } do an authoritative server-side field merge; otherwise
+        // a bare homepage object is a whole-file replace (back-compat).
+        const body = await readJsonBody(req);
+        if (body && Array.isArray(body.changedKeys) && body.homepage && typeof body.homepage === "object") {
+          await store.putHomepageMerge(body.homepage, body.changedKeys);
+        } else {
+          await store.putHomepage(body);
+        }
+        return send(res, 200, { ok: true });
+      }
+    }
+    // /api/pages
+    if (seg[0] === "pages") {
+      if (method === "GET") return send(res, 200, await store.getPages());
+      if (method === "PUT") {
+        const body = await readJsonBody(req);
+        if (body && Array.isArray(body.changedKeys) && body.pages && typeof body.pages === "object") {
+          await store.putPagesMerge(body.pages, body.changedKeys);
+        } else {
+          await store.putPages(body);
+        }
         return send(res, 200, { ok: true });
       }
     }
@@ -202,6 +223,48 @@ async function handleApi(req, res, url) {
         if (method === "DELETE") {
           const r = await store.deleteProduct(id);
           return r.ok ? send(res, 200, r) : send(res, 404, { error: "Not found" });
+        }
+      }
+    }
+    // /api/lighting/subcats  and  /api/lighting/products(+/{id})
+    if (seg[0] === "lighting") {
+      if (seg[1] === "subcats" && method === "GET") {
+        return send(res, 200, await store.getLightingSubcats());
+      }
+      if (seg[1] === "products") {
+        const id = seg[2];
+        if (!id) {
+          if (method === "GET") {
+            return send(
+              res,
+              200,
+              await store.listLightingProducts({
+                subId: Number(url.searchParams.get("sub") || 0),
+                q: url.searchParams.get("q") || "",
+                page: Number(url.searchParams.get("page") || 1),
+                pageSize: Number(url.searchParams.get("pageSize") || 60),
+              })
+            );
+          }
+          if (method === "POST") {
+            const body = await readJsonBody(req);
+            delete body.id;
+            return send(res, 201, await store.saveLightingProduct(body));
+          }
+        } else {
+          if (method === "GET") {
+            const p = await store.getLightingProduct(id);
+            return p ? send(res, 200, p) : send(res, 404, { error: "Not found" });
+          }
+          if (method === "PUT") {
+            const body = await readJsonBody(req);
+            body.id = Number(id);
+            return send(res, 200, await store.saveLightingProduct(body));
+          }
+          if (method === "DELETE") {
+            const r = await store.deleteLightingProduct(id);
+            return r.ok ? send(res, 200, r) : send(res, 404, { error: "Not found" });
+          }
         }
       }
     }

@@ -3,7 +3,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { Product, Category } from "@/lib/types";
 import { apiGet, apiSend, uploadImage, adminPreviewSrc, formatPrice, type ProductList } from "./lib";
-import { Field, TextArea, Toggle, Button } from "./ui";
+import { Field, TextArea, Toggle, Button, Card, SectionCard } from "./ui";
+import LightingProducts from "./LightingProducts";
 
 type Draft = {
   id?: number;
@@ -62,6 +63,7 @@ export default function ProductsTab({
   const [saving, setSaving] = useState(false);
   const [catFilter, setCatFilter] = useState("");
   const fileRef = useRef<HTMLInputElement>(null);
+  const [source, setSource] = useState<"store" | "lighting">("store");
 
   async function load() {
     setLoading(true);
@@ -208,6 +210,21 @@ export default function ProductsTab({
 
   const shown = filtered.slice(0, 120);
 
+  // Top-level categories for the homepage-style "browse by category" strip.
+  const tops = useMemo(
+    () => cats.filter((c) => !c.parent).sort((a, b) => a.name.localeCompare(b.name, "he")),
+    [cats]
+  );
+  // The top category currently in focus and its direct subcategories — shown as
+  // a second drill-down chip row, mirroring the storefront category page.
+  const activeTop = lineFilter ? topOf(lineFilter.id) : null;
+  const subsOfActive = useMemo(() => {
+    if (!activeTop) return [] as Category[];
+    return (childrenOf.get(activeTop.id) || [])
+      .map((id) => catById.get(id))
+      .filter((c): c is Category => !!c);
+  }, [activeTop, childrenOf, catById]);
+
   function openNew() {
     setDraft(emptyDraft());
     setFile(null);
@@ -302,188 +319,266 @@ export default function ProductsTab({
 
   return (
     <div className="space-y-5">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex flex-wrap items-center gap-2">
-          <div ref={searchRef} className="relative">
-            <input
-              value={query}
-              onChange={(e) => {
-                setQuery(e.target.value);
-                setOpen(true);
-                if (lineFilter) setLineFilter(null);
-              }}
-              onFocus={() => setOpen(true)}
-              placeholder="חיפוש מוצר או קו מוצרים…"
-              className="w-80 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm outline-none focus:border-red-500"
-            />
-            {open && query.trim() && hasSuggestions ? (
-              <div className="absolute z-50 mt-1 max-h-96 w-[26rem] overflow-y-auto rounded-xl border border-gray-200 bg-white p-2 shadow-2xl">
-                {suggestCats.length ? (
-                  <div className="mb-1">
-                    <p className="px-2 pb-1 pt-1 text-[0.7rem] font-bold text-gray-400">
-                      קווי מוצרים
-                    </p>
-                    {suggestCats.map((c) => (
-                      <button
-                        key={`cat-${c.id}`}
-                        onClick={() => pickLine(c)}
-                        className="flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-right text-sm hover:bg-red-50"
-                      >
-                        <span className="text-base">{c.icon || "📦"}</span>
-                        <span className="font-semibold text-gray-700">{c.name}</span>
-                        {c.count ? (
-                          <span className="mr-auto text-xs text-gray-400">{c.count} מוצרים</span>
-                        ) : null}
-                      </button>
-                    ))}
-                  </div>
-                ) : null}
-                {suggestGroups.map((g) => (
-                  <div key={`grp-${g.id}`} className="mb-1">
-                    <p className="flex items-center gap-1 px-2 pb-1 pt-1 text-[0.7rem] font-bold text-gray-400">
-                      <span>{g.icon}</span>
-                      {g.name}
-                    </p>
-                    {g.items.map((p) => (
-                      <button
-                        key={`p-${p.id}`}
-                        onClick={() => {
-                          openEdit(p);
-                          setOpen(false);
-                          setQuery("");
-                        }}
-                        className="flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-right text-sm hover:bg-gray-50"
-                      >
-                        <span className="h-8 w-8 shrink-0 overflow-hidden rounded border border-gray-100 bg-gray-50">
-                          {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img src={adminPreviewSrc(p.image)} alt="" loading="lazy" className="h-full w-full object-contain" />
-                        </span>
-                        <span className="min-w-0">
-                          <span className="line-clamp-1 text-gray-800">{p.name}</span>
-                          {p.model ? (
-                            <span className="text-xs text-gray-400" dir="ltr">
-                              {p.model}
-                            </span>
-                          ) : null}
-                        </span>
-                        <span className="mr-auto shrink-0 font-bold text-gray-700">
-                          {formatPrice(p.price)}
-                        </span>
-                      </button>
-                    ))}
-                  </div>
-                ))}
-              </div>
-            ) : null}
-          </div>
-          {lineFilter ? (
-            <span className="inline-flex items-center gap-1 rounded-full bg-red-50 px-3 py-1.5 text-sm font-semibold text-red-700">
-              קו מוצרים: {lineFilter.name}
-              <button
-                onClick={() => setLineFilter(null)}
-                className="text-red-400 hover:text-red-700"
-                aria-label="ניקוי סינון"
-              >
-                ×
-              </button>
-            </span>
-          ) : null}
-          <span className="text-sm text-gray-500">
-            {filtered.length} מתוך {products.length}
-          </span>
+      <div className="flex gap-2 rounded-xl border border-line bg-soft p-1">
+        <button
+          onClick={() => setSource("store")}
+          className={`flex-1 rounded-lg px-3 py-2 text-sm font-bold transition ${
+            source === "store" ? "bg-brand-red text-white shadow-sm" : "text-heading hover:bg-white"
+          }`}
+        >
+          🛒 מוצרי החנות
+        </button>
+        <button
+          onClick={() => setSource("lighting")}
+          className={`flex-1 rounded-lg px-3 py-2 text-sm font-bold transition ${
+            source === "lighting" ? "bg-brand-red text-white shadow-sm" : "text-heading hover:bg-white"
+          }`}
+        >
+          💡 תאורה
+        </button>
+      </div>
+
+      {source === "lighting" ? (
+        <LightingProducts onToast={onToast} />
+      ) : (
+        <>
+      <div className="flex items-center justify-between gap-3">
+        <div>
+          <h2 className="text-base font-extrabold text-heading sm:text-lg">ניהול מוצרים</h2>
+          <p className="text-xs text-muted">{filtered.length} מתוך {products.length} מוצרים</p>
         </div>
         <Button onClick={openNew}>+ מוצר חדש</Button>
       </div>
 
-      {loading ? (
-        <p className="p-8 text-gray-500">טוען מוצרים…</p>
-      ) : (
-        <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
-          <table className="w-full text-right text-sm">
-            <thead className="bg-gray-50 text-xs text-gray-500">
-              <tr>
-                <th className="p-3 font-semibold">תמונה</th>
-                <th className="p-3 font-semibold">שם</th>
-                <th className="p-3 font-semibold">דגם</th>
-                <th className="p-3 font-semibold">מחיר</th>
-                <th className="p-3 font-semibold">מלאי</th>
-                <th className="p-3 font-semibold">פעולות</th>
-              </tr>
-            </thead>
-            <tbody>
-              {shown.map((p) => (
-                <tr
-                  key={p.id}
-                  className="cursor-pointer border-t border-gray-100 hover:bg-gray-50"
-                  onClick={() => openEdit(p)}
-                  tabIndex={0}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" || e.key === " ") {
-                      e.preventDefault();
+      <div ref={searchRef} className="relative">
+        <input
+          value={query}
+          onChange={(e) => {
+            setQuery(e.target.value);
+            setOpen(true);
+            if (lineFilter) setLineFilter(null);
+          }}
+          onFocus={() => setOpen(true)}
+          placeholder="🔍 חיפוש מוצר, דגם או קו מוצרים…"
+          className="w-full rounded-xl border border-line bg-white px-4 py-3 text-base shadow-sm outline-none focus:border-brand-red focus:ring-2 focus:ring-red-100 sm:py-2.5 sm:text-sm"
+        />
+        {open && query.trim() && hasSuggestions ? (
+          <div className="absolute z-50 mt-1 max-h-96 w-full overflow-y-auto rounded-xl border border-line bg-white p-2 shadow-pop">
+            {suggestCats.length ? (
+              <div className="mb-1">
+                <p className="px-2 pb-1 pt-1 text-[0.7rem] font-bold text-muted">קווי מוצרים</p>
+                {suggestCats.map((c) => (
+                  <button
+                    key={`cat-${c.id}`}
+                    onClick={() => pickLine(c)}
+                    className="flex w-full items-center gap-2 rounded-lg px-2 py-2 text-right text-sm hover:bg-red-50"
+                  >
+                    <span className="text-base">{c.icon || "📦"}</span>
+                    <span className="font-semibold text-heading">{c.name}</span>
+                    {c.count ? <span className="mr-auto text-xs text-muted">{c.count} מוצרים</span> : null}
+                  </button>
+                ))}
+              </div>
+            ) : null}
+            {suggestGroups.map((g) => (
+              <div key={`grp-${g.id}`} className="mb-1">
+                <p className="flex items-center gap-1 px-2 pb-1 pt-1 text-[0.7rem] font-bold text-muted">
+                  <span>{g.icon}</span>
+                  {g.name}
+                </p>
+                {g.items.map((p) => (
+                  <button
+                    key={`p-${p.id}`}
+                    onClick={() => {
                       openEdit(p);
-                    }
-                  }}
-                  title="לחצו לעריכת המוצר"
-                >
-                  <td className="p-2">
-                    <div className="h-12 w-12 overflow-hidden rounded border border-gray-200 bg-gray-50">
+                      setOpen(false);
+                      setQuery("");
+                    }}
+                    className="flex w-full items-center gap-2 rounded-lg px-2 py-2 text-right text-sm hover:bg-soft"
+                  >
+                    <span className="h-9 w-9 shrink-0 overflow-hidden rounded border border-line bg-soft">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img src={adminPreviewSrc(p.image)} alt="" loading="lazy" className="h-full w-full object-contain" />
-                    </div>
-                  </td>
-                  <td className="max-w-xs p-3">
-                    <span className="line-clamp-2 font-semibold text-gray-800">{p.name}</span>
-                    <span className="text-xs text-gray-400">#{p.id}</span>
-                  </td>
-                  <td className="p-3 text-gray-500" dir="ltr">{p.model || "—"}</td>
-                  <td className="p-3">
-                    <span className="font-bold text-gray-800">{formatPrice(p.price)}</span>
-                    {p.onSale ? <span className="mr-1 rounded bg-red-100 px-1.5 py-0.5 text-xs font-bold text-red-700">מבצע</span> : null}
-                  </td>
-                  <td className="p-3">
-                    {p.inStock ? (
-                      <span className="text-emerald-600">במלאי</span>
-                    ) : (
-                      <span className="text-gray-400">אזל</span>
-                    )}
-                  </td>
-                  <td className="p-3" onClick={(e) => e.stopPropagation()}>
-                    <div className="flex gap-2">
-                      <Button variant="ghost" onClick={() => openEdit(p)}>עריכה</Button>
-                      <Button variant="danger" onClick={() => remove(p)}>מחיקה</Button>
-                    </div>
-                  </td>
-                </tr>
+                    </span>
+                    <span className="min-w-0 flex-1">
+                      <span className="line-clamp-1 text-heading">{p.name}</span>
+                      {p.model ? (
+                        <span className="block text-xs text-muted" dir="ltr">{p.model}</span>
+                      ) : null}
+                    </span>
+                    <span className="shrink-0 font-bold text-brand-red">{formatPrice(p.price)}</span>
+                  </button>
+                ))}
+              </div>
+            ))}
+          </div>
+        ) : null}
+      </div>
+
+      {tops.length ? (
+        <SectionCard title="עיון לפי קטגוריה">
+          <div className="flex flex-wrap gap-2">
+            <button
+              onClick={() => setLineFilter(null)}
+              className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-2 text-sm font-bold transition ${
+                !lineFilter
+                  ? "border-brand-red bg-brand-red text-white"
+                  : "border-line bg-white text-heading hover:border-brand-red/40"
+              }`}
+            >
+              הכל
+            </button>
+            {tops.map((c) => {
+              const active = activeTop?.id === c.id;
+              return (
+                <button
+                  key={c.id}
+                  onClick={() => (active && lineFilter?.id === c.id ? setLineFilter(null) : pickLine(c))}
+                  className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-2 text-sm font-bold transition ${
+                    active
+                      ? "border-brand-red bg-brand-red text-white"
+                      : "border-line bg-white text-heading hover:border-brand-red/40"
+                  }`}
+                >
+                  <span aria-hidden="true" className="text-base">{c.icon || "📦"}</span>
+                  {c.name}
+                  {c.count ? (
+                    <span className={`rounded-full px-1.5 text-[0.65rem] font-bold ${active ? "bg-white/20 text-white" : "bg-soft text-muted"}`}>
+                      {c.count}
+                    </span>
+                  ) : null}
+                </button>
+              );
+            })}
+          </div>
+          {activeTop && subsOfActive.length ? (
+            <div className="mt-3 flex flex-wrap gap-2 border-t border-line pt-3">
+              <button
+                onClick={() => pickLine(activeTop)}
+                className={`rounded-full px-3 py-1.5 text-xs font-bold transition ${
+                  lineFilter?.id === activeTop.id ? "bg-brand-blue text-white" : "bg-soft text-heading hover:bg-line"
+                }`}
+              >
+                הכל ב{activeTop.name}
+              </button>
+              {subsOfActive.map((s) => (
+                <button
+                  key={s.id}
+                  onClick={() => pickLine(s)}
+                  className={`rounded-full px-3 py-1.5 text-xs font-bold transition ${
+                    lineFilter?.id === s.id ? "bg-brand-blue text-white" : "bg-soft text-heading hover:bg-line"
+                  }`}
+                >
+                  {s.name}
+                </button>
               ))}
-            </tbody>
-          </table>
+            </div>
+          ) : null}
+        </SectionCard>
+      ) : null}
+
+      {lineFilter ? (
+        <span className="inline-flex w-fit items-center gap-1 rounded-full bg-red-50 px-3 py-1.5 text-sm font-bold text-brand-red">
+          סינון: {lineFilter.name}
+          <button onClick={() => setLineFilter(null)} className="text-brand-red/60 hover:text-brand-red" aria-label="ניקוי סינון">×</button>
+        </span>
+      ) : null}
+
+      {loading ? (
+        <div className="grid place-items-center gap-3 py-16 text-muted">
+          <span className="h-8 w-8 animate-spin rounded-full border-2 border-line border-t-brand-red" />
+          <span className="text-sm">טוען מוצרים…</span>
+        </div>
+      ) : shown.length === 0 ? (
+        <Card>
+          <p className="py-8 text-center text-sm text-muted">לא נמצאו מוצרים. נסו חיפוש אחר או בחרו קטגוריה.</p>
+        </Card>
+      ) : (
+        <>
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+            {shown.map((p) => (
+              <article
+                key={p.id}
+                className="card-hover group flex flex-col overflow-hidden rounded-2xl border border-line bg-white shadow-card"
+              >
+                <button
+                  onClick={() => openEdit(p)}
+                  className="flex flex-1 flex-col p-2.5 text-right"
+                  title="לחצו לעריכת המוצר"
+                >
+                  <span className="relative mb-2 block aspect-square overflow-hidden rounded-xl bg-soft">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={adminPreviewSrc(p.image)} alt="" loading="lazy" className="h-full w-full object-contain" />
+                    {p.onSale ? (
+                      <span className="absolute right-1.5 top-1.5 rounded-full bg-brand-red px-2 py-0.5 text-[0.65rem] font-black text-white shadow-sm">מבצע</span>
+                    ) : null}
+                    {!p.inStock ? (
+                      <span className="absolute left-1.5 top-1.5 rounded-full bg-gray-800/80 px-2 py-0.5 text-[0.65rem] font-bold text-white">אזל</span>
+                    ) : null}
+                  </span>
+                  <span className="clamp-2 text-[0.8rem] font-bold leading-snug text-heading">{p.name}</span>
+                  {p.model ? (
+                    <span className="mt-0.5 text-[0.7rem] text-muted" dir="ltr">{p.model}</span>
+                  ) : null}
+                  <span className="mt-auto flex items-baseline gap-1.5 pt-1.5">
+                    <span className="text-sm font-black text-brand-red">{formatPrice(p.price)}</span>
+                    {p.onSale && p.regularPrice && p.regularPrice > p.price ? (
+                      <span className="text-[0.7rem] text-muted line-through" dir="ltr">{formatPrice(p.regularPrice)}</span>
+                    ) : null}
+                  </span>
+                </button>
+                <div className="flex border-t border-line text-xs font-bold">
+                  <button onClick={() => openEdit(p)} className="flex-1 py-2 text-brand-blue transition hover:bg-soft">✎ עריכה</button>
+                  <span className="w-px bg-line" aria-hidden="true" />
+                  <button onClick={() => remove(p)} className="flex-1 py-2 text-muted transition hover:bg-red-50 hover:text-brand-red">🗑 מחיקה</button>
+                </div>
+              </article>
+            ))}
+          </div>
           {filtered.length > shown.length ? (
-            <p className="p-3 text-center text-xs text-gray-400">
-              מציג {shown.length} ראשונים — צמצמו בחיפוש כדי לראות עוד
+            <p className="mt-3 text-center text-xs text-muted">
+              מציג {shown.length} מתוך {filtered.length} — צמצמו בחיפוש או בקטגוריה כדי לראות עוד
             </p>
           ) : null}
-        </div>
+        </>
       )}
 
       {draft ? (
-        <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/40 p-4">
-          <div className="my-6 w-full max-w-2xl rounded-xl bg-white p-6 shadow-2xl">
-            <h3 className="mb-4 text-lg font-extrabold text-gray-800">
-              {draft.id ? `עריכת מוצר #${draft.id}` : "מוצר חדש"}
-            </h3>
+        <div
+          className="fixed inset-0 z-50 flex items-stretch justify-center bg-black/50 sm:items-start sm:p-4"
+          onClick={close}
+        >
+          <div
+            className="flex max-h-screen w-full flex-col bg-white shadow-pop sm:my-2 sm:max-h-[calc(100vh-1rem)] sm:max-w-2xl sm:rounded-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between gap-2 border-b border-line px-4 py-3 sm:rounded-t-2xl">
+              <h3 className="text-base font-extrabold text-heading">
+                {draft.id ? `עריכת מוצר #${draft.id}` : "מוצר חדש"}
+              </h3>
+              <button
+                onClick={close}
+                aria-label="סגירה"
+                className="grid h-9 w-9 place-items-center rounded-full text-muted transition hover:bg-soft"
+              >
+                ✕
+              </button>
+            </div>
 
-            <div className="space-y-4">
+            <div className="flex-1 space-y-4 overflow-y-auto p-4">
               <div className="flex items-center gap-4">
-                <div className="h-24 w-24 shrink-0 overflow-hidden rounded-lg border border-gray-200 bg-gray-50">
+                <div className="h-24 w-24 shrink-0 overflow-hidden rounded-xl border border-line bg-soft">
                   {preview || draft.image ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img src={preview || adminPreviewSrc(draft.image)} alt="" className="h-full w-full object-contain" />
-                  ) : null}
+                  ) : (
+                    <span className="grid h-full w-full place-items-center text-2xl text-line">🖼️</span>
+                  )}
                 </div>
                 <div>
                   <input ref={fileRef} type="file" accept="image/*" hidden onChange={(e) => pickFile(e.target.files?.[0])} />
                   <Button variant="ghost" onClick={() => fileRef.current?.click()}>בחירת תמונה</Button>
-                  <p className="mt-1 text-xs text-gray-400">התמונה תועלה בעת השמירה</p>
+                  <p className="mt-1 text-xs text-muted">התמונה תועלה בעת השמירה</p>
                 </div>
               </div>
 
@@ -501,13 +596,13 @@ export default function ProductsTab({
               </div>
 
               <div>
-                <span className="mb-1 block text-sm font-semibold text-gray-700">קטגוריות</span>
+                <span className="mb-1 block text-sm font-semibold text-heading">קטגוריות</span>
                 {draft.categoryIds.length ? (
                   <div className="mb-2 flex flex-wrap gap-1">
                     {draft.categoryIds.map((id) => (
-                      <span key={id} className="inline-flex items-center gap-1 rounded-full bg-red-50 px-2 py-0.5 text-xs font-semibold text-red-700">
+                      <span key={id} className="inline-flex items-center gap-1 rounded-full bg-red-50 px-2 py-0.5 text-xs font-bold text-brand-red">
                         {catName.get(id) || `#${id}`}
-                        <button onClick={() => toggleCat(id)} className="text-red-400 hover:text-red-700">×</button>
+                        <button onClick={() => toggleCat(id)} className="text-brand-red/60 hover:text-brand-red">×</button>
                       </span>
                     ))}
                   </div>
@@ -516,14 +611,14 @@ export default function ProductsTab({
                   value={catFilter}
                   onChange={(e) => setCatFilter(e.target.value)}
                   placeholder="סינון קטגוריות…"
-                  className="mb-2 w-full rounded-lg border border-gray-300 px-3 py-1.5 text-sm outline-none focus:border-red-500"
+                  className="mb-2 w-full rounded-lg border border-line px-3 py-2 text-base outline-none focus:border-brand-red sm:py-1.5 sm:text-sm"
                 />
-                <div className="max-h-40 overflow-y-auto rounded-lg border border-gray-200 p-2">
+                <div className="max-h-40 overflow-y-auto rounded-lg border border-line p-2">
                   {filteredCats.map((c) => (
-                    <label key={c.id} className="flex cursor-pointer items-center gap-2 rounded px-1 py-0.5 text-sm hover:bg-gray-50">
-                      <input type="checkbox" checked={draft.categoryIds.includes(c.id)} onChange={() => toggleCat(c.id)} className="accent-red-600" />
-                      <span className="text-gray-700">{c.name}</span>
-                      <span className="text-xs text-gray-300">#{c.id}</span>
+                    <label key={c.id} className="flex cursor-pointer items-center gap-2 rounded px-1 py-1 text-sm hover:bg-soft">
+                      <input type="checkbox" checked={draft.categoryIds.includes(c.id)} onChange={() => toggleCat(c.id)} className="h-4 w-4 accent-brand-red" />
+                      <span className="text-heading">{c.name}</span>
+                      <span className="text-xs text-line">#{c.id}</span>
                     </label>
                   ))}
                 </div>
@@ -532,13 +627,15 @@ export default function ProductsTab({
               <TextArea label="תיאור" value={draft.description} onChange={(v) => setDraft({ ...draft, description: v })} rows={4} />
             </div>
 
-            <div className="mt-6 flex justify-end gap-3">
+            <div className="flex justify-end gap-3 border-t border-line px-4 py-3 sm:rounded-b-2xl">
               <Button variant="ghost" onClick={close}>ביטול</Button>
               <Button onClick={save} disabled={saving}>{saving ? "שומר…" : "שמירה"}</Button>
             </div>
           </div>
         </div>
       ) : null}
+        </>
+      )}
     </div>
   );
 }

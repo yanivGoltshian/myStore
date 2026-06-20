@@ -12,15 +12,50 @@ import BrandTab from "./BrandTab";
 import HomepageTab from "./HomepageTab";
 import ProductsTab from "./ProductsTab";
 import CategoriesTab from "./CategoriesTab";
+import PagesTab from "./PagesTab";
 
-type TabId = "brand" | "homepage" | "products" | "categories";
+type TabId = "brand" | "homepage" | "products" | "categories" | "pages";
 
-const TABS: { id: TabId; label: string }[] = [
-  { id: "homepage", label: "עמוד הבית" },
-  { id: "products", label: "מוצרים" },
-  { id: "categories", label: "קטגוריות" },
-  { id: "brand", label: "מותג ופרטים" },
+const TABS: { id: TabId; label: string; icon: string }[] = [
+  { id: "homepage", label: "עמוד הבית", icon: "🏠" },
+  { id: "products", label: "מוצרים", icon: "📦" },
+  { id: "categories", label: "קטגוריות", icon: "🗂️" },
+  { id: "pages", label: "עמודי תוכן", icon: "📄" },
+  { id: "brand", label: "מותג ופרטים", icon: "⚙️" },
 ];
+
+// Compact brand lockup (gold lightning bolt) matching the storefront Logo, but
+// NOT a link — so tapping it never navigates the admin away from the panel.
+function BrandMark({ subtitle }: { subtitle?: string }) {
+  return (
+    <span className="inline-flex items-center gap-2">
+      <svg
+        width={30}
+        height={30}
+        viewBox="0 0 24 24"
+        aria-hidden="true"
+        style={{ filter: "drop-shadow(0 0 2px rgba(212,175,55,.5))", transform: "skewX(-9deg)" }}
+      >
+        <path
+          d="M13.6 2 4 13.7h6L9 22l11-12.6h-6.6L13.6 2Z"
+          fill="none"
+          stroke="#d4af37"
+          strokeWidth="1.6"
+          strokeLinejoin="round"
+          strokeLinecap="round"
+        />
+      </svg>
+      <span className="flex flex-col leading-none">
+        <span className="text-[0.95rem] font-black italic tracking-tight text-white">
+          חשמל חנקין
+        </span>
+        <span className="mt-0.5 text-[0.58rem] font-bold uppercase tracking-[0.22em] text-brand-gold">
+          {subtitle || "ניהול האתר"}
+        </span>
+      </span>
+    </span>
+  );
+}
 
 type AuthState = "checking" | "authorized" | "denied";
 
@@ -184,84 +219,97 @@ export default function AdminApp() {
 
   if (auth === "checking") {
     return (
-      <div className="grid min-h-screen place-items-center bg-gray-100 text-gray-500">
-        בודק הרשאות…
+      <div className="grid min-h-screen place-items-center bg-soft text-muted" dir="rtl">
+        <div className="flex flex-col items-center gap-3">
+          <span className="h-9 w-9 animate-spin rounded-full border-2 border-line border-t-brand-red" />
+          <span className="text-sm font-semibold">בודק הרשאות…</span>
+        </div>
       </div>
     );
   }
 
   if (auth === "denied") {
     return (
-      <div className="grid min-h-screen place-items-center bg-gray-100 p-6" dir="rtl">
-        <div className="w-full max-w-sm rounded-2xl bg-white p-8 text-center shadow-xl">
-          <span className="mx-auto mb-3 grid h-12 w-12 place-items-center rounded-xl bg-red-700 text-lg font-black text-white">
-            ח
-          </span>
-          <h1 className="mb-2 text-xl font-extrabold text-gray-800">ניהול · חשמל חנקין</h1>
-          <p className="mb-6 text-sm text-gray-500">
-            התחבר עם חשבון Google המורשה כדי לנהל את האתר.
-          </p>
-          {clientId ? (
-            <div className="flex justify-center">
-              <div ref={btnRef} />
-            </div>
-          ) : (
-            <p className="rounded-lg bg-amber-50 px-3 py-2 text-sm text-amber-700">
-              ההתחברות עדיין לא הוגדרה. יש להגדיר את מזהה Google (Client ID).
+      <div className="grid min-h-screen place-items-center bg-soft p-6" dir="rtl">
+        <div className="w-full max-w-sm overflow-hidden rounded-2xl bg-white text-center shadow-pop">
+          <div className="stars-bg px-6 py-7">
+            <BrandMark />
+          </div>
+          <div className="p-6">
+            <h1 className="mb-2 text-lg font-extrabold text-heading">כניסת מנהלים</h1>
+            <p className="mb-6 text-sm text-muted">
+              התחברו עם חשבון Google המורשה כדי לנהל את האתר.
             </p>
-          )}
-          {loginError ? (
-            <p className="mt-4 rounded-lg bg-red-50 px-3 py-2 text-sm font-semibold text-red-700">
-              {loginError}
-            </p>
-          ) : null}
+            {clientId ? (
+              <div className="flex justify-center">
+                <div ref={btnRef} />
+              </div>
+            ) : (
+              <p className="rounded-lg bg-amber-50 px-3 py-2 text-sm text-amber-700">
+                ההתחברות עדיין לא הוגדרה. יש להגדיר את מזהה Google (Client ID).
+              </p>
+            )}
+            {loginError ? (
+              <p className="mt-4 rounded-lg bg-red-50 px-3 py-2 text-sm font-semibold text-brand-red">
+                {loginError}
+              </p>
+            ) : null}
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-100" dir="rtl">
-      <header className="sticky top-0 z-40 border-b border-gray-200 bg-white shadow-sm">
-        <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-3">
-          <div className="flex items-center gap-2">
-            <span className="grid h-8 w-8 place-items-center rounded-lg bg-red-700 text-sm font-black text-white">ח</span>
-            <div>
-              <h1 className="text-base font-extrabold text-gray-800">ניהול · חשמל חנקין</h1>
-              <p className="text-[0.7rem] text-gray-400">{user}</p>
+    <div className="min-h-screen bg-soft" dir="rtl">
+      <header className="sticky top-0 z-40 shadow-md">
+        <div className="stars-bg">
+          <div className="mx-auto flex max-w-5xl items-center justify-between gap-3 px-3 py-3 sm:px-4">
+            <BrandMark subtitle={user} />
+            <div className="flex items-center gap-1.5">
+              <a
+                href="/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="rounded-full border border-white/30 px-3 py-1.5 text-xs font-bold text-white transition hover:bg-white/10"
+              >
+                צפייה באתר ↗
+              </a>
+              <button
+                onClick={logout}
+                className="rounded-full border border-white/30 px-3 py-1.5 text-xs font-bold text-white transition hover:bg-white/10"
+              >
+                יציאה
+              </button>
             </div>
           </div>
-          <div className="flex items-center gap-3">
-            <a href="/" target="_blank" rel="noopener noreferrer" className="text-sm font-semibold text-gray-500 hover:text-red-700">
-              צפייה באתר ↗
-            </a>
-            <button onClick={logout} className="text-sm font-semibold text-gray-400 hover:text-red-700">
-              יציאה
-            </button>
-          </div>
         </div>
-        <nav className="mx-auto flex max-w-5xl gap-1 px-4">
-          {TABS.map((t) => (
-            <button
-              key={t.id}
-              onClick={() => setTab(t.id)}
-              className={`-mb-px border-b-2 px-4 py-2.5 text-sm font-bold transition ${
-                tab === t.id
-                  ? "border-red-700 text-red-700"
-                  : "border-transparent text-gray-500 hover:text-gray-800"
-              }`}
-            >
-              {t.label}
-            </button>
-          ))}
+        <nav className="border-b border-line bg-white">
+          <div className="mx-auto flex max-w-5xl gap-1.5 overflow-x-auto px-3 py-2 no-scrollbar sm:px-4">
+            {TABS.map((t) => (
+              <button
+                key={t.id}
+                onClick={() => setTab(t.id)}
+                className={`flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full px-4 py-2 text-sm font-bold transition ${
+                  tab === t.id
+                    ? "bg-brand-red text-white shadow-sm"
+                    : "bg-soft text-heading hover:bg-line"
+                }`}
+              >
+                <span aria-hidden="true">{t.icon}</span>
+                {t.label}
+              </button>
+            ))}
+          </div>
         </nav>
       </header>
 
-      <main className="mx-auto max-w-5xl px-4 py-6">
+      <main className="mx-auto max-w-5xl px-3 py-5 sm:px-4 sm:py-6">
         {tab === "brand" ? <BrandTab onToast={onToast} /> : null}
         {tab === "homepage" ? <HomepageTab onToast={onToast} /> : null}
         {tab === "products" ? <ProductsTab onToast={onToast} /> : null}
         {tab === "categories" ? <CategoriesTab onToast={onToast} /> : null}
+        {tab === "pages" ? <PagesTab onToast={onToast} /> : null}
       </main>
 
       <Toast toast={toast} />

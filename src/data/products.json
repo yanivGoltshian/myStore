@@ -1301,7 +1301,7 @@
     "regularPrice": 279,
     "salePrice": 279,
     "onSale": false,
-    "image": "/images/products/33425.png",
+    "image": "/images/products/33425.jpg",
     "categoryIds": [
       120,
       781
@@ -2229,7 +2229,7 @@
     "regularPrice": 99,
     "salePrice": 99,
     "onSale": false,
-    "image": "/images/products/35104.png",
+    "image": "/images/products/35104.jpg",
     "categoryIds": [
       140,
       141
@@ -3355,7 +3355,7 @@
     "regularPrice": 319,
     "salePrice": 319,
     "onSale": false,
-    "image": "/images/products/33423.png",
+    "image": "/images/products/33423.jpg",
     "categoryIds": [
       120,
       127
@@ -4378,7 +4378,7 @@
     "regularPrice": 299,
     "salePrice": 299,
     "onSale": false,
-    "image": "/images/products/29115.jpg",
+    "image": "/images/lighting/29115.jpg",
     "categoryIds": [
       120,
       756

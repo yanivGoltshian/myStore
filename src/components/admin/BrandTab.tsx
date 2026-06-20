@@ -64,8 +64,8 @@ export default function BrandTab({
 
   return (
     <div className="space-y-8">
-      <section className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
-        <h2 className="mb-4 text-lg font-extrabold text-gray-800">שם ומיתוג</h2>
+      <section className="rounded-2xl border border-line bg-white p-5 shadow-card">
+        <h2 className="mb-4 text-lg font-extrabold text-heading">שם ומיתוג</h2>
         <div className="grid gap-4 sm:grid-cols-2">
           <Field label="שם החנות" value={site.name} onChange={(v) => set("name", v)} />
           <Field label="שם באנגלית" value={site.nameEn} onChange={(v) => set("nameEn", v)} dir="ltr" />
@@ -81,8 +81,8 @@ export default function BrandTab({
         </div>
       </section>
 
-      <section className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
-        <h2 className="mb-4 text-lg font-extrabold text-gray-800">פרטי קשר ורשתות</h2>
+      <section className="rounded-2xl border border-line bg-white p-5 shadow-card">
+        <h2 className="mb-4 text-lg font-extrabold text-heading">פרטי קשר ורשתות</h2>
         <div className="grid gap-4 sm:grid-cols-2">
           <Field label="טלפון (תצוגה)" value={site.phone} onChange={(v) => set("phone", v)} dir="ltr" />
           <Field label="טלפון (ספרות בלבד)" value={site.phoneRaw} onChange={(v) => set("phoneRaw", v)} dir="ltr" hint="לקישור חיוג, לדוגמה 035562520" />
@@ -93,8 +93,8 @@ export default function BrandTab({
         </div>
       </section>
 
-      <section className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
-        <h2 className="mb-4 text-lg font-extrabold text-gray-800">כתובת הסניף</h2>
+      <section className="rounded-2xl border border-line bg-white p-5 shadow-card">
+        <h2 className="mb-4 text-lg font-extrabold text-heading">כתובת הסניף</h2>
         <div className="grid gap-4 sm:grid-cols-2">
           <Field label="רחוב" value={site.address.street} onChange={(v) => setAddr("street", v)} />
           <Field label="רחוב (אנגלית)" value={site.address.streetEn} onChange={(v) => setAddr("streetEn", v)} dir="ltr" />
@@ -108,8 +108,8 @@ export default function BrandTab({
         </div>
       </section>
 
-      <section className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
-        <h2 className="mb-4 text-lg font-extrabold text-gray-800">שעות פעילות</h2>
+      <section className="rounded-2xl border border-line bg-white p-5 shadow-card">
+        <h2 className="mb-4 text-lg font-extrabold text-heading">שעות פעילות</h2>
         <TextArea label="שעות (טקסט חופשי)" value={site.hours} onChange={(v) => set("hours", v)} rows={2} />
         <p className="mt-2 text-xs text-gray-400">
           שעות מובְנות ל־SEO ניתן לערוך דרך עורך ה־JSON המתקדם למטה.
@@ -126,14 +126,14 @@ export default function BrandTab({
       </div>
 
       {showRaw ? (
-        <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
-          <h3 className="mb-2 text-sm font-extrabold text-gray-800">עורך JSON מתקדם</h3>
+        <div className="rounded-2xl border border-line bg-white p-5 shadow-card">
+          <h3 className="mb-2 text-sm font-extrabold text-heading">עורך JSON מתקדם</h3>
           <textarea
             value={rawText}
             dir="ltr"
             rows={16}
             onChange={(e) => setRawText(e.target.value)}
-            className="w-full rounded-lg border border-gray-300 bg-gray-50 p-3 font-mono text-xs text-gray-900"
+            className="w-full rounded-lg border border-line bg-gray-50 p-3 font-mono text-xs text-gray-900"
           />
           <div className="mt-3 flex gap-2">
             <Button variant="subtle" onClick={applyRaw}>

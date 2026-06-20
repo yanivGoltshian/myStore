@@ -1,9 +1,19 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import type { Homepage, Category, PromoTile, HomeSection } from "@/lib/types";
-import { apiGet, apiSend, uploadImage, adminPreviewSrc } from "./lib";
-import { Field, TextArea, Button } from "./ui";
+import type {
+  Homepage,
+  Category,
+  PromoTile,
+  HomeSection,
+  DealsCube,
+  DealFace,
+  Product,
+  LightingShowcase,
+} from "@/lib/types";
+import { lightingSubcats } from "@/lib/lighting";
+import { apiGet, apiSend, uploadImage, adminPreviewSrc, formatPrice, type ProductList } from "./lib";
+import { Field, TextArea, Button, Toggle } from "./ui";
 
 // Deep clone via JSON (homepage data is plain JSON) for the save-merge baseline.
 function clone<T>(v: T): T {
@@ -71,7 +81,7 @@ function ImageUpload({
     <div>
       <span className="mb-1 block text-sm font-semibold text-gray-700">{label}</span>
       <div className="flex items-center gap-3">
-        <div className="flex h-16 w-28 shrink-0 items-center justify-center overflow-hidden rounded-md border border-gray-200 bg-gray-50">
+        <div className="flex h-16 w-28 shrink-0 items-center justify-center overflow-hidden rounded-md border border-line bg-gray-50">
           {previewSrc && !imgError ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
@@ -105,6 +115,86 @@ function ImageUpload({
   );
 }
 
+// Search-as-you-type product picker. Filters the catalog by name/model/id and,
+// on selection, hands the chosen product back so the caller can autofill a deal.
+function ProductPicker({
+  products,
+  onPick,
+}: {
+  products: Product[];
+  onPick: (p: Product) => void;
+}) {
+  const [q, setQ] = useState("");
+  const [open, setOpen] = useState(false);
+  const boxRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function onDoc(e: MouseEvent) {
+      if (boxRef.current && !boxRef.current.contains(e.target as Node)) setOpen(false);
+    }
+    document.addEventListener("mousedown", onDoc);
+    return () => document.removeEventListener("mousedown", onDoc);
+  }, []);
+
+  const term = q.trim().toLowerCase();
+  const matches = term
+    ? products
+        .filter(
+          (p) =>
+            p.name.toLowerCase().includes(term) ||
+            String(p.model).toLowerCase().includes(term) ||
+            String(p.id).includes(term)
+        )
+        .slice(0, 8)
+    : [];
+
+  return (
+    <div ref={boxRef} className="relative">
+      <span className="mb-1 block text-sm font-semibold text-gray-700">בחירת מוצר מהקטלוג</span>
+      <input
+        value={q}
+        onChange={(e) => {
+          setQ(e.target.value);
+          setOpen(true);
+        }}
+        onFocus={() => setOpen(true)}
+        placeholder="חיפוש לפי שם / דגם / מק״ט…"
+        className="w-full rounded-lg border border-line bg-white px-3 py-2 text-base sm:text-sm text-gray-900 shadow-sm outline-none focus:border-brand-red"
+      />
+      {open && matches.length > 0 && (
+        <ul className="absolute z-20 mt-1 max-h-72 w-full overflow-auto rounded-lg border border-line bg-white shadow-lg">
+          {matches.map((p) => (
+            <li key={p.id}>
+              <button
+                type="button"
+                onClick={() => {
+                  onPick(p);
+                  setQ("");
+                  setOpen(false);
+                }}
+                className="flex w-full items-center gap-3 px-3 py-2 text-right hover:bg-gray-50"
+              >
+                <span className="grid h-10 w-10 shrink-0 place-items-center overflow-hidden rounded border border-line bg-gray-50">
+                  {p.image ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={adminPreviewSrc(p.image)} alt="" className="h-full w-full object-contain" />
+                  ) : null}
+                </span>
+                <span className="min-w-0 flex-1">
+                  <span className="block truncate text-sm font-semibold text-gray-900">{p.name}</span>
+                  <span className="block text-xs text-gray-500">
+                    #{p.id} · {formatPrice(p.onSale && p.salePrice ? p.salePrice : p.price)}
+                  </span>
+                </span>
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+
 export default function HomepageTab({
   onToast,
 }: {
@@ -112,6 +202,7 @@ export default function HomepageTab({
 }) {
   const [hp, setHp] = useState<Homepage | null>(null);
   const [cats, setCats] = useState<Category[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
   const [saving, setSaving] = useState(false);
   const [showRaw, setShowRaw] = useState(false);
   const [rawText, setRawText] = useState("");
@@ -128,6 +219,7 @@ export default function HomepageTab({
       })
       .catch((e: Error) => onToast(e.message, false));
     apiGet<Category[]>("/api/categories").then(setCats).catch(() => {});
+    apiGet<ProductList>("/api/products").then((d) => setProducts(d.products)).catch(() => {});
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -186,6 +278,79 @@ export default function HomepageTab({
     setHp((s) => (s ? { ...s, sections: s.sections.filter((_, j) => j !== i) } : s));
   }
 
+  // --- Lighting showcase helpers ---
+  const lightingShowcase: LightingShowcase = hp.lightingShowcase ?? {
+    enabled: false,
+    title: "✦ מחלקת התאורה",
+    subtitle: "",
+    subcatIds: [],
+  };
+  const pickedLightingSubcats = lightingShowcase.subcatIds
+    .map((id) => lightingSubcats.find((c) => c.id === id))
+    .filter((c): c is (typeof lightingSubcats)[number] => Boolean(c));
+  const availableLightingSubcats = lightingSubcats.filter(
+    (c) => !lightingShowcase.subcatIds.includes(c.id)
+  );
+  function setLightingShowcase(patch: Partial<LightingShowcase>) {
+    setHp((s) =>
+      s ? { ...s, lightingShowcase: { ...lightingShowcase, ...patch } } : s
+    );
+  }
+  function addLightingSubcat(id: number) {
+    if (!id || lightingShowcase.subcatIds.includes(id)) return;
+    setLightingShowcase({ subcatIds: [...lightingShowcase.subcatIds, id] });
+  }
+  function removeLightingSubcat(id: number) {
+    setLightingShowcase({
+      subcatIds: lightingShowcase.subcatIds.filter((x) => x !== id),
+    });
+  }
+  function moveLightingSubcat(i: number, dir: -1 | 1) {
+    const j = i + dir;
+    if (j < 0 || j >= lightingShowcase.subcatIds.length) return;
+    const next = lightingShowcase.subcatIds.slice();
+    [next[i], next[j]] = [next[j], next[i]];
+    setLightingShowcase({ subcatIds: next });
+  }
+
+  // --- Deals cube helpers ---
+  const cube: DealsCube = hp.dealsCube ?? { enabled: false, intervalMs: 4500, faces: [] };
+  function setCube(patch: Partial<DealsCube>) {
+    setHp((s) => (s ? { ...s, dealsCube: { ...cube, ...patch } } : s));
+  }
+  function setFace(i: number, patch: Partial<DealFace>) {
+    setCube({ faces: cube.faces.map((f, j) => (j === i ? { ...f, ...patch } : f)) });
+  }
+  function addFace() {
+    setCube({
+      faces: [
+        ...cube.faces,
+        { id: `deal-${Date.now()}`, title: "מבצע חדש", image: "", dealPrice: 0, href: "" },
+      ],
+    });
+  }
+  function removeFace(i: number) {
+    setCube({ faces: cube.faces.filter((_, j) => j !== i) });
+  }
+  function moveFace(i: number, dir: -1 | 1) {
+    const j = i + dir;
+    if (j < 0 || j >= cube.faces.length) return;
+    const next = cube.faces.slice();
+    [next[i], next[j]] = [next[j], next[i]];
+    setCube({ faces: next });
+  }
+  function pickForFace(i: number, p: Product) {
+    const onSale = p.onSale && p.salePrice > 0 && p.regularPrice > p.salePrice;
+    setFace(i, {
+      productId: p.id,
+      title: p.name,
+      image: p.image,
+      href: `/product/${p.id}/`,
+      dealPrice: onSale ? p.salePrice : p.price || p.regularPrice,
+      originalPrice: onSale ? p.regularPrice : undefined,
+    });
+  }
+
   async function save() {
     if (!hp) return;
     setSaving(true);
@@ -223,7 +388,7 @@ export default function HomepageTab({
       <select
         value={String(value || 0)}
         onChange={(e) => onChange(Number(e.target.value))}
-        className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm outline-none focus:border-red-500"
+        className="w-full rounded-lg border border-line bg-white px-3 py-2 text-base sm:text-sm text-gray-900 shadow-sm outline-none focus:border-brand-red"
       >
         <option value="0">— קטגוריה —</option>
         {cats.map((c) => (
@@ -237,8 +402,8 @@ export default function HomepageTab({
 
   return (
     <div className="space-y-8">
-      <section className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
-        <h2 className="mb-4 text-lg font-extrabold text-gray-800">באנר ראשי (Hero)</h2>
+      <section className="rounded-2xl border border-line bg-white p-5 shadow-card">
+        <h2 className="mb-4 text-lg font-extrabold text-heading">באנר ראשי (Hero)</h2>
         <div className="space-y-4">
           <ImageUpload
             label="תמונת הבאנר"
@@ -256,22 +421,127 @@ export default function HomepageTab({
         </div>
       </section>
 
-      <section className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
-        <h2 className="mb-4 text-lg font-extrabold text-gray-800">הודעת מבצע ופרטי טופבר</h2>
+      <section className="rounded-2xl border border-line bg-white p-5 shadow-card">
+        <h2 className="mb-4 text-lg font-extrabold text-heading">הודעת מבצע ופרטי טופבר</h2>
         <div className="grid gap-4 sm:grid-cols-2">
           <Field label="הודעת רצועה עליונה" value={hp.announcement} onChange={(v) => setHp((s) => (s ? { ...s, announcement: v } : s))} />
           <Field label="טלפון בטופבר" value={hp.topbarPhone} onChange={(v) => setHp((s) => (s ? { ...s, topbarPhone: v } : s))} dir="ltr" />
         </div>
       </section>
 
-      <section className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
+      <section className="rounded-2xl border border-line bg-white p-5 shadow-card">
+        <div className="mb-1 flex flex-wrap items-center justify-between gap-3">
+          <h2 className="text-lg font-extrabold text-heading">🔥 קוביית מבצעים</h2>
+          <div className="flex items-center gap-4">
+            <Toggle
+              label="מוצגת באתר"
+              checked={!!cube.enabled}
+              onChange={(v) => setCube({ enabled: v })}
+            />
+            <Button variant="subtle" onClick={addFace} disabled={cube.faces.length >= 6}>
+              + פאה
+            </Button>
+          </div>
+        </div>
+        <p className="mb-4 text-sm text-gray-500">
+          קובייה מסתובבת מעל אריחי הקידום. מומלצות 4 פאות. כל פאה = מבצע על מוצר: בחרו מוצר
+          מהקטלוג והפרטים ימולאו אוטומטית; הזינו מחיר מבצע (ומחיר מקורי כדי להציג הנחה).
+        </p>
+
+        <div className="mb-4 max-w-xs">
+          <Field
+            label="מהירות החלפה (שניות)"
+            type="number"
+            value={String(Math.round((cube.intervalMs ?? 4500) / 1000))}
+            onChange={(v) => setCube({ intervalMs: Math.max(2, Number(v) || 4.5) * 1000 })}
+            hint="כמה שניות כל פאה מוצגת לפני הסיבוב"
+          />
+        </div>
+
+        {cube.faces.length === 0 ? (
+          <p className="rounded-lg border border-dashed border-line bg-gray-50 p-4 text-center text-sm text-gray-500">
+            אין מבצעים עדיין. לחצו “+ פאה” כדי להוסיף מבצע ראשון.
+          </p>
+        ) : (
+          <div className="space-y-4">
+            {cube.faces.map((f, i) => {
+              const hasDeal = typeof f.originalPrice === "number" && f.originalPrice > f.dealPrice;
+              return (
+                <div key={f.id} className="rounded-xl border border-line bg-gray-50 p-3 sm:p-4">
+                  <div className="mb-3 flex items-center justify-between">
+                    <span className="text-sm font-bold text-heading">פאה {i + 1}</span>
+                    <div className="flex items-center gap-1">
+                      <Button variant="ghost" onClick={() => moveFace(i, -1)} disabled={i === 0}>↑</Button>
+                      <Button variant="ghost" onClick={() => moveFace(i, 1)} disabled={i === cube.faces.length - 1}>↓</Button>
+                      <Button variant="danger" onClick={() => removeFace(i)}>מחיקה</Button>
+                    </div>
+                  </div>
+
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <div className="space-y-3">
+                      <ProductPicker products={products} onPick={(p) => pickForFace(i, p)} />
+                      <Field label="כותרת" value={f.title} onChange={(v) => setFace(i, { title: v })} />
+                      <div className="grid grid-cols-2 gap-3">
+                        <Field
+                          label="מחיר מקורי (₪)"
+                          type="number"
+                          value={f.originalPrice != null ? String(f.originalPrice) : ""}
+                          onChange={(v) =>
+                            setFace(i, { originalPrice: v.trim() === "" ? undefined : Number(v) || 0 })
+                          }
+                          hint="ריק = ללא הנחה"
+                        />
+                        <Field
+                          label="מחיר מבצע (₪)"
+                          type="number"
+                          value={String(f.dealPrice)}
+                          onChange={(v) => setFace(i, { dealPrice: Number(v) || 0 })}
+                        />
+                      </div>
+                      <Field
+                        label="קישור בלחיצה"
+                        value={f.href}
+                        onChange={(v) => setFace(i, { href: v })}
+                        dir="ltr"
+                        hint="לדוגמה /product/36189/"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <ImageUpload
+                        label="תמונה (ברירת מחדל: תמונת המוצר)"
+                        value={f.image}
+                        onUploaded={(p) => setFace(i, { image: p })}
+                        onError={(m) => onToast(m, false)}
+                      />
+                      <div className="rounded-lg border border-line bg-white p-3 text-right">
+                        <p className="truncate text-sm font-extrabold text-gray-900">{f.title || "—"}</p>
+                        <p className="mt-1">
+                          {hasDeal && (
+                            <span className="ml-2 text-xs text-gray-400 line-through">
+                              {formatPrice(f.originalPrice as number)}
+                            </span>
+                          )}
+                          <span className="text-lg font-black text-brand-red">{formatPrice(f.dealPrice || 0)}</span>
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </section>
+
+      <section className="rounded-2xl border border-line bg-white p-5 shadow-card">
         <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-lg font-extrabold text-gray-800">אריחי קידום (Promo Tiles)</h2>
+          <h2 className="text-lg font-extrabold text-heading">אריחי קידום (Promo Tiles)</h2>
           <Button variant="subtle" onClick={addTile}>+ אריח</Button>
         </div>
         <div className="space-y-4">
           {hp.promoTiles.map((t, i) => (
-            <div key={t.id} className="grid items-end gap-3 rounded-lg border border-gray-200 bg-gray-50 p-3 sm:grid-cols-[7rem_1fr_1fr_auto]">
+            <div key={t.id} className="grid items-end gap-3 rounded-lg border border-line bg-gray-50 p-3 sm:grid-cols-[7rem_1fr_1fr_auto]">
               <ImageUpload
                 label="תמונה"
                 value={t.image}
@@ -289,14 +559,98 @@ export default function HomepageTab({
         </div>
       </section>
 
-      <section className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
+      <section className="rounded-2xl border border-line bg-white p-5 shadow-card">
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <h2 className="text-lg font-extrabold text-heading">✦ מחלקת תאורה בעמוד הבית</h2>
+            <p className="mt-1 text-sm text-gray-500">
+              מקטע ייעודי שמוביל לקטגוריות התאורה ולמוצרי התאורה באתר.
+            </p>
+          </div>
+          <Toggle
+            label="מוצג באתר"
+            checked={!!lightingShowcase.enabled}
+            onChange={(v) => setLightingShowcase({ enabled: v })}
+          />
+        </div>
+
+        <div className="grid gap-4 sm:grid-cols-2">
+          <Field
+            label="כותרת"
+            value={lightingShowcase.title}
+            onChange={(v) => setLightingShowcase({ title: v })}
+          />
+          <Field
+            label="תיאור קצר"
+            value={lightingShowcase.subtitle || ""}
+            onChange={(v) => setLightingShowcase({ subtitle: v })}
+          />
+        </div>
+
+        <div className="mt-4 rounded-xl border border-line bg-gray-50 p-3">
+          <div className="mb-3 flex flex-wrap items-end justify-between gap-3">
+            <div>
+              <h3 className="text-sm font-extrabold text-heading">קטגוריות תאורה מוצגות</h3>
+              <p className="text-xs text-gray-500">הסדר כאן הוא הסדר באתר. מומלץ להציג 6–8 קטגוריות.</p>
+            </div>
+            <select
+              value=""
+              onChange={(e) => {
+                addLightingSubcat(Number(e.target.value));
+                e.currentTarget.value = "";
+              }}
+              className="min-w-52 rounded-lg border border-line bg-white px-3 py-2 text-base sm:text-sm text-gray-900 shadow-sm outline-none focus:border-brand-red"
+            >
+              <option value="">+ הוספת קטגוריית תאורה</option>
+              {availableLightingSubcats.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.name} ({c.count.toLocaleString("he-IL")})
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {pickedLightingSubcats.length === 0 ? (
+            <p className="rounded-lg border border-dashed border-line bg-white p-4 text-center text-sm text-gray-500">
+              לא נבחרו קטגוריות. אם המקטע פעיל, האתר ישתמש בברירת מחדל.
+            </p>
+          ) : (
+            <div className="space-y-2">
+              {pickedLightingSubcats.map((c, i) => (
+                <div
+                  key={c.id}
+                  className="flex flex-wrap items-center gap-3 rounded-lg border border-line bg-white p-2"
+                >
+                  <span className="grid h-12 w-12 shrink-0 place-items-center overflow-hidden rounded border border-line bg-soft">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={adminPreviewSrc(c.thumb)} alt="" className="h-full w-full object-contain" />
+                  </span>
+                  <span className="min-w-0 flex-1">
+                    <span className="block truncate text-sm font-extrabold text-heading">{c.name}</span>
+                    <span className="text-xs text-gray-500">
+                      #{c.id} · {c.count.toLocaleString("he-IL")} מוצרים
+                    </span>
+                  </span>
+                  <div className="flex items-center gap-1">
+                    <Button variant="ghost" onClick={() => moveLightingSubcat(i, -1)} disabled={i === 0}>↑</Button>
+                    <Button variant="ghost" onClick={() => moveLightingSubcat(i, 1)} disabled={i === pickedLightingSubcats.length - 1}>↓</Button>
+                    <Button variant="danger" onClick={() => removeLightingSubcat(c.id)}>מחיקה</Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </section>
+
+      <section className="rounded-2xl border border-line bg-white p-5 shadow-card">
         <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-lg font-extrabold text-gray-800">מקטעי מוצרים בעמוד הבית</h2>
+          <h2 className="text-lg font-extrabold text-heading">מקטעי מוצרים בעמוד הבית</h2>
           <Button variant="subtle" onClick={addSection}>+ מקטע</Button>
         </div>
         <div className="space-y-4">
           {hp.sections.map((sec, i) => (
-            <div key={sec.id} className="grid items-end gap-3 rounded-lg border border-gray-200 bg-gray-50 p-3 sm:grid-cols-[auto_1fr_1fr_5rem_auto]">
+            <div key={sec.id} className="grid items-end gap-3 rounded-lg border border-line bg-gray-50 p-3 sm:grid-cols-[auto_1fr_1fr_5rem_auto]">
               <Field label="אייקון" value={sec.icon} onChange={(v) => setSection(i, { icon: v })} />
               <Field label="כותרת" value={sec.title} onChange={(v) => setSection(i, { title: v })} />
               <label className="block">
@@ -324,13 +678,13 @@ export default function HomepageTab({
       </div>
 
       {showRaw ? (
-        <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
+        <div className="rounded-2xl border border-line bg-white p-5 shadow-card">
           <textarea
             value={rawText}
             dir="ltr"
             rows={16}
             onChange={(e) => setRawText(e.target.value)}
-            className="w-full rounded-lg border border-gray-300 bg-gray-50 p-3 font-mono text-xs text-gray-900"
+            className="w-full rounded-lg border border-line bg-gray-50 p-3 font-mono text-xs text-gray-900"
           />
           <div className="mt-3 flex gap-2">
             <Button

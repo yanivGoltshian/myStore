@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
-import LegalLayout, { type LegalSection } from "@/components/LegalLayout";
-import { site } from "@/lib/data";
+import LegalLayout from "@/components/LegalLayout";
+import { pages, site } from "@/lib/data";
 
 export const metadata: Metadata = {
   title: "הצהרת נגישות",
@@ -8,53 +8,6 @@ export const metadata: Metadata = {
   alternates: { canonical: "/accessibility/" },
 };
 
-const sections: LegalSection[] = [
-  {
-    heading: "מחויבות לנגישות",
-    paragraphs: [
-      `${site.name} רואה חשיבות רבה במתן שירות שוויוני לכלל הלקוחות, ופועלת לשפר את נגישות האתר באופן מתמשך. אנו מאמינים שלכל אדם מגיעה הזכות לקבל שירות בכבוד, בעצמאות ובשוויון.`,
-    ],
-  },
-  {
-    heading: "מצב הנגישות באתר",
-    paragraphs: [
-      "האתר נמצא בתהליך הנגשה מתמשך. נכון למועד זה האתר אינו עומד במלוא הוראות תקן הנגישות הישראלי (ת\u05f4י 5568, המבוסס על WCAG 2.0 ברמה AA), ואנו פועלים לשפר את הנגישות בהדרגה.",
-      "האתר בנוי במבנה עברי מימין לשמאל (RTL), בעיצוב רספונסיבי המותאם למחשב, לטאבלט ולמכשירים ניידים, ותומך בהגדלת התצוגה דרך הדפדפן. עם זאת, ייתכנו רכיבים באתר — ובפרט תכנים ותמונות שמקורם בספקים חיצוניים — שאינם נגישים במלואם.",
-    ],
-  },
-  {
-    heading: "שירות מלא בכל ערוץ",
-    paragraphs: [
-      "אם נתקלתם בקושי נגישות כלשהו באתר, אנחנו לרשותכם בערוץ חלופי מלא ונגיש: בטלפון, בוואטסאפ או בחנות הפיזית. נשמח להשלים עבורכם כל מידע על מוצר, לבצע הזמנה ולתת כל שירות — ללא תלות באתר.",
-    ],
-    bullets: [
-      `טלפון: ${site.phone}`,
-      `וואטסאפ: ${site.whatsappDisplay}`,
-      `כתובת: ${site.address.full}`,
-      `שעות פעילות: ${site.hours}`,
-    ],
-  },
-  {
-    heading: "פנייה בנושא נגישות",
-    paragraphs: [
-      "נשמח לקבל כל פנייה, הערה או בקשה בנושא נגישות האתר, ולטפל בה בהקדם. ניתן לפנות אלינו בטלפון או בוואטסאפ שלמעלה.",
-    ],
-  },
-  {
-    heading: "עדכון ההצהרה",
-    paragraphs: [
-      "הצהרת נגישות זו משקפת את מצב הנגישות הנוכחי של האתר, ותתעדכן בהתאם לשיפורים שיבוצעו מעת לעת.",
-    ],
-  },
-];
-
 export default function AccessibilityPage() {
-  return (
-    <LegalLayout
-      title="הצהרת נגישות"
-      intro="פועלים לשיפור נגישות האתר ולמתן שירות נגיש לכל אדם"
-      updated="יוני 2026"
-      sections={sections}
-    />
-  );
+  return <LegalLayout {...pages.accessibility} />;
 }

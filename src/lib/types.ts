@@ -57,12 +57,37 @@ export type Hero = {
   href: string;
 };
 
+export type DealFace = {
+  id: string;
+  productId?: number;
+  title: string;
+  image: string;
+  originalPrice?: number;
+  dealPrice: number;
+  href: string;
+};
+
+export type DealsCube = {
+  enabled: boolean;
+  intervalMs?: number;
+  faces: DealFace[];
+};
+
+export type LightingShowcase = {
+  enabled: boolean;
+  title: string;
+  subtitle?: string;
+  subcatIds: number[];
+};
+
 export type Homepage = {
   announcement: string;
   topbarPhone: string;
   hero: Hero;
   promoTiles: PromoTile[];
+  lightingShowcase?: LightingShowcase;
   sections: HomeSection[];
+  dealsCube?: DealsCube;
 };
 
 export type OpeningHours = {
@@ -100,4 +125,46 @@ export type Site = {
   address: SiteAddress;
   hours: string;
   openingHours: OpeningHours[];
+};
+
+export type LegalSection = {
+  heading: string;
+  paragraphs?: string[];
+  bullets?: string[];
+};
+
+export type LegalContentPage = {
+  title: string;
+  intro?: string;
+  updated: string;
+  sections: LegalSection[];
+};
+
+export type AboutValue = {
+  icon: string;
+  title: string;
+  text: string;
+};
+
+export type AboutPageContent = {
+  title: string;
+  intro: string[];
+  visit: {
+    addressLead: string;
+    phoneLead: string;
+  };
+  values: AboutValue[];
+};
+
+export type ContactPageContent = {
+  title: string;
+  lead: string;
+};
+
+export type ContentPages = {
+  privacy: LegalContentPage;
+  terms: LegalContentPage;
+  accessibility: LegalContentPage;
+  about: AboutPageContent;
+  contact: ContactPageContent;
 };
