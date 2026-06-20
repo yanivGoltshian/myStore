@@ -89,6 +89,7 @@ export type Site = {
   url: string;
   deployUrl: string;
   ogImage: string;
+  googleSiteVerification?: string;
   phone: string;
   phoneRaw: string;
   whatsapp: string;
