@@ -99,17 +99,127 @@ export function fileToData(
   });
 }
 
+// --- Client-side image optimisation ---------------------------------------
+// Every image an admin uploads is resized + compressed in the browser BEFORE
+// it is sent, so it matches the rest of the catalog exactly: product photos are
+// normalised to 700px-wide white-background JPEGs (~20–35KB, same as the
+// original Goldline import) and banners to a 2000px cap. Doing this on the
+// client keeps the Azure Function tiny (no `sharp`/native deps → no extra cost
+// or cold-start) and shrinks the upload payload + the committed asset.
+type ImageSpec = { maxW: number; maxH: number; quality: number };
+
+const IMAGE_SPECS: Record<"product" | "banner", ImageSpec> = {
+  // Matches the existing 700px product thumbnails (aspect preserved, white bg).
+  product: { maxW: 700, maxH: 700, quality: 0.82 },
+  // Promo tiles (~600–800px) and the hero (~2000px) all fit under this cap.
+  banner: { maxW: 2000, maxH: 2000, quality: 0.85 },
+};
+
+function blobToBase64(blob: Blob): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const fr = new FileReader();
+    fr.onerror = () => reject(new Error("שגיאה בעיבוד התמונה"));
+    fr.onload = () => {
+      const res = String(fr.result || "");
+      const comma = res.indexOf(",");
+      resolve(comma >= 0 ? res.slice(comma + 1) : res);
+    };
+    fr.readAsDataURL(blob);
+  });
+}
+
+function loadImageElement(url: string): Promise<HTMLImageElement> {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => resolve(img);
+    img.onerror = () => reject(new Error("שגיאה בטעינת התמונה"));
+    img.src = url;
+  });
+}
+
+// Resize (never upscale) onto a white canvas and re-encode as JPEG. Returns the
+// already-stripped base64 payload + the (always image/jpeg) content type.
+export async function processImageFile(
+  file: File,
+  spec: ImageSpec
+): Promise<{ base64: string; contentType: string }> {
+  let source: CanvasImageSource;
+  let srcW = 0;
+  let srcH = 0;
+  let bitmap: ImageBitmap | null = null;
+  let objectUrl: string | null = null;
+
+  try {
+    bitmap = await createImageBitmap(file, { imageOrientation: "from-image" });
+    source = bitmap;
+    srcW = bitmap.width;
+    srcH = bitmap.height;
+  } catch {
+    // Fallback for browsers without createImageBitmap / unsupported types.
+    objectUrl = URL.createObjectURL(file);
+    const img = await loadImageElement(objectUrl);
+    source = img;
+    srcW = img.naturalWidth;
+    srcH = img.naturalHeight;
+  }
+
+  try {
+    if (!srcW || !srcH) throw new Error("מימדי תמונה לא תקינים");
+    const scale = Math.min(1, spec.maxW / srcW, spec.maxH / srcH);
+    const w = Math.max(1, Math.round(srcW * scale));
+    const h = Math.max(1, Math.round(srcH * scale));
+
+    const canvas = document.createElement("canvas");
+    canvas.width = w;
+    canvas.height = h;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) throw new Error("Canvas לא נתמך");
+    // Flatten any transparency onto white so PNG/WebP cut-outs match the
+    // white-background product/banner look (and JPEG has no alpha channel).
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(0, 0, w, h);
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = "high";
+    ctx.drawImage(source, 0, 0, w, h);
+
+    const blob = await new Promise<Blob | null>((resolve) =>
+      canvas.toBlob(resolve, "image/jpeg", spec.quality)
+    );
+    if (!blob) throw new Error("שגיאה בקידוד התמונה");
+    return { base64: await blobToBase64(blob), contentType: "image/jpeg" };
+  } finally {
+    bitmap?.close();
+    if (objectUrl) URL.revokeObjectURL(objectUrl);
+  }
+}
+
+// Force a .jpg filename so the server stores the optimised JPEG with a matching
+// extension (banner paths are derived from the filename).
+function toJpgName(name: string): string {
+  const base = (name || "image").replace(/\.[^.]+$/, "");
+  return `${base || "image"}.jpg`;
+}
+
 export async function uploadImage(
   kind: "product" | "banner",
   file: File,
   opts: Record<string, unknown> = {}
 ): Promise<string> {
-  const { base64, contentType } = await fileToData(file);
+  let payload: { base64: string; contentType: string };
+  let filename = file.name;
+  try {
+    payload = await processImageFile(file, IMAGE_SPECS[kind]);
+    filename = toJpgName(file.name);
+  } catch {
+    // If in-browser processing fails for any reason, fall back to the raw file
+    // so an upload never hard-fails.
+    payload = await fileToData(file);
+  }
   const res = await apiSend<{ path: string }>("/api/upload", "POST", {
     kind,
-    base64,
-    contentType,
-    filename: file.name,
+    base64: payload.base64,
+    contentType: payload.contentType,
+    filename,
     ...opts,
   });
   return res.path;
