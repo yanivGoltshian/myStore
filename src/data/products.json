@@ -85,10 +85,10 @@
     "id": 34827,
     "name": "קוצץ מזון מהיר 4 להבים / ATL-806",
     "model": "ATL-806",
-    "price": 129,
+    "price": 99,
     "regularPrice": 129,
-    "salePrice": 129,
-    "onSale": false,
+    "salePrice": 99,
+    "onSale": true,
     "image": "/images/products/34827.jpg",
     "categoryIds": [
       120,
