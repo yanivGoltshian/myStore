@@ -205,6 +205,22 @@ function toJpgName(name: string): string {
   return `${base || "image"}.jpg`;
 }
 
+// Admin-only image preview source. The admin panel is served from Azure SWA,
+// whose deployed `out/` lags a fresh commit by the CI rebuild (~2-3 min). So an
+// image just committed via /api/upload 404s on THIS origin until the rebuild
+// lands — which made the upload preview look broken. The repo is public, so we
+// preview images straight from GitHub raw, which serves the committed bytes
+// within seconds. The stored paths (used by the public site) stay relative and
+// unchanged; only the admin's <img> preview is rewritten.
+const RAW_PREVIEW_BASE =
+  "https://raw.githubusercontent.com/yanivGoltshian/myStore/main/public";
+
+export function adminPreviewSrc(path: string): string {
+  if (!path) return "";
+  if (/^(https?:|blob:|data:)/i.test(path)) return path;
+  return RAW_PREVIEW_BASE + (path.startsWith("/") ? path : `/${path}`);
+}
+
 export async function uploadImage(
   kind: "product" | "banner",
   file: File,

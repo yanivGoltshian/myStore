@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { Product, Category } from "@/lib/types";
-import { apiGet, apiSend, uploadImage, formatPrice, type ProductList } from "./lib";
+import { apiGet, apiSend, uploadImage, adminPreviewSrc, formatPrice, type ProductList } from "./lib";
 import { Field, TextArea, Toggle, Button } from "./ui";
 
 type Draft = {
@@ -356,7 +356,7 @@ export default function ProductsTab({
                       >
                         <span className="h-8 w-8 shrink-0 overflow-hidden rounded border border-gray-100 bg-gray-50">
                           {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img src={p.image} alt="" loading="lazy" className="h-full w-full object-contain" />
+                          <img src={adminPreviewSrc(p.image)} alt="" loading="lazy" className="h-full w-full object-contain" />
                         </span>
                         <span className="min-w-0">
                           <span className="line-clamp-1 text-gray-800">{p.name}</span>
@@ -428,7 +428,7 @@ export default function ProductsTab({
                   <td className="p-2">
                     <div className="h-12 w-12 overflow-hidden rounded border border-gray-200 bg-gray-50">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={p.image} alt="" loading="lazy" className="h-full w-full object-contain" />
+                      <img src={adminPreviewSrc(p.image)} alt="" loading="lazy" className="h-full w-full object-contain" />
                     </div>
                   </td>
                   <td className="max-w-xs p-3">
@@ -477,7 +477,7 @@ export default function ProductsTab({
                 <div className="h-24 w-24 shrink-0 overflow-hidden rounded-lg border border-gray-200 bg-gray-50">
                   {preview || draft.image ? (
                     // eslint-disable-next-line @next/next/no-img-element
-                    <img src={preview || draft.image} alt="" className="h-full w-full object-contain" />
+                    <img src={preview || adminPreviewSrc(draft.image)} alt="" className="h-full w-full object-contain" />
                   ) : null}
                 </div>
                 <div>

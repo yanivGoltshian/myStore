@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import type { Homepage, Category, PromoTile, HomeSection } from "@/lib/types";
-import { apiGet, apiSend, uploadImage } from "./lib";
+import { apiGet, apiSend, uploadImage, adminPreviewSrc } from "./lib";
 import { Field, TextArea, Button } from "./ui";
 
 function ImageUpload({
@@ -23,6 +23,7 @@ function ImageUpload({
   // committed path isn't served from this origin until the rebuild finishes).
   const [localPreview, setLocalPreview] = useState<string | null>(null);
   const [justUploaded, setJustUploaded] = useState(false);
+  const [imgError, setImgError] = useState(false);
 
   useEffect(() => {
     return () => {
@@ -34,6 +35,7 @@ function ImageUpload({
     if (!file) return;
     setBusy(true);
     setJustUploaded(false);
+    setImgError(false);
     const preview = URL.createObjectURL(file);
     setLocalPreview((prev) => {
       if (prev) URL.revokeObjectURL(prev);
@@ -52,16 +54,29 @@ function ImageUpload({
     }
   }
 
-  const previewSrc = localPreview || value;
+  // Prefer the just-picked local blob; otherwise preview the committed image
+  // from GitHub raw (available within seconds of commit, unlike this origin).
+  const previewSrc = localPreview || adminPreviewSrc(value);
+
+  useEffect(() => {
+    setImgError(false);
+  }, [previewSrc]);
 
   return (
     <div>
       <span className="mb-1 block text-sm font-semibold text-gray-700">{label}</span>
       <div className="flex items-center gap-3">
-        <div className="h-16 w-28 shrink-0 overflow-hidden rounded-md border border-gray-200 bg-gray-50">
-          {previewSrc ? (
+        <div className="flex h-16 w-28 shrink-0 items-center justify-center overflow-hidden rounded-md border border-gray-200 bg-gray-50">
+          {previewSrc && !imgError ? (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={previewSrc} alt="" className="h-full w-full object-contain" />
+            <img
+              src={previewSrc}
+              alt=""
+              className="h-full w-full object-contain"
+              onError={() => setImgError(true)}
+            />
+          ) : value ? (
+            <span className="px-1 text-center text-[10px] leading-tight text-gray-400">🕓 מתפרסם…</span>
           ) : null}
         </div>
         <input
