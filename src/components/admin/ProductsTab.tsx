@@ -2,12 +2,30 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { Product, Category } from "@/lib/types";
-import { apiGet, apiSend, uploadImage, adminPreviewSrc, formatPrice, type ProductList } from "./lib";
-import { Field, TextArea, Toggle, Button, Card, SectionCard } from "./ui";
-import LightingProducts from "./LightingProducts";
+import {
+  apiGet,
+  apiSend,
+  uploadImage,
+  adminPreviewSrc,
+  formatPrice,
+  type ProductList,
+  type LightingAdminProduct,
+  type LightingList,
+} from "./lib";
+import { Field, RichTextArea, Toggle, Button, Card, SectionCard } from "./ui";
+import FallbackImage from "@/components/FallbackImage";
+
+const LIGHTING_TOP_ID = 9000;
+const LIGHTING_CATEGORY_OFFSET = 9000;
+const LIGHTING_PAGE_SIZE = 60;
+
+type ProductSource = "store" | "lighting";
+type AdminCategory = Category;
+type CatalogProduct = Product & { source: ProductSource; lightingSubId?: number };
 
 type Draft = {
   id?: number;
+  source: ProductSource;
   name: string;
   model: string;
   regularPrice: string;
@@ -15,12 +33,23 @@ type Draft = {
   onSale: boolean;
   inStock: boolean;
   categoryIds: number[];
+  lightingSubId: number;
   description: string;
   image: string;
 };
 
-function emptyDraft(): Draft {
+function isLightingCategory(c: AdminCategory | undefined): boolean {
+  return !!c && (c.id === LIGHTING_TOP_ID || c.parent === LIGHTING_TOP_ID);
+}
+
+function lightingSubId(c: AdminCategory | undefined): number {
+  if (!c || c.id === LIGHTING_TOP_ID) return 0;
+  return Number(c.parent === LIGHTING_TOP_ID ? c.id - LIGHTING_CATEGORY_OFFSET : 0);
+}
+
+function emptyDraft(source: ProductSource, subId = 0): Draft {
   return {
+    source,
     name: "",
     model: "",
     regularPrice: "",
@@ -28,21 +57,46 @@ function emptyDraft(): Draft {
     onSale: false,
     inStock: true,
     categoryIds: [],
+    lightingSubId: subId,
     description: "",
     image: "",
   };
 }
 
-function toDraft(p: Product): Draft {
+function toCatalogProduct(p: Product): CatalogProduct {
+  return { ...p, source: "store" };
+}
+
+function toLightingProduct(p: LightingAdminProduct): CatalogProduct {
   return {
     id: p.id,
+    name: p.name || "",
+    model: p.model || "",
+    price: p.price || 0,
+    regularPrice: p.price || 0,
+    salePrice: p.price || 0,
+    onSale: false,
+    image: p.image || "",
+    categoryIds: [LIGHTING_TOP_ID, p.subId ? LIGHTING_CATEGORY_OFFSET + p.subId : LIGHTING_TOP_ID],
+    inStock: p.inStock !== false,
+    description: p.description || "",
+    source: "lighting",
+    lightingSubId: Number(p.subId || 0),
+  };
+}
+
+function toDraft(p: CatalogProduct): Draft {
+  return {
+    id: p.id,
+    source: p.source,
     name: p.name,
     model: p.model,
     regularPrice: String(p.regularPrice || p.price || 0),
     salePrice: String(p.salePrice || p.price || 0),
-    onSale: !!p.onSale,
+    onSale: p.source === "store" && !!p.onSale,
     inStock: p.inStock !== false,
     categoryIds: Array.isArray(p.categoryIds) ? p.categoryIds : [],
+    lightingSubId: Number(p.lightingSubId || 0),
     description: p.description || "",
     image: p.image || "",
   };
@@ -53,35 +107,94 @@ export default function ProductsTab({
 }: {
   onToast: (msg: string, ok: boolean) => void;
 }) {
-  const [products, setProducts] = useState<Product[]>([]);
-  const [cats, setCats] = useState<Category[]>([]);
+  const [products, setProducts] = useState<CatalogProduct[]>([]);
+  const [cats, setCats] = useState<AdminCategory[]>([]);
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState("");
+  const [debouncedQuery, setDebouncedQuery] = useState("");
   const [draft, setDraft] = useState<Draft | null>(null);
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState("");
   const [saving, setSaving] = useState(false);
   const [catFilter, setCatFilter] = useState("");
+  const [page, setPage] = useState(1);
+  const [serverCount, setServerCount] = useState(0);
+  const [open, setOpen] = useState(false);
+  const [lineFilter, setLineFilter] = useState<{ id: number; name: string } | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
-  const [source, setSource] = useState<"store" | "lighting">("store");
+  const searchRef = useRef<HTMLDivElement>(null);
 
-  async function load() {
+  const catById = useMemo(() => new Map(cats.map((c) => [c.id, c])), [cats]);
+  const selectedCat = useMemo(
+    () => (lineFilter ? catById.get(lineFilter.id) : undefined),
+    [catById, lineFilter]
+  );
+  const lightingMode = isLightingCategory(selectedCat);
+  const selectedLightingSub = lightingSubId(selectedCat);
+
+  async function loadCategories() {
+    try {
+      setCats(await apiGet<AdminCategory[]>("/api/categories"));
+    } catch {
+      /* products can still be edited without category metadata */
+    }
+  }
+
+  const loadStore = useCallback(async () => {
     setLoading(true);
     try {
       const list = await apiGet<ProductList>("/api/products");
-      setProducts(list.products);
+      setProducts(list.products.map(toCatalogProduct));
+      setServerCount(list.count);
     } catch (e) {
       onToast((e as Error).message, false);
     } finally {
       setLoading(false);
     }
-  }
+  }, [onToast]);
+
+  const loadLighting = useCallback(
+    async (subId: number, q: string, nextPage: number) => {
+      setLoading(true);
+      try {
+        const params = new URLSearchParams({
+          sub: String(subId),
+          q,
+          page: String(nextPage),
+          pageSize: String(LIGHTING_PAGE_SIZE),
+        });
+        const list = await apiGet<LightingList>(`/api/lighting/products?${params}`);
+        setProducts(list.products.map(toLightingProduct));
+        setServerCount(list.count);
+      } catch (e) {
+        onToast((e as Error).message, false);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [onToast]
+  );
 
   useEffect(() => {
-    load();
-    apiGet<Category[]>("/api/categories").then(setCats).catch(() => {});
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    loadCategories();
+    loadStore();
+  }, [loadStore]);
+
+  useEffect(() => {
+    const t = setTimeout(() => {
+      setDebouncedQuery(query.trim());
+      setPage(1);
+    }, 300);
+    return () => clearTimeout(t);
+  }, [query]);
+
+  useEffect(() => {
+    if (lightingMode) void loadLighting(selectedLightingSub, debouncedQuery, page);
+  }, [lightingMode, selectedLightingSub, debouncedQuery, page, loadLighting]);
+
+  useEffect(() => {
+    if (!lightingMode) void loadStore();
+  }, [lightingMode, loadStore]);
 
   const catName = useMemo(() => {
     const m = new Map<number, string>();
@@ -90,11 +203,6 @@ export default function ProductsTab({
   }, [cats]);
 
   // ----- main-site style autocomplete (grouped by category) -----
-  const [open, setOpen] = useState(false);
-  const [lineFilter, setLineFilter] = useState<{ id: number; name: string } | null>(null);
-  const searchRef = useRef<HTMLDivElement>(null);
-
-  const catById = useMemo(() => new Map(cats.map((c) => [c.id, c])), [cats]);
   const childrenOf = useMemo(() => {
     const m = new Map<number, number[]>();
     cats.forEach((c) => {
@@ -124,7 +232,7 @@ export default function ProductsTab({
   );
 
   const topOf = useCallback(
-    (id: number): Category | undefined => {
+    (id: number): AdminCategory | undefined => {
       let c = catById.get(id);
       let guard = 0;
       while (c && c.parent && guard++ < 20) c = catById.get(c.parent);
@@ -143,17 +251,15 @@ export default function ProductsTab({
     return () => document.removeEventListener("mousedown", onDown);
   }, []);
 
-  // category "lines" matching the query
   const suggestCats = useMemo(() => {
     const q = query.trim();
     if (!q) return [];
     return cats.filter((c) => c.name.includes(q)).slice(0, 6);
   }, [cats, query]);
 
-  // products matching the query, grouped by their top-level category
   const suggestGroups = useMemo(() => {
     const q = query.trim().toLowerCase();
-    if (!q) return [] as { id: number; name: string; icon: string; items: Product[] }[];
+    if (!q) return [] as { id: number; name: string; icon: string; items: CatalogProduct[] }[];
     const matched = products
       .filter(
         (p) =>
@@ -162,9 +268,9 @@ export default function ProductsTab({
           String(p.id).includes(q)
       )
       .slice(0, 60);
-    const groups = new Map<number, { id: number; name: string; icon: string; items: Product[] }>();
+    const groups = new Map<number, { id: number; name: string; icon: string; items: CatalogProduct[] }>();
     for (const p of matched) {
-      const top = topOf(p.categoryIds?.[0] ?? 0);
+      const top = p.source === "lighting" ? catById.get(LIGHTING_TOP_ID) : topOf(p.categoryIds?.[0] ?? 0);
       const gid = top?.id ?? 0;
       let g = groups.get(gid);
       if (!g) {
@@ -174,24 +280,26 @@ export default function ProductsTab({
       if (g.items.length < 4) g.items.push(p);
     }
     let total = 0;
-    const out: { id: number; name: string; icon: string; items: Product[] }[] = [];
+    const out: { id: number; name: string; icon: string; items: CatalogProduct[] }[] = [];
     for (const g of groups.values()) {
       if (total >= 16) break;
       out.push(g);
       total += g.items.length;
     }
     return out;
-  }, [products, query, topOf]);
+  }, [products, query, topOf, catById]);
 
   const hasSuggestions = suggestCats.length > 0 || suggestGroups.length > 0;
 
-  function pickLine(c: Category) {
+  function pickLine(c: AdminCategory) {
     setLineFilter({ id: c.id, name: c.name });
     setQuery("");
     setOpen(false);
+    setPage(1);
   }
 
   const filtered = useMemo(() => {
+    if (lightingMode) return products;
     if (lineFilter) {
       const set = new Set(descendantsOf(lineFilter.id));
       return products.filter(
@@ -206,31 +314,37 @@ export default function ProductsTab({
         String(p.model || "").toLowerCase().includes(q) ||
         String(p.id).includes(q)
     );
-  }, [products, query, lineFilter, descendantsOf]);
+  }, [products, query, lineFilter, descendantsOf, lightingMode]);
 
-  const shown = filtered.slice(0, 120);
+  const shown = lightingMode ? filtered : filtered.slice(0, 120);
 
-  // Top-level categories for the homepage-style "browse by category" strip.
   const tops = useMemo(
     () => cats.filter((c) => !c.parent).sort((a, b) => a.name.localeCompare(b.name, "he")),
     [cats]
   );
-  // The top category currently in focus and its direct subcategories — shown as
-  // a second drill-down chip row, mirroring the storefront category page.
   const activeTop = lineFilter ? topOf(lineFilter.id) : null;
   const subsOfActive = useMemo(() => {
-    if (!activeTop) return [] as Category[];
+    if (!activeTop) return [] as AdminCategory[];
     return (childrenOf.get(activeTop.id) || [])
       .map((id) => catById.get(id))
-      .filter((c): c is Category => !!c);
+      .filter((c): c is AdminCategory => !!c);
   }, [activeTop, childrenOf, catById]);
 
+  const lightingSubcats = useMemo(
+    () => cats.filter((c) => c.parent === LIGHTING_TOP_ID).sort((a, b) => a.name.localeCompare(b.name, "he")),
+    [cats]
+  );
+
+  function currentSource(): ProductSource {
+    return lightingMode ? "lighting" : "store";
+  }
+
   function openNew() {
-    setDraft(emptyDraft());
+    setDraft(emptyDraft(currentSource(), lightingMode ? selectedLightingSub : 0));
     setFile(null);
     setPreview("");
   }
-  function openEdit(p: Product) {
+  function openEdit(p: CatalogProduct) {
     setDraft(toDraft(p));
     setFile(null);
     setPreview("");
@@ -260,41 +374,69 @@ export default function ProductsTab({
     );
   }
 
+  async function reloadCurrent() {
+    await loadCategories();
+    if (lightingMode) await loadLighting(selectedLightingSub, debouncedQuery, page);
+    else await loadStore();
+  }
+
   async function save() {
     if (!draft) return;
     if (!draft.name.trim()) {
       onToast("יש להזין שם מוצר", false);
       return;
     }
+    if (draft.source === "lighting" && !draft.lightingSubId) {
+      onToast("יש לבחור תת־קטגוריית תאורה", false);
+      return;
+    }
     setSaving(true);
     try {
-      const payload = {
-        name: draft.name,
-        model: draft.model,
-        regularPrice: Number(draft.regularPrice) || 0,
-        salePrice: Number(draft.salePrice) || 0,
-        onSale: draft.onSale,
-        inStock: draft.inStock,
-        categoryIds: draft.categoryIds,
-        description: draft.description,
-        image: draft.image,
-      };
-
-      let id = draft.id;
-      if (!id) {
-        const created = await apiSend<Product>("/api/products", "POST", payload);
-        id = created.id;
+      if (draft.source === "lighting") {
+        const payload = {
+          name: draft.name,
+          model: draft.model,
+          price: Number(draft.regularPrice) || 0,
+          inStock: draft.inStock,
+          description: draft.description,
+          image: draft.image,
+          subId: draft.lightingSubId,
+        };
+        let id = draft.id;
+        if (!id) {
+          const created = await apiSend<LightingAdminProduct>("/api/lighting/products", "POST", payload);
+          id = created.id;
+        }
+        if (file && id) {
+          payload.image = await uploadImage("lighting", file, { id });
+        }
+        await apiSend(`/api/lighting/products/${id}`, "PUT", { ...payload, id });
+      } else {
+        const payload = {
+          name: draft.name,
+          model: draft.model,
+          regularPrice: Number(draft.regularPrice) || 0,
+          salePrice: Number(draft.salePrice) || 0,
+          onSale: draft.onSale,
+          inStock: draft.inStock,
+          categoryIds: draft.categoryIds,
+          description: draft.description,
+          image: draft.image,
+        };
+        let id = draft.id;
+        if (!id) {
+          const created = await apiSend<Product>("/api/products", "POST", payload);
+          id = created.id;
+        }
+        if (file && id) {
+          payload.image = await uploadImage("product", file, { id });
+        }
+        await apiSend(`/api/products/${id}`, "PUT", { ...payload, id });
       }
-      // upload image now that we have an id
-      if (file && id) {
-        const path = await uploadImage("product", file, { id });
-        payload.image = path;
-      }
-      await apiSend(`/api/products/${id}`, "PUT", { ...payload, id });
 
       onToast("המוצר נשמר — האתר יתעדכן בעוד דקה־שתיים", true);
       close();
-      await load();
+      await reloadCurrent();
     } catch (e) {
       onToast((e as Error).message, false);
     } finally {
@@ -302,10 +444,11 @@ export default function ProductsTab({
     }
   }
 
-  async function remove(p: Product) {
+  async function remove(p: CatalogProduct) {
     if (!confirm(`למחוק את "${p.name}"? פעולה זו אינה הפיכה.`)) return;
     try {
-      await apiSend(`/api/products/${p.id}`, "DELETE", {});
+      const path = p.source === "lighting" ? `/api/lighting/products/${p.id}` : `/api/products/${p.id}`;
+      await apiSend(path, "DELETE", {});
       onToast("המוצר נמחק", true);
       setProducts((list) => list.filter((x) => x.id !== p.id));
     } catch (e) {
@@ -313,41 +456,24 @@ export default function ProductsTab({
     }
   }
 
-  const filteredCats = catFilter.trim()
+  const filteredCats = (catFilter.trim()
     ? cats.filter((c) => c.name.includes(catFilter.trim()))
-    : cats;
+    : cats
+  ).filter((c) => !isLightingCategory(c));
+
+  const totalPages = lightingMode ? Math.max(1, Math.ceil(serverCount / LIGHTING_PAGE_SIZE)) : 1;
+  const countText = lightingMode
+    ? `${serverCount.toLocaleString("he-IL")} מוצרים${selectedCat ? ` ב${selectedCat.name}` : ""}`
+    : `${filtered.length} מתוך ${products.length} מוצרים`;
 
   return (
     <div className="space-y-5">
-      <div className="flex gap-2 rounded-xl border border-line bg-soft p-1">
-        <button
-          onClick={() => setSource("store")}
-          className={`flex-1 rounded-lg px-3 py-2 text-sm font-bold transition ${
-            source === "store" ? "bg-brand-red text-white shadow-sm" : "text-heading hover:bg-white"
-          }`}
-        >
-          🛒 מוצרי החנות
-        </button>
-        <button
-          onClick={() => setSource("lighting")}
-          className={`flex-1 rounded-lg px-3 py-2 text-sm font-bold transition ${
-            source === "lighting" ? "bg-brand-red text-white shadow-sm" : "text-heading hover:bg-white"
-          }`}
-        >
-          💡 תאורה
-        </button>
-      </div>
-
-      {source === "lighting" ? (
-        <LightingProducts onToast={onToast} />
-      ) : (
-        <>
       <div className="flex items-center justify-between gap-3">
         <div>
           <h2 className="text-base font-extrabold text-heading sm:text-lg">ניהול מוצרים</h2>
-          <p className="text-xs text-muted">{filtered.length} מתוך {products.length} מוצרים</p>
+          <p className="text-xs text-muted">{countText}</p>
         </div>
-        <Button onClick={openNew}>+ מוצר חדש</Button>
+        <Button onClick={openNew}>{lightingMode ? "+ פריט תאורה" : "+ מוצר חדש"}</Button>
       </div>
 
       <div ref={searchRef} className="relative">
@@ -356,7 +482,7 @@ export default function ProductsTab({
           onChange={(e) => {
             setQuery(e.target.value);
             setOpen(true);
-            if (lineFilter) setLineFilter(null);
+            if (lineFilter && !lightingMode) setLineFilter(null);
           }}
           onFocus={() => setOpen(true)}
           placeholder="🔍 חיפוש מוצר, דגם או קו מוצרים…"
@@ -397,14 +523,11 @@ export default function ProductsTab({
                     className="flex w-full items-center gap-2 rounded-lg px-2 py-2 text-right text-sm hover:bg-soft"
                   >
                     <span className="h-9 w-9 shrink-0 overflow-hidden rounded border border-line bg-soft">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={adminPreviewSrc(p.image)} alt="" loading="lazy" className="h-full w-full object-contain" />
+                      <FallbackImage src={adminPreviewSrc(p.image)} alt="" loading="lazy" className="h-full w-full object-contain" />
                     </span>
                     <span className="min-w-0 flex-1">
                       <span className="line-clamp-1 text-heading">{p.name}</span>
-                      {p.model ? (
-                        <span className="block text-xs text-muted" dir="ltr">{p.model}</span>
-                      ) : null}
+                      {p.model ? <span className="block text-xs text-muted" dir="ltr">{p.model}</span> : null}
                     </span>
                     <span className="shrink-0 font-bold text-brand-red">{formatPrice(p.price)}</span>
                   </button>
@@ -419,11 +542,12 @@ export default function ProductsTab({
         <SectionCard title="עיון לפי קטגוריה">
           <div className="flex flex-wrap gap-2">
             <button
-              onClick={() => setLineFilter(null)}
+              onClick={() => {
+                setLineFilter(null);
+                setPage(1);
+              }}
               className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-2 text-sm font-bold transition ${
-                !lineFilter
-                  ? "border-brand-red bg-brand-red text-white"
-                  : "border-line bg-white text-heading hover:border-brand-red/40"
+                !lineFilter ? "border-brand-red bg-brand-red text-white" : "border-line bg-white text-heading hover:border-brand-red/40"
               }`}
             >
               הכל
@@ -435,16 +559,14 @@ export default function ProductsTab({
                   key={c.id}
                   onClick={() => (active && lineFilter?.id === c.id ? setLineFilter(null) : pickLine(c))}
                   className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-2 text-sm font-bold transition ${
-                    active
-                      ? "border-brand-red bg-brand-red text-white"
-                      : "border-line bg-white text-heading hover:border-brand-red/40"
+                    active ? "border-brand-red bg-brand-red text-white" : "border-line bg-white text-heading hover:border-brand-red/40"
                   }`}
                 >
                   <span aria-hidden="true" className="text-base">{c.icon || "📦"}</span>
                   {c.name}
                   {c.count ? (
                     <span className={`rounded-full px-1.5 text-[0.65rem] font-bold ${active ? "bg-white/20 text-white" : "bg-soft text-muted"}`}>
-                      {c.count}
+                      {c.count.toLocaleString("he-IL")}
                     </span>
                   ) : null}
                 </button>
@@ -497,34 +619,18 @@ export default function ProductsTab({
         <>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
             {shown.map((p) => (
-              <article
-                key={p.id}
-                className="card-hover group flex flex-col overflow-hidden rounded-2xl border border-line bg-white shadow-card"
-              >
-                <button
-                  onClick={() => openEdit(p)}
-                  className="flex flex-1 flex-col p-2.5 text-right"
-                  title="לחצו לעריכת המוצר"
-                >
+              <article key={`${p.source}-${p.id}`} className="card-hover group flex flex-col overflow-hidden rounded-2xl border border-line bg-white shadow-card">
+                <button onClick={() => openEdit(p)} className="flex flex-1 flex-col p-2.5 text-right" title="לחצו לעריכת המוצר">
                   <span className="relative mb-2 block aspect-square overflow-hidden rounded-xl bg-soft">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={adminPreviewSrc(p.image)} alt="" loading="lazy" className="h-full w-full object-contain" />
-                    {p.onSale ? (
-                      <span className="absolute right-1.5 top-1.5 rounded-full bg-brand-red px-2 py-0.5 text-[0.65rem] font-black text-white shadow-sm">מבצע</span>
-                    ) : null}
-                    {!p.inStock ? (
-                      <span className="absolute left-1.5 top-1.5 rounded-full bg-gray-800/80 px-2 py-0.5 text-[0.65rem] font-bold text-white">אזל</span>
-                    ) : null}
+                    <FallbackImage src={adminPreviewSrc(p.image)} alt="" loading="lazy" className="h-full w-full object-contain" />
+                    {p.onSale ? <span className="absolute right-1.5 top-1.5 rounded-full bg-brand-red px-2 py-0.5 text-[0.65rem] font-black text-white shadow-sm">מבצע</span> : null}
+                    {!p.inStock ? <span className="absolute left-1.5 top-1.5 rounded-full bg-gray-800/80 px-2 py-0.5 text-[0.65rem] font-bold text-white">אזל</span> : null}
                   </span>
                   <span className="clamp-2 text-[0.8rem] font-bold leading-snug text-heading">{p.name}</span>
-                  {p.model ? (
-                    <span className="mt-0.5 text-[0.7rem] text-muted" dir="ltr">{p.model}</span>
-                  ) : null}
+                  {p.model ? <span className="mt-0.5 text-[0.7rem] text-muted" dir="ltr">{p.model}</span> : null}
                   <span className="mt-auto flex items-baseline gap-1.5 pt-1.5">
                     <span className="text-sm font-black text-brand-red">{formatPrice(p.price)}</span>
-                    {p.onSale && p.regularPrice && p.regularPrice > p.price ? (
-                      <span className="text-[0.7rem] text-muted line-through" dir="ltr">{formatPrice(p.regularPrice)}</span>
-                    ) : null}
+                    {p.onSale && p.regularPrice && p.regularPrice > p.price ? <span className="text-[0.7rem] text-muted line-through" dir="ltr">{formatPrice(p.regularPrice)}</span> : null}
                   </span>
                 </button>
                 <div className="flex border-t border-line text-xs font-bold">
@@ -535,45 +641,33 @@ export default function ProductsTab({
               </article>
             ))}
           </div>
-          {filtered.length > shown.length ? (
-            <p className="mt-3 text-center text-xs text-muted">
-              מציג {shown.length} מתוך {filtered.length} — צמצמו בחיפוש או בקטגוריה כדי לראות עוד
-            </p>
+          {lightingMode && totalPages > 1 ? (
+            <div className="flex items-center justify-center gap-3 pt-1">
+              <Button variant="ghost" onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page <= 1}>← הקודם</Button>
+              <span className="text-sm font-semibold text-muted">עמוד {page.toLocaleString("he-IL")} מתוך {totalPages.toLocaleString("he-IL")}</span>
+              <Button variant="ghost" onClick={() => setPage((p) => Math.min(totalPages, p + 1))} disabled={page >= totalPages}>הבא →</Button>
+            </div>
+          ) : null}
+          {!lightingMode && filtered.length > shown.length ? (
+            <p className="mt-3 text-center text-xs text-muted">מציג {shown.length} מתוך {filtered.length} — צמצמו בחיפוש או בקטגוריה כדי לראות עוד</p>
           ) : null}
         </>
       )}
 
       {draft ? (
-        <div
-          className="fixed inset-0 z-50 flex items-stretch justify-center bg-black/50 sm:items-start sm:p-4"
-          onClick={close}
-        >
-          <div
-            className="flex max-h-screen w-full flex-col bg-white shadow-pop sm:my-2 sm:max-h-[calc(100vh-1rem)] sm:max-w-2xl sm:rounded-2xl"
-            onClick={(e) => e.stopPropagation()}
-          >
+        <div className="fixed inset-0 z-50 flex items-stretch justify-center bg-black/50 sm:items-start sm:p-4" onClick={close}>
+          <div className="flex max-h-screen w-full flex-col bg-white shadow-pop sm:my-2 sm:max-h-[calc(100vh-1rem)] sm:max-w-2xl sm:rounded-2xl" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between gap-2 border-b border-line px-4 py-3 sm:rounded-t-2xl">
               <h3 className="text-base font-extrabold text-heading">
-                {draft.id ? `עריכת מוצר #${draft.id}` : "מוצר חדש"}
+                {draft.id ? `עריכת ${draft.source === "lighting" ? "פריט תאורה" : "מוצר"} #${draft.id}` : draft.source === "lighting" ? "פריט תאורה חדש" : "מוצר חדש"}
               </h3>
-              <button
-                onClick={close}
-                aria-label="סגירה"
-                className="grid h-9 w-9 place-items-center rounded-full text-muted transition hover:bg-soft"
-              >
-                ✕
-              </button>
+              <button onClick={close} aria-label="סגירה" className="grid h-9 w-9 place-items-center rounded-full text-muted transition hover:bg-soft">✕</button>
             </div>
 
             <div className="flex-1 space-y-4 overflow-y-auto p-4">
               <div className="flex items-center gap-4">
                 <div className="h-24 w-24 shrink-0 overflow-hidden rounded-xl border border-line bg-soft">
-                  {preview || draft.image ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={preview || adminPreviewSrc(draft.image)} alt="" className="h-full w-full object-contain" />
-                  ) : (
-                    <span className="grid h-full w-full place-items-center text-2xl text-line">🖼️</span>
-                  )}
+                  {preview || draft.image ? <FallbackImage src={preview || adminPreviewSrc(draft.image)} alt="" className="h-full w-full object-contain" /> : <span className="grid h-full w-full place-items-center text-2xl text-line">{draft.source === "lighting" ? "💡" : "🖼️"}</span>}
                 </div>
                 <div>
                   <input ref={fileRef} type="file" accept="image/*" hidden onChange={(e) => pickFile(e.target.files?.[0])} />
@@ -585,46 +679,57 @@ export default function ProductsTab({
               <div className="grid gap-4 sm:grid-cols-2">
                 <Field label="שם המוצר" value={draft.name} onChange={(v) => setDraft({ ...draft, name: v })} />
                 <Field label="דגם / מק״ט" value={draft.model} onChange={(v) => setDraft({ ...draft, model: v })} dir="ltr" />
-                <Field label="מחיר רגיל (₪)" type="number" value={draft.regularPrice} onChange={(v) => setDraft({ ...draft, regularPrice: v })} />
+                <Field label={draft.source === "lighting" ? "מחיר (₪)" : "מחיר רגיל (₪)"} type="number" value={draft.regularPrice} onChange={(v) => setDraft({ ...draft, regularPrice: v })} />
                 <div className="flex items-end gap-4">
-                  <Toggle label="במבצע" checked={draft.onSale} onChange={(v) => setDraft({ ...draft, onSale: v })} />
+                  {draft.source === "store" ? <Toggle label="במבצע" checked={draft.onSale} onChange={(v) => setDraft({ ...draft, onSale: v })} /> : null}
                   <Toggle label="במלאי" checked={draft.inStock} onChange={(v) => setDraft({ ...draft, inStock: v })} />
                 </div>
-                {draft.onSale ? (
-                  <Field label="מחיר מבצע (₪)" type="number" value={draft.salePrice} onChange={(v) => setDraft({ ...draft, salePrice: v })} />
-                ) : null}
+                {draft.source === "store" && draft.onSale ? <Field label="מחיר מבצע (₪)" type="number" value={draft.salePrice} onChange={(v) => setDraft({ ...draft, salePrice: v })} /> : null}
               </div>
 
-              <div>
-                <span className="mb-1 block text-sm font-semibold text-heading">קטגוריות</span>
-                {draft.categoryIds.length ? (
-                  <div className="mb-2 flex flex-wrap gap-1">
-                    {draft.categoryIds.map((id) => (
-                      <span key={id} className="inline-flex items-center gap-1 rounded-full bg-red-50 px-2 py-0.5 text-xs font-bold text-brand-red">
-                        {catName.get(id) || `#${id}`}
-                        <button onClick={() => toggleCat(id)} className="text-brand-red/60 hover:text-brand-red">×</button>
-                      </span>
+              {draft.source === "lighting" ? (
+                <label className="block">
+                  <span className="mb-1 block text-sm font-semibold text-heading">קטגוריית תאורה</span>
+                  <select
+                    value={draft.lightingSubId || ""}
+                    onChange={(e) => setDraft({ ...draft, lightingSubId: Number(e.target.value) })}
+                    disabled={!!draft.id}
+                    className="w-full rounded-lg border border-line bg-white px-3 py-2.5 text-base outline-none focus:border-brand-red disabled:bg-soft disabled:text-muted sm:text-sm"
+                  >
+                    <option value="">בחרו קטגוריה…</option>
+                    {lightingSubcats.map((s) => (
+                      <option key={s.id} value={lightingSubId(s)}>{s.name}</option>
+                    ))}
+                  </select>
+                  {draft.id ? <span className="mt-1 block text-xs text-muted">לא ניתן לשנות קטגוריה לפריט קיים</span> : null}
+                </label>
+              ) : (
+                <div>
+                  <span className="mb-1 block text-sm font-semibold text-heading">קטגוריות</span>
+                  {draft.categoryIds.length ? (
+                    <div className="mb-2 flex flex-wrap gap-1">
+                      {draft.categoryIds.map((id) => (
+                        <span key={id} className="inline-flex items-center gap-1 rounded-full bg-red-50 px-2 py-0.5 text-xs font-bold text-brand-red">
+                          {catName.get(id) || `#${id}`}
+                          <button onClick={() => toggleCat(id)} className="text-brand-red/60 hover:text-brand-red">×</button>
+                        </span>
+                      ))}
+                    </div>
+                  ) : null}
+                  <input value={catFilter} onChange={(e) => setCatFilter(e.target.value)} placeholder="סינון קטגוריות…" className="mb-2 w-full rounded-lg border border-line px-3 py-2 text-base outline-none focus:border-brand-red sm:py-1.5 sm:text-sm" />
+                  <div className="max-h-40 overflow-y-auto rounded-lg border border-line p-2">
+                    {filteredCats.map((c) => (
+                      <label key={c.id} className="flex cursor-pointer items-center gap-2 rounded px-1 py-1 text-sm hover:bg-soft">
+                        <input type="checkbox" checked={draft.categoryIds.includes(c.id)} onChange={() => toggleCat(c.id)} className="h-4 w-4 accent-brand-red" />
+                        <span className="text-heading">{c.name}</span>
+                        <span className="text-xs text-line">#{c.id}</span>
+                      </label>
                     ))}
                   </div>
-                ) : null}
-                <input
-                  value={catFilter}
-                  onChange={(e) => setCatFilter(e.target.value)}
-                  placeholder="סינון קטגוריות…"
-                  className="mb-2 w-full rounded-lg border border-line px-3 py-2 text-base outline-none focus:border-brand-red sm:py-1.5 sm:text-sm"
-                />
-                <div className="max-h-40 overflow-y-auto rounded-lg border border-line p-2">
-                  {filteredCats.map((c) => (
-                    <label key={c.id} className="flex cursor-pointer items-center gap-2 rounded px-1 py-1 text-sm hover:bg-soft">
-                      <input type="checkbox" checked={draft.categoryIds.includes(c.id)} onChange={() => toggleCat(c.id)} className="h-4 w-4 accent-brand-red" />
-                      <span className="text-heading">{c.name}</span>
-                      <span className="text-xs text-line">#{c.id}</span>
-                    </label>
-                  ))}
                 </div>
-              </div>
+              )}
 
-              <TextArea label="תיאור" value={draft.description} onChange={(v) => setDraft({ ...draft, description: v })} rows={4} />
+              <RichTextArea label="תיאור" value={draft.description} onChange={(v) => setDraft({ ...draft, description: v })} />
             </div>
 
             <div className="flex justify-end gap-3 border-t border-line px-4 py-3 sm:rounded-b-2xl">
@@ -634,8 +739,6 @@ export default function ProductsTab({
           </div>
         </div>
       ) : null}
-        </>
-      )}
     </div>
   );
 }

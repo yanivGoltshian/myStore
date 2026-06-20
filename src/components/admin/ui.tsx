@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useRef, type ReactNode } from "react";
 import type { Category } from "@/lib/types";
 
 export function Field({
@@ -65,6 +66,98 @@ export function TextArea({
         className="w-full rounded-lg border border-line bg-white px-3 py-2.5 text-base text-gray-900 shadow-sm outline-none focus:border-brand-red focus:ring-2 focus:ring-red-100 sm:py-2 sm:text-sm"
       />
     </label>
+  );
+}
+
+export function RichTextArea({
+  label,
+  value,
+  onChange,
+  dir = "rtl",
+  minRows = 6,
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  dir?: "rtl" | "ltr";
+  minRows?: number;
+}) {
+  const ref = useRef<HTMLDivElement>(null);
+  // Initialise to a sentinel (not `value`) so the very first effect run always
+  // paints the incoming value into the DOM. Initialising to `value` made the
+  // mount paint a no-op, leaving existing descriptions blank in the editor.
+  const last = useRef<string | null>(null);
+
+  // Push external value into the editable DOM only when it changes from the
+  // outside (e.g. mounting, or opening a different product). This avoids the
+  // caret jumping to the start on every keystroke that a naive controlled
+  // contentEditable has.
+  useEffect(() => {
+    const el = ref.current;
+    if (el && value !== last.current) {
+      el.innerHTML = value || "";
+      last.current = value;
+    }
+  }, [value]);
+
+  const emit = () => {
+    const html = ref.current?.innerHTML ?? "";
+    last.current = html;
+    onChange(html);
+  };
+
+  const run = (command: string, arg?: string) => {
+    ref.current?.focus();
+    try {
+      document.execCommand(command, false, arg);
+    } catch {
+      /* execCommand is best-effort */
+    }
+    emit();
+  };
+
+  const tools: { title: string; cmd: string; label: ReactNode }[] = [
+    { title: "מודגש", cmd: "bold", label: <span className="font-bold">B</span> },
+    { title: "נטוי", cmd: "italic", label: <span className="italic">I</span> },
+    { title: "קו תחתון", cmd: "underline", label: <span className="underline">U</span> },
+    { title: "רשימת תבליטים", cmd: "insertUnorderedList", label: "•" },
+    { title: "רשימה ממוספרת", cmd: "insertOrderedList", label: "1." },
+    { title: "נקה עיצוב", cmd: "removeFormat", label: "⌫" },
+  ];
+
+  return (
+    <div className="block">
+      <span className="mb-1 block text-sm font-semibold text-heading">{label}</span>
+      <div className="overflow-hidden rounded-lg border border-line bg-white shadow-sm focus-within:border-brand-red focus-within:ring-2 focus-within:ring-red-100">
+        <div
+          dir="rtl"
+          className="flex flex-wrap items-center gap-1 border-b border-line bg-gray-50 px-2 py-1.5"
+        >
+          {tools.map((t) => (
+            <button
+              key={t.cmd}
+              type="button"
+              title={t.title}
+              onMouseDown={(e) => e.preventDefault()}
+              onClick={() => run(t.cmd)}
+              className="flex h-7 min-w-7 items-center justify-center rounded px-1.5 text-sm text-heading hover:bg-gray-200"
+            >
+              {t.label}
+            </button>
+          ))}
+        </div>
+        <div
+          ref={ref}
+          contentEditable
+          dir={dir}
+          suppressContentEditableWarning
+          onInput={emit}
+          onBlur={emit}
+          style={{ minHeight: `${minRows * 1.6}rem` }}
+          className="admin-rte w-full overflow-y-auto px-3 py-2.5 text-base leading-relaxed text-gray-900 outline-none sm:text-sm [&_a]:text-brand-red [&_a]:underline [&_b]:font-bold [&_li]:my-0.5 [&_ol]:my-1 [&_ol]:list-decimal [&_ol]:pr-6 [&_strong]:font-bold [&_ul]:my-1 [&_ul]:list-disc [&_ul]:pr-6"
+        />
+      </div>
+    </div>
   );
 }
 
