@@ -69,9 +69,9 @@
     "id": 35091,
     "name": "מגן ברקים ונחשולי מתח / LPP-01",
     "model": "LPP-01",
-    "price": 0,
-    "regularPrice": 0,
-    "salePrice": 0,
+    "price": 49,
+    "regularPrice": 49,
+    "salePrice": 49,
     "onSale": false,
     "image": "/images/products/35091.jpg",
     "categoryIds": [
