@@ -3,10 +3,10 @@
     "id": 36189,
     "name": "שואב אבק יבש/רטוב SPIDER נטען / ATL-889",
     "model": "ATL-889",
-    "price": 144,
+    "price": 149,
     "regularPrice": 149,
-    "salePrice": 144,
-    "onSale": true,
+    "salePrice": 149,
+    "onSale": false,
     "image": "/images/products/36189.jpg",
     "categoryIds": [
       136,
