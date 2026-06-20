@@ -5,6 +5,11 @@ import type { Homepage, Category, PromoTile, HomeSection } from "@/lib/types";
 import { apiGet, apiSend, uploadImage, adminPreviewSrc } from "./lib";
 import { Field, TextArea, Button } from "./ui";
 
+// Deep clone via JSON (homepage data is plain JSON) for the save-merge baseline.
+function clone<T>(v: T): T {
+  return JSON.parse(JSON.stringify(v)) as T;
+}
+
 function ImageUpload({
   label,
   value,
@@ -110,9 +115,18 @@ export default function HomepageTab({
   const [saving, setSaving] = useState(false);
   const [showRaw, setShowRaw] = useState(false);
   const [rawText, setRawText] = useState("");
+  // Snapshot of the homepage exactly as it was loaded. Used at save time to tell
+  // which top-level regions THIS session actually edited, so we never clobber a
+  // region (e.g. promo tiles) that changed on the server after we loaded.
+  const baseRef = useRef<Homepage | null>(null);
 
   useEffect(() => {
-    apiGet<Homepage>("/api/homepage").then(setHp).catch((e: Error) => onToast(e.message, false));
+    apiGet<Homepage>("/api/homepage")
+      .then((d) => {
+        setHp(d);
+        baseRef.current = clone(d);
+      })
+      .catch((e: Error) => onToast(e.message, false));
     apiGet<Category[]>("/api/categories").then(setCats).catch(() => {});
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -176,7 +190,29 @@ export default function HomepageTab({
     if (!hp) return;
     setSaving(true);
     try {
-      await apiSend("/api/homepage", "PUT", hp);
+      // Merge-on-save guards against lost updates: re-read the latest server copy
+      // and overwrite ONLY the top-level regions this session changed (vs the
+      // baseline we loaded). Other regions keep their freshest server value, so
+      // editing the Hero can't revert promo tiles another admin/process updated.
+      let payload: Homepage = hp;
+      const base = baseRef.current;
+      if (base) {
+        try {
+          const fresh = await apiGet<Homepage>("/api/homepage");
+          const merged = { ...fresh } as Homepage;
+          (Object.keys(hp) as (keyof Homepage)[]).forEach((k) => {
+            if (JSON.stringify(hp[k]) !== JSON.stringify(base[k])) {
+              (merged as Record<string, unknown>)[k as string] = hp[k];
+            }
+          });
+          payload = merged;
+        } catch {
+          payload = hp; // refetch failed — fall back to saving our local copy
+        }
+      }
+      await apiSend("/api/homepage", "PUT", payload);
+      setHp(payload);
+      baseRef.current = clone(payload);
       onToast("עמוד הבית נשמר — האתר יתעדכן בעוד דקה־שתיים", true);
     } catch (e) {
       onToast((e as Error).message, false);
