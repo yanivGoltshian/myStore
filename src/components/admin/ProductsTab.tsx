@@ -412,7 +412,19 @@ export default function ProductsTab({
             </thead>
             <tbody>
               {shown.map((p) => (
-                <tr key={p.id} className="border-t border-gray-100 hover:bg-gray-50">
+                <tr
+                  key={p.id}
+                  className="cursor-pointer border-t border-gray-100 hover:bg-gray-50"
+                  onClick={() => openEdit(p)}
+                  tabIndex={0}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      openEdit(p);
+                    }
+                  }}
+                  title="לחצו לעריכת המוצר"
+                >
                   <td className="p-2">
                     <div className="h-12 w-12 overflow-hidden rounded border border-gray-200 bg-gray-50">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -435,7 +447,7 @@ export default function ProductsTab({
                       <span className="text-gray-400">אזל</span>
                     )}
                   </td>
-                  <td className="p-3">
+                  <td className="p-3" onClick={(e) => e.stopPropagation()}>
                     <div className="flex gap-2">
                       <Button variant="ghost" onClick={() => openEdit(p)}>עריכה</Button>
                       <Button variant="danger" onClick={() => remove(p)}>מחיקה</Button>
