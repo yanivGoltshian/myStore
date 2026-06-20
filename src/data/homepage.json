@@ -2,11 +2,48 @@
   "announcement": "משלוח לכל הארץ · אחריות מלאה · שירות לקוחות 03-5562520",
   "topbarPhone": "03-5562520",
   "hero": {
-    "image": "/images/banners/hero-hankin.jpg",
+    "image": "/images/banners/1000277133.jpg",
     "alt": "חשמל חנקין — חנות מוצרי חשמל ביתיים ושירותי חשמלאי בבית הלקוח",
     "href": "/category/146/"
   },
-  "promoTiles": [],
+  "promoTiles": [
+    {
+      "id": "t-new",
+      "title": "מוצרים חדשים",
+      "image": "/images/banners/promo-new.jpg",
+      "categoryId": 146
+    },
+    {
+      "id": "t-winter",
+      "title": "מוצרי חורף",
+      "image": "/images/banners/promo-winter.jpg",
+      "categoryId": 15
+    },
+    {
+      "id": "t-choppers",
+      "title": "קוצצי מזון",
+      "image": "/images/banners/promo-choppers.jpg",
+      "categoryId": 120
+    },
+    {
+      "id": "t-grills",
+      "title": "מנגלים וגרילים",
+      "image": "/images/banners/promo-grills.jpg",
+      "categoryId": 695
+    },
+    {
+      "id": "t-cleaning",
+      "title": "מוצרי ניקיון",
+      "image": "/images/banners/promo-cleaning.jpg",
+      "categoryId": 136
+    },
+    {
+      "id": "t-fan",
+      "title": "מאווררים ומצננים",
+      "image": "/images/banners/promo-fan.jpg",
+      "categoryId": 112
+    }
+  ],
   "sections": [
     {
       "id": "s-new",

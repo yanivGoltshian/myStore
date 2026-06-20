@@ -190,29 +190,26 @@ export default function HomepageTab({
     if (!hp) return;
     setSaving(true);
     try {
-      // Merge-on-save guards against lost updates: re-read the latest server copy
-      // and overwrite ONLY the top-level regions this session changed (vs the
-      // baseline we loaded). Other regions keep their freshest server value, so
-      // editing the Hero can't revert promo tiles another admin/process updated.
-      let payload: Homepage = hp;
+      // Lost-update safe save. We send the full homepage we hold PLUS the list of
+      // top-level regions this session actually edited (vs the baseline we loaded).
+      // The server re-reads the latest commit and overwrites ONLY those regions,
+      // so editing the Hero can't revert promo tiles another admin/process changed.
+      // The merge happens on the SERVER (against a guaranteed-fresh read), so even
+      // a flaky client network can't make us clobber newer data with a stale copy.
       const base = baseRef.current;
+      let body: unknown = hp;
       if (base) {
-        try {
-          const fresh = await apiGet<Homepage>("/api/homepage");
-          const merged = { ...fresh } as Homepage;
-          (Object.keys(hp) as (keyof Homepage)[]).forEach((k) => {
-            if (JSON.stringify(hp[k]) !== JSON.stringify(base[k])) {
-              (merged as Record<string, unknown>)[k as string] = hp[k];
-            }
-          });
-          payload = merged;
-        } catch {
-          payload = hp; // refetch failed — fall back to saving our local copy
-        }
+        const changedKeys = (Object.keys(hp) as (keyof Homepage)[])
+          .filter((k) => JSON.stringify(hp[k]) !== JSON.stringify(base[k]))
+          .map((k) => String(k));
+        body = { homepage: hp, changedKeys };
       }
-      await apiSend("/api/homepage", "PUT", payload);
-      setHp(payload);
-      baseRef.current = clone(payload);
+      await apiSend("/api/homepage", "PUT", body);
+      // Re-sync to the authoritative server copy so the editor (and our baseline)
+      // reflect the merged result, including any regions another session changed.
+      const latest = await apiGet<Homepage>("/api/homepage").catch(() => hp);
+      setHp(latest);
+      baseRef.current = clone(latest);
       onToast("עמוד הבית נשמר — האתר יתעדכן בעוד דקה־שתיים", true);
     } catch (e) {
       onToast((e as Error).message, false);

@@ -18,6 +18,16 @@ jobs:
     if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.action != 'closed')
     runs-on: ubuntu-latest
     name: Build and Deploy
+    # Azure Static Web Apps allows only one deployment at a time. Rapid admin
+    # commits (e.g. an image upload + a homepage save land seconds apart) each
+    # trigger a deploy; without serialization a newer deploy CANCELS the older
+    # in-progress one, which marks the run "failed" and emails the owner a scary
+    # "Run failed" notice even though the build itself succeeded. Queue the
+    # deploys instead (cancel-in-progress: false) so every commit publishes in
+    # order and no run is cancelled.
+    concurrency:
+      group: swa-deploy-${{ github.ref }}
+      cancel-in-progress: false
     steps:
       - uses: actions/checkout@v4
         with:

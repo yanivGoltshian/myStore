@@ -29,6 +29,29 @@ export async function putHomepage(obj) {
   return getBackend().writeJSON(PATHS.homepage, obj, "admin: update homepage");
 }
 
+// Authoritative, server-side field merge — the robust defense against lost
+// updates on the homepage. The admin sends the FULL homepage it holds plus the
+// list of top-level regions it actually edited this session (`changedKeys`).
+// We re-read the very latest committed homepage (the GitHub backend busts the
+// edge cache, so this is always current) and overwrite ONLY those regions; every
+// other region keeps its freshest server value. This means an admin tab that has
+// been open for a while (stale Hero/promo data) can never clobber newer content
+// it didn't touch — even if the client's own pre-save refetch failed. Unknown or
+// missing keys are ignored, so a malformed `changedKeys` can't wipe data.
+export async function putHomepageMerge(incoming, changedKeys) {
+  const be = getBackend();
+  const fresh = await be.readJSON(PATHS.homepage).catch(() => null);
+  const base = fresh && typeof fresh === "object" && !Array.isArray(fresh) ? fresh : {};
+  const merged = { ...base };
+  const keys = Array.isArray(changedKeys) ? changedKeys : [];
+  for (const k of keys) {
+    if (incoming && Object.prototype.hasOwnProperty.call(incoming, k)) {
+      merged[k] = incoming[k];
+    }
+  }
+  return be.writeJSON(PATHS.homepage, merged, "admin: update homepage");
+}
+
 // ---------- categories ----------
 export async function getCategories() {
   return getBackend().readJSON(PATHS.categories);
