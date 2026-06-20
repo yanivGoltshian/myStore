@@ -212,13 +212,15 @@ function toJpgName(name: string): string {
 // preview images straight from GitHub raw, which serves the committed bytes
 // within seconds. The stored paths (used by the public site) stay relative and
 // unchanged; only the admin's <img> preview is rewritten.
-const RAW_PREVIEW_BASE =
-  "https://raw.githubusercontent.com/yanivGoltshian/myStore/main/public";
-
+// Admin <img> previews must stay same-origin: the Azure SWA admin sets a strict
+// CSP (img-src 'self' data:), so cross-origin hosts (e.g. raw.githubusercontent)
+// are blocked and render as broken icons. Existing images are already in the
+// deployed out/, so the stored relative path loads instantly. A just-uploaded
+// image is covered by the local object-URL blob (same component instance) and,
+// after a reload during the ~2–3 min publish window, by the "🕓 מתפרסם…"
+// onError placeholder. So we return the stored path unchanged.
 export function adminPreviewSrc(path: string): string {
-  if (!path) return "";
-  if (/^(https?:|blob:|data:)/i.test(path)) return path;
-  return RAW_PREVIEW_BASE + (path.startsWith("/") ? path : `/${path}`);
+  return path || "";
 }
 
 export async function uploadImage(
