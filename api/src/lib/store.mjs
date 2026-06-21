@@ -13,6 +13,7 @@ const PATHS = {
   descendants: "src/data/descendants.json",
   coupons: "src/data/coupons.json",
   couponSettings: "src/data/coupon-settings.json",
+  newsletterSettings: "src/data/newsletter-settings.json",
 };
 
 const PRODUCTS_DIR = "public/images/products";
@@ -116,6 +117,35 @@ export async function putCouponSettings(obj) {
     PATHS.couponSettings,
     settings,
     `admin: ${settings.enabled ? "enable" : "disable"} coupon system`,
+  );
+  return settings;
+}
+
+// --- Newsletter master switch + Brevo list config -------------------------
+// Mirrors the coupon settings, but DEFAULTS TO OFF: the feature ships disabled
+// and the owner turns it on from the admin once Brevo is configured. The
+// brevoListId is the (non-secret) numeric Brevo contact-list id; the secret
+// BREVO_API_KEY lives only in the Function's environment, never in this file.
+export async function getNewsletterSettings() {
+  const raw = await getBackend()
+    .readJSON(PATHS.newsletterSettings)
+    .catch(() => null);
+  const enabled =
+    raw && typeof raw === "object" ? raw.enabled === true : false;
+  const listRaw = raw && typeof raw === "object" ? raw.brevoListId : null;
+  const brevoListId = Number(listRaw) > 0 ? Number(listRaw) : null;
+  return { enabled, brevoListId };
+}
+
+export async function putNewsletterSettings(obj) {
+  const enabled = !!(obj && obj.enabled);
+  const listRaw = obj ? obj.brevoListId : null;
+  const brevoListId = Number(listRaw) > 0 ? Number(listRaw) : null;
+  const settings = { enabled, brevoListId };
+  await getBackend().writeJSON(
+    PATHS.newsletterSettings,
+    settings,
+    `admin: ${enabled ? "enable" : "disable"} newsletter`,
   );
   return settings;
 }
