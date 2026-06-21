@@ -161,11 +161,47 @@ and deploys to SWA Free. Headers/CSP are enforced in `staticwebapp.config.json`.
 | `GITHUB_BRANCH`                    | `main`                                             |
 | `GOOGLE_CLIENT_ID`                 | OAuth client ID (admin login)                      |
 | `ADMIN_EMAILS`                     | Comma-separated admin allowlist                    |
+| `BREVO_API_KEY`                    | **Newsletter only** — Brevo secret key (server-side send) |
+| `BREVO_LIST_ID`                    | **Newsletter only** — Brevo contact-list id (optional; the admin JSON wins) |
 | `AZURE_STATIC_WEB_APPS_API_TOKEN`  | Repo secret — SWA deploy token (GitHub Actions)    |
 | `ADMIN_DEV=1`                      | **Local only** — bypass Google login in the harness|
 
 Public, non-secret runtime config lives in `public/admin-auth.json` (`googleClientId`) and
 `src/data/site.json` (store name, URLs, hours, social).
+
+---
+
+## Newsletter signup (Brevo) — ships OFF
+
+An optional email-newsletter signup lives in the footer. It is **disabled by default** —
+nothing newsletter-related renders until the owner turns it on. Sending, the contact list,
+and legal unsubscribe are handled by **[Brevo](https://www.brevo.com/)** (free tier: 300
+emails/day, unlimited contacts), so it stays $0/mo. The master switch is
+`src/data/newsletter-settings.json` (`enabled`, read at build time); the public Vercel copy
+has no Functions, so the form POSTs cross-origin to the Azure SWA `newsletter-subscribe`
+Function, which holds the secret key and re-checks the switch at runtime.
+
+### Activate it in one command
+
+```bash
+npm run newsletter:setup          # interactive: prompts for the Brevo key
+# or, fully non-interactive:
+BREVO_API_KEY=xkeysib-… npm run newsletter:setup -- --enable --yes
+```
+
+The script (`tools/newsletter-setup.mjs`) automates every owner step:
+
+1. validates your **Brevo API key** ([get one here](https://app.brevo.com/settings/keys/api));
+2. **creates a Brevo contact list** (or reuses `--list-id <n>`) and captures its id;
+3. sets the **Azure SWA app settings** `BREVO_API_KEY` (secret) + `BREVO_LIST_ID`
+   (auto-discovers the SWA via `az`; needs `az login` first);
+4. with `--enable`, flips the master switch ON, commits `newsletter-settings.json`, and
+   pushes — Azure + Vercel rebuild in ~1–2 min and the form appears site-wide.
+
+It is idempotent and **never prints or commits the API key**. Useful flags:
+`--config-only` (set secrets but stay OFF), `--dry-run`, `--list-id <n>`,
+`--swa-name/--swa-rg` (skip auto-discovery), `--help`. You can also flip the toggle by hand
+in the admin → **ניוזלטר** tab once the SWA secrets are set.
 
 ---
 
@@ -182,7 +218,8 @@ public/
   images/        product, lighting, brand assets
   lighting/      cat-*.json — the ~7k lighting catalog (runtime-loaded)
 api/             Azure Functions (ESM): lib/{auth,http,backend,github,store}.mjs + functions/*
-tools/           admin-local.mjs (offline admin harness), dev-full.mjs, image scripts
+tools/           admin-local.mjs (offline admin harness), dev-full.mjs,
+                 newsletter-setup.mjs (Brevo + SWA activation), image scripts
 scripts/         gen-search-index.mjs (prebuild)
 ```
 
