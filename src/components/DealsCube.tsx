@@ -273,7 +273,7 @@ function CubeFace({
     : 0;
 
   return (
-    <div style={style} aria-hidden={!isActive}>
+    <div style={style} aria-hidden={!isActive} inert={!isActive}>
       <Link
         href={face.href}
         className="card-hover group flex h-full w-full items-stretch overflow-hidden rounded-2xl border border-black/10 bg-white shadow-[0_10px_30px_rgba(0,0,0,.12)]"

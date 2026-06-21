@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { Site } from "@/lib/types";
-import { apiGet, apiSend } from "./lib";
+import { apiGet, apiSend, uploadLogo, uploadFavicon } from "./lib";
 import { Field, TextArea, Button } from "./ui";
 
 export default function BrandTab({
@@ -32,6 +32,32 @@ export default function BrandTab({
     v: Site["address"][K]
   ) {
     setSite((s) => (s ? { ...s, address: { ...s.address, [k]: v } } : s));
+  }
+
+  const DEFAULT_PRIMARY = "#862421";
+  const DEFAULT_LOGO = "/images/brand/logo.png";
+  const themePrimary = site.theme?.primary || DEFAULT_PRIMARY;
+  const logoImage = site.logo?.image || DEFAULT_LOGO;
+  const logoAlt = site.logo?.alt ?? site.name;
+  const siteFavicon = site.favicon || "";
+
+  function setThemePrimary(v: string) {
+    setSite((s) =>
+      s ? { ...s, theme: { ...(s.theme ?? { primary: DEFAULT_PRIMARY }), primary: v } } : s
+    );
+  }
+  function setLogoField<K extends keyof NonNullable<Site["logo"]>>(
+    k: K,
+    v: NonNullable<Site["logo"]>[K]
+  ) {
+    setSite((s) =>
+      s
+        ? {
+            ...s,
+            logo: { ...(s.logo ?? { image: DEFAULT_LOGO, alt: s.name }), [k]: v },
+          }
+        : s
+    );
   }
 
   async function save(payload: Site) {
@@ -77,6 +103,65 @@ export default function BrandTab({
             onChange={(v) => set("url", v)}
             dir="ltr"
             hint="חשוב ל־SEO. עדכנו לכתובת האמיתית אחרי הפריסה."
+          />
+        </div>
+      </section>
+
+      <section className="rounded-2xl border border-line bg-white p-5 shadow-card">
+        <h2 className="mb-1 text-lg font-extrabold text-heading">מיתוג חזותי</h2>
+        <p className="mb-4 text-xs text-gray-400">
+          צבע הנושא, הלוגו והטקסט החלופי שלו — משפיעים על כל האתר.
+        </p>
+
+        <div className="grid gap-5 sm:grid-cols-2">
+          <div>
+            <span className="mb-1 block text-sm font-semibold text-gray-700">
+              צבע ראשי של האתר
+            </span>
+            <div className="flex items-center gap-3">
+              <input
+                type="color"
+                value={/^#[0-9a-fA-F]{6}$/.test(themePrimary) ? themePrimary : DEFAULT_PRIMARY}
+                onChange={(e) => setThemePrimary(e.target.value)}
+                className="h-10 w-14 shrink-0 cursor-pointer rounded-md border border-line bg-white p-1"
+                aria-label="בורר צבע ראשי"
+              />
+              <input
+                type="text"
+                dir="ltr"
+                value={themePrimary}
+                onChange={(e) => setThemePrimary(e.target.value)}
+                className="w-32 rounded-lg border border-line px-3 py-2 font-mono text-sm text-gray-900"
+                aria-label="קוד צבע (Hex)"
+              />
+            </div>
+            <p className="mt-1 text-xs text-gray-400">
+              משפיע על הכותרת, הכפתורים והקישורים בכל האתר (לדוגמה {DEFAULT_PRIMARY}).
+            </p>
+          </div>
+
+          <Field
+            label="טקסט חלופי ללוגו (Alt)"
+            value={logoAlt}
+            onChange={(v) => setLogoField("alt", v)}
+            hint="טקסט נגישות שמתאר את הלוגו (משמש גם לקישור לדף הבית)"
+          />
+        </div>
+
+        <div className="mt-5">
+          <LogoPicker
+            value={logoImage}
+            onUploaded={(p) => setLogoField("image", p)}
+            onError={(m) => onToast(m, false)}
+          />
+        </div>
+
+        <div className="mt-5 border-t border-line pt-5">
+          <FaviconPicker
+            value={siteFavicon}
+            onUploaded={(p) => set("favicon", p)}
+            onClear={() => set("favicon", undefined)}
+            onError={(m) => onToast(m, false)}
           />
         </div>
       </section>
@@ -144,6 +229,215 @@ export default function BrandTab({
             </Button>
           </div>
         </div>
+      ) : null}
+    </div>
+  );
+}
+
+function LogoPicker({
+  value,
+  onUploaded,
+  onError,
+}: {
+  value: string;
+  onUploaded: (path: string) => void;
+  onError: (msg: string) => void;
+}) {
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [busy, setBusy] = useState(false);
+  const [localPreview, setLocalPreview] = useState<string | null>(null);
+  const [justUploaded, setJustUploaded] = useState(false);
+  const [imgError, setImgError] = useState(false);
+
+  useEffect(() => {
+    return () => {
+      if (localPreview) URL.revokeObjectURL(localPreview);
+    };
+  }, [localPreview]);
+
+  async function pick(file: File | undefined) {
+    if (!file) return;
+    setBusy(true);
+    setJustUploaded(false);
+    setImgError(false);
+    const preview = URL.createObjectURL(file);
+    setLocalPreview((prev) => {
+      if (prev) URL.revokeObjectURL(prev);
+      return preview;
+    });
+    try {
+      const path = await uploadLogo(file);
+      onUploaded(path);
+      setJustUploaded(true);
+    } catch (e) {
+      onError((e as Error).message);
+      URL.revokeObjectURL(preview);
+      setLocalPreview(null);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  const previewSrc = localPreview || value;
+
+  useEffect(() => {
+    setImgError(false);
+  }, [previewSrc]);
+
+  return (
+    <div>
+      <span className="mb-1 block text-sm font-semibold text-gray-700">לוגו האתר</span>
+      <div className="flex items-center gap-3">
+        <div className="flex h-16 w-32 shrink-0 items-center justify-center overflow-hidden rounded-md border border-line bg-gray-100 p-1">
+          {previewSrc && !imgError ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={previewSrc}
+              alt=""
+              className="h-full w-full object-contain"
+              onError={() => setImgError(true)}
+            />
+          ) : value ? (
+            <span className="px-1 text-center text-[10px] leading-tight text-gray-400">
+              🕓 מתפרסם…
+            </span>
+          ) : null}
+        </div>
+        <input
+          ref={inputRef}
+          type="file"
+          accept="image/png,image/svg+xml,image/webp,image/jpeg"
+          hidden
+          onChange={(e) => pick(e.target.files?.[0])}
+        />
+        <Button variant="ghost" onClick={() => inputRef.current?.click()} disabled={busy}>
+          {busy ? "מעלה…" : "העלאת לוגו"}
+        </Button>
+      </div>
+      {justUploaded ? (
+        <p className="mt-1 text-xs text-emerald-700">
+          ✓ הלוגו נשמר. שמרו ופרסמו — הוא יופיע באתר תוך 2–3 דקות (זמן פרסום).
+        </p>
+      ) : null}
+      <p className="mt-1 text-xs text-gray-400" dir="ltr">
+        {value}
+      </p>
+    </div>
+  );
+}
+
+function FaviconPicker({
+  value,
+  onUploaded,
+  onClear,
+  onError,
+}: {
+  value: string;
+  onUploaded: (path: string) => void;
+  onClear: () => void;
+  onError: (msg: string) => void;
+}) {
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [busy, setBusy] = useState(false);
+  const [localPreview, setLocalPreview] = useState<string | null>(null);
+  const [justUploaded, setJustUploaded] = useState(false);
+  const [imgError, setImgError] = useState(false);
+
+  useEffect(() => {
+    return () => {
+      if (localPreview) URL.revokeObjectURL(localPreview);
+    };
+  }, [localPreview]);
+
+  async function pick(file: File | undefined) {
+    if (!file) return;
+    setBusy(true);
+    setJustUploaded(false);
+    setImgError(false);
+    const preview = URL.createObjectURL(file);
+    setLocalPreview((prev) => {
+      if (prev) URL.revokeObjectURL(prev);
+      return preview;
+    });
+    try {
+      const path = await uploadFavicon(file);
+      onUploaded(path);
+      setJustUploaded(true);
+    } catch (e) {
+      onError((e as Error).message);
+      URL.revokeObjectURL(preview);
+      setLocalPreview(null);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  function clear() {
+    if (localPreview) URL.revokeObjectURL(localPreview);
+    setLocalPreview(null);
+    setJustUploaded(false);
+    setImgError(false);
+    onClear();
+  }
+
+  // Fall back to the bundled branded icon when no custom favicon is set.
+  const fallback = "/icon.svg";
+  const previewSrc = localPreview || value || fallback;
+
+  useEffect(() => {
+    setImgError(false);
+  }, [previewSrc]);
+
+  return (
+    <div>
+      <span className="mb-1 block text-sm font-semibold text-gray-700">
+        אייקון האתר (Favicon)
+      </span>
+      <div className="flex items-center gap-3">
+        <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-md border border-line bg-gray-100 p-1">
+          {previewSrc && !imgError ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={previewSrc}
+              alt=""
+              className="h-full w-full object-contain"
+              onError={() => setImgError(true)}
+            />
+          ) : value ? (
+            <span className="px-1 text-center text-[10px] leading-tight text-gray-400">
+              🕓 מתפרסם…
+            </span>
+          ) : null}
+        </div>
+        <input
+          ref={inputRef}
+          type="file"
+          accept="image/png,image/svg+xml,image/webp,image/jpeg"
+          hidden
+          onChange={(e) => pick(e.target.files?.[0])}
+        />
+        <Button variant="ghost" onClick={() => inputRef.current?.click()} disabled={busy}>
+          {busy ? "מעלה…" : "העלאת אייקון"}
+        </Button>
+        {value ? (
+          <Button variant="ghost" onClick={clear} disabled={busy}>
+            איפוס לברירת מחדל
+          </Button>
+        ) : null}
+      </div>
+      {justUploaded ? (
+        <p className="mt-1 text-xs text-emerald-700">
+          ✓ האייקון נשמר. שמרו ופרסמו — הוא יופיע בלשונית הדפדפן תוך 2–3 דקות (זמן פרסום).
+        </p>
+      ) : null}
+      <p className="mt-1 text-xs text-gray-400">
+        האייקון שמופיע בלשונית הדפדפן ובמסך הבית. מומלץ תמונה ריבועית (PNG עם שקיפות).
+        {value ? null : " כרגע בשימוש האייקון המותגי המובנה."}
+      </p>
+      {value ? (
+        <p className="mt-1 text-xs text-gray-400" dir="ltr">
+          {value}
+        </p>
       ) : null}
     </div>
   );

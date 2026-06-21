@@ -64,7 +64,7 @@ export default function ContactPage() {
               <a href={telLink} className="rounded-md bg-brand-red px-5 py-2.5 text-sm font-bold text-white hover:bg-brand-red-dark">
                 ☎ התקשרו עכשיו
               </a>
-              <a href={waLink} target="_blank" rel="noopener noreferrer" className="rounded-md bg-[#25D366] px-5 py-2.5 text-sm font-bold text-white hover:opacity-90">
+              <a href={waLink} target="_blank" rel="noopener noreferrer" className="rounded-md bg-[#0e7b3a] px-5 py-2.5 text-sm font-bold text-white hover:opacity-90">
                 💬 שלחו וואטסאפ
               </a>
             </div>

@@ -184,6 +184,17 @@ async function handleApi(req, res, url) {
       const result = await store.uploadImage(await readJsonBody(req));
       return send(res, 200, { ok: true, ...result });
     }
+    // /api/import-products (bulk Excel import → single write)
+    if (seg[0] === "import-products" && method === "POST") {
+      const body = await readJsonBody(req);
+      if (!Array.isArray(body.products))
+        return send(res, 400, { error: "Expected { products: [...] }." });
+      const result = await store.bulkImportProducts({
+        products: body.products,
+        mode: body.mode,
+      });
+      return send(res, 200, result);
+    }
     // /api/products  and  /api/products/{id}
     if (seg[0] === "products") {
       const id = seg[1];

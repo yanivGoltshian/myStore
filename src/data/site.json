@@ -2,10 +2,18 @@
   "name": "חשמל חנקין",
   "nameEn": "Electro Hankin",
   "legalName": "חשמל חנקין",
+  "vatId": "055593511",
   "tagline": "מוצרי חשמל ומכשירי חשמל לבית ולמטבח",
   "url": "https://electro-hankin.vercel.app",
   "deployUrl": "https://electro-hankin.vercel.app",
   "ogImage": "/og-image.jpg",
+  "theme": {
+    "primary": "#862421"
+  },
+  "logo": {
+    "image": "/images/brand/logo.png",
+    "alt": "חשמל חנקין"
+  },
   "googleSiteVerification": "JJmoD90tPPrOBs7As_pxQk6U2i17W76bXGx24hNBZtA",
   "phone": "03-5562520",
   "phoneRaw": "035562520",
@@ -25,7 +33,27 @@
   },
   "hours": "א׳–ה׳ 09:30–14:00 ו־16:30–19:30 · יום ג׳ אחה״צ סגור · ו׳ 09:30–14:00 · שבת סגור",
   "openingHours": [
-    { "days": ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday"], "opens": "09:30", "closes": "14:00" },
-    { "days": ["Sunday", "Monday", "Wednesday", "Thursday"], "opens": "16:30", "closes": "19:30" }
+    {
+      "days": [
+        "Sunday",
+        "Monday",
+        "Tuesday",
+        "Wednesday",
+        "Thursday",
+        "Friday"
+      ],
+      "opens": "09:30",
+      "closes": "14:00"
+    },
+    {
+      "days": [
+        "Sunday",
+        "Monday",
+        "Wednesday",
+        "Thursday"
+      ],
+      "opens": "16:30",
+      "closes": "19:30"
+    }
   ]
 }

@@ -110,6 +110,7 @@ export type Site = {
   name: string;
   nameEn: string;
   legalName: string;
+  vatId?: string;
   tagline: string;
   url: string;
   deployUrl: string;
@@ -125,12 +126,16 @@ export type Site = {
   address: SiteAddress;
   hours: string;
   openingHours: OpeningHours[];
+  theme?: { primary: string };
+  logo?: { image: string; alt: string };
+  favicon?: string;
 };
 
 export type LegalSection = {
   heading: string;
   paragraphs?: string[];
   bullets?: string[];
+  links?: { href: string; label: string }[];
 };
 
 export type LegalContentPage = {
@@ -164,6 +169,7 @@ export type ContactPageContent = {
 export type ContentPages = {
   privacy: LegalContentPage;
   terms: LegalContentPage;
+  returns: LegalContentPage;
   accessibility: LegalContentPage;
   about: AboutPageContent;
   contact: ContactPageContent;

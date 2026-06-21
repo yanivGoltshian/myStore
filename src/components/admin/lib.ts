@@ -250,6 +250,91 @@ export async function uploadImage(
   return res.path;
 }
 
+// Upload a logo / brand image. Unlike product/banner uploads, this does NOT run
+// the Canvas JPEG optimiser — that flattens transparency, which would ruin a
+// transparent PNG logo. The raw bytes are sent and the server keeps the
+// original extension (.png stays .png).
+export async function uploadLogo(file: File): Promise<string> {
+  const payload = await fileToData(file);
+  const res = await apiSend<{ path: string }>("/api/upload", "POST", {
+    kind: "brand",
+    base64: payload.base64,
+    contentType: payload.contentType,
+    filename: file.name,
+  });
+  return res.path;
+}
+
+// Normalise an uploaded favicon: scale to fit a square canvas (never upscale),
+// centre it (contain — no cropping) on a TRANSPARENT background and encode as
+// PNG so alpha is preserved. One 512px square serves the tab favicon, the
+// apple-touch icon and the PWA "any" icons (browsers/OS downscale as needed).
+export async function processFaviconToPng(
+  file: File,
+  size = 512
+): Promise<{ base64: string; contentType: string }> {
+  let source: CanvasImageSource;
+  let srcW = 0;
+  let srcH = 0;
+  let bitmap: ImageBitmap | null = null;
+  let objectUrl: string | null = null;
+
+  try {
+    bitmap = await createImageBitmap(file, { imageOrientation: "from-image" });
+    source = bitmap;
+    srcW = bitmap.width;
+    srcH = bitmap.height;
+  } catch {
+    objectUrl = URL.createObjectURL(file);
+    const img = await loadImageElement(objectUrl);
+    source = img;
+    srcW = img.naturalWidth;
+    srcH = img.naturalHeight;
+  }
+
+  try {
+    if (!srcW || !srcH) throw new Error("מימדי תמונה לא תקינים");
+    const scale = Math.min(1, size / srcW, size / srcH);
+    const w = Math.max(1, Math.round(srcW * scale));
+    const h = Math.max(1, Math.round(srcH * scale));
+
+    const canvas = document.createElement("canvas");
+    canvas.width = size;
+    canvas.height = size;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) throw new Error("Canvas לא נתמך");
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = "high";
+    ctx.drawImage(
+      source,
+      Math.round((size - w) / 2),
+      Math.round((size - h) / 2),
+      w,
+      h
+    );
+
+    const blob = await new Promise<Blob | null>((resolve) =>
+      canvas.toBlob(resolve, "image/png")
+    );
+    if (!blob) throw new Error("שגיאה בקידוד התמונה");
+    return { base64: await blobToBase64(blob), contentType: "image/png" };
+  } finally {
+    if (bitmap) bitmap.close();
+    if (objectUrl) URL.revokeObjectURL(objectUrl);
+  }
+}
+
+export async function uploadFavicon(file: File): Promise<string> {
+  const payload = await processFaviconToPng(file);
+  const res = await apiSend<{ path: string }>("/api/upload", "POST", {
+    kind: "favicon",
+    base64: payload.base64,
+    contentType: payload.contentType,
+    filename: file.name,
+  });
+  return res.path;
+}
+
 const ils = new Intl.NumberFormat("he-IL", {
   style: "currency",
   currency: "ILS",

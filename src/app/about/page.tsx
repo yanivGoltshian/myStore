@@ -53,7 +53,7 @@ export default function AboutPage() {
           <Link href="/" className="rounded-md bg-brand-red px-6 py-3 text-sm font-bold text-white hover:bg-brand-red-dark">
             למעבר לחנות
           </Link>
-          <a href={waLink} target="_blank" rel="noopener noreferrer" className="rounded-md bg-[#25D366] px-6 py-3 text-sm font-bold text-white hover:opacity-90">
+          <a href={waLink} target="_blank" rel="noopener noreferrer" className="rounded-md bg-[#0e7b3a] px-6 py-3 text-sm font-bold text-white hover:opacity-90">
             💬 דברו איתנו בוואטסאפ
           </a>
           <Link href="/contact/" className="rounded-md border-2 border-brand-red px-6 py-3 text-sm font-bold text-brand-red hover:bg-brand-red hover:text-white">

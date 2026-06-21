@@ -15,6 +15,7 @@ const PATHS = {
 
 const PRODUCTS_DIR = "public/images/products";
 const BANNERS_DIR = "public/images/banners";
+const BRAND_DIR = "public/images/brand";
 const LIGHTING_DIR = "public/images/lighting";
 
 // Lighting catalog (thousands of items) — stored separately from products.json:
@@ -335,6 +336,99 @@ export async function deleteProduct(id) {
   return { ok: true, id };
 }
 
+// Bulk import (Excel round-trip). Writes products.json ONCE (a single commit)
+// instead of looping saveProduct (one commit per row). Two modes:
+//   - "replace": the supplied list BECOMES the whole catalog (deletions honored).
+//   - "merge":   update existing ids + add new ones, keep everything else.
+// Each row is normalised through normalizeProduct; unknown category ids are
+// dropped (with a warning) and blank image cells fall back to the existing image
+// or the conventional /images/products/<id>.jpg path (never wiped to "").
+export async function bulkImportProducts(input = {}) {
+  const incoming = Array.isArray(input.products) ? input.products : [];
+  const mode = input.mode === "merge" ? "merge" : "replace";
+  const existing = await getProducts();
+
+  let validCatIds = null;
+  try {
+    const cats = await getCategories();
+    validCatIds = new Set(
+      cats.map((c) => toNumber(c.id)).filter((n) => n > 0)
+    );
+  } catch {
+    /* categories optional — skip category validation if unavailable */
+  }
+
+  const result = {
+    mode,
+    created: 0,
+    updated: 0,
+    skipped: 0,
+    total: 0,
+    warnings: [],
+  };
+
+  const byId = new Map(existing.map((p) => [toNumber(p.id), p]));
+  let maxId = existing.reduce((m, p) => Math.max(m, toNumber(p.id)), 0);
+  for (const row of incoming) {
+    maxId = Math.max(maxId, toNumber(row && row.id, 0));
+  }
+
+  const finalById = mode === "merge" ? new Map(byId) : new Map();
+
+  let rowNum = 0;
+  for (const row of incoming) {
+    rowNum++;
+    const name = String((row && row.name) ?? "").trim();
+    if (!name) {
+      result.skipped++;
+      result.warnings.push(`שורה ${rowNum}: דילוג — חסר שם מוצר.`);
+      continue;
+    }
+
+    let id = toNumber(row.id, 0);
+    const isCreate = !id || !byId.has(id);
+    if (!id) id = ++maxId;
+    const base = isCreate ? {} : byId.get(id);
+
+    let catIds = Array.isArray(row.categoryIds)
+      ? row.categoryIds.map((c) => toNumber(c)).filter((c) => c > 0)
+      : Array.isArray(base.categoryIds)
+        ? base.categoryIds
+        : [];
+    if (validCatIds && validCatIds.size) {
+      const unknown = catIds.filter((c) => !validCatIds.has(c));
+      if (unknown.length) {
+        result.warnings.push(
+          `שורה ${rowNum} (${name}): קטגוריות לא מוכרות הוסרו — ${unknown.join(", ")}.`
+        );
+      }
+      catIds = catIds.filter((c) => validCatIds.has(c));
+    }
+
+    const rawImg = String(row.image ?? "").trim();
+    const image = rawImg || base.image || `/images/products/${id}.jpg`;
+
+    const normalized = normalizeProduct(
+      { ...base, ...row, categoryIds: catIds, image },
+      id
+    );
+    finalById.set(id, normalized);
+    if (isCreate) result.created++;
+    else result.updated++;
+  }
+
+  const finalArr = Array.from(finalById.values()).sort(
+    (a, b) => toNumber(b.id) - toNumber(a.id)
+  );
+  result.total = finalArr.length;
+  await getBackend().writeJSON(
+    PATHS.products,
+    finalArr,
+    `admin: bulk import products (${mode}, ${result.total} items)`
+  );
+  return result;
+}
+
 // ---------- image uploads ----------
 const EXT_BY_TYPE = {
   "image/jpeg": "jpg",
@@ -352,7 +446,7 @@ function slugifyName(name) {
     .slice(0, 60);
 }
 
-// payload: { kind: "product"|"banner", base64, contentType, id?, filename? }
+// payload: { kind: "product"|"banner"|"brand"|"favicon"|"lighting", base64, contentType, id?, filename? }
 // returns { path: "/images/...", repoPath: "public/images/..." }
 export async function uploadImage(payload) {
   const { kind, base64, contentType } = payload;
@@ -372,6 +466,19 @@ export async function uploadImage(payload) {
     const fname = base.includes(".") ? base : `${base}.${ext}`;
     publicPath = `/images/banners/${fname}`;
     repoPath = `${BANNERS_DIR}/${fname}`;
+  } else if (kind === "brand") {
+    // Logo / brand assets. Use a fresh timestamped name each upload so the new
+    // file gets a new URL (avoids CDN/browser caching the previous logo). Keeps
+    // the uploaded extension (e.g. .png) so transparency is preserved.
+    const fname = `logo-${Date.now()}.${ext}`;
+    publicPath = `/images/brand/${fname}`;
+    repoPath = `${BRAND_DIR}/${fname}`;
+  } else if (kind === "favicon") {
+    // Site favicon / app icon. Timestamped name for cache-busting; keeps the
+    // uploaded extension (PNG) so transparency is preserved.
+    const fname = `favicon-${Date.now()}.${ext}`;
+    publicPath = `/images/brand/${fname}`;
+    repoPath = `${BRAND_DIR}/${fname}`;
   } else if (kind === "lighting") {
     const id = toNumber(payload.id);
     if (!id) throw new Error("Lighting upload requires an id.");

@@ -17,6 +17,41 @@ const heebo = Heebo({
   display: "swap",
 });
 
+// Derive a darker shade of the brand color (used for hover/active states).
+function darken(hex: string, amt = 0.18): string {
+  const m = /^#?([0-9a-fA-F]{6})$/.exec(hex.trim());
+  if (!m) return hex;
+  const n = parseInt(m[1], 16);
+  const r = Math.max(0, Math.round(((n >> 16) & 255) * (1 - amt)));
+  const g = Math.max(0, Math.round(((n >> 8) & 255) * (1 - amt)));
+  const b = Math.max(0, Math.round((n & 255) * (1 - amt)));
+  return `#${((1 << 24) | (r << 16) | (g << 8) | b).toString(16).slice(1)}`;
+}
+
+const brandPrimary = site.theme?.primary || "#862421";
+const brandPrimaryDark = darken(brandPrimary);
+
+// Favicon / app icons. When the admin uploads a custom favicon
+// (site.favicon set) it becomes authoritative for the tab icon, the
+// apple-touch icon and the shortcut. Otherwise fall back to the bundled
+// branded icons in public/ (icon.svg + favicon.ico + apple-icon.png).
+const iconsMeta: Metadata["icons"] = site.favicon
+  ? {
+      icon: [
+        { url: site.favicon, type: "image/png" },
+        { url: "/favicon.ico", sizes: "any" },
+      ],
+      shortcut: [{ url: site.favicon }],
+      apple: [{ url: site.favicon }],
+    }
+  : {
+      icon: [
+        { url: "/icon.svg", type: "image/svg+xml" },
+        { url: "/favicon.ico", sizes: "any" },
+      ],
+      apple: [{ url: "/apple-icon.png", sizes: "180x180" }],
+    };
+
 const title = `${site.name} | ${site.tagline}`;
 const description = `${site.name} — חנות מוצרי החשמל והמכשירים החשמליים לבית ולמטבח. מוצרי מטבח, קיץ, חורף, טיפוח וניקיון במחירים משתלמים, באחריות מלאה ובשירות אישי. ${site.address.full}. טל׳ ${site.phone}.`;
 
@@ -51,13 +86,7 @@ export const metadata: Metadata = {
   creator: site.name,
   publisher: site.name,
   formatDetection: { telephone: true, address: true, email: true },
-  icons: {
-    icon: [
-      { url: "/icon.svg", type: "image/svg+xml" },
-      { url: "/favicon.ico", sizes: "any" },
-    ],
-    apple: [{ url: "/apple-icon.png", sizes: "180x180" }],
-  },
+  icons: iconsMeta,
   alternates: {
     canonical: "/",
     languages: { "he-IL": "/" },
@@ -95,7 +124,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#961a1a",
+  themeColor: brandPrimary,
   colorScheme: "light",
   width: "device-width",
   initialScale: 1,
@@ -160,7 +189,17 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="he" dir="rtl" className={heebo.variable}>
+    <html
+      lang="he"
+      dir="rtl"
+      className={heebo.variable}
+      style={
+        {
+          "--color-brand-red": brandPrimary,
+          "--color-brand-red-dark": brandPrimaryDark,
+        } as React.CSSProperties
+      }
+    >
       <body>
         <ScrollToTop />
         <PWARegister />

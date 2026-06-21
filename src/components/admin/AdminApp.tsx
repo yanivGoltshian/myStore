@@ -13,14 +13,17 @@ import HomepageTab from "./HomepageTab";
 import ProductsTab from "./ProductsTab";
 import CategoriesTab from "./CategoriesTab";
 import PagesTab from "./PagesTab";
+import ImportExport from "./ImportExport";
+import { site } from "@/lib/data";
 
-type TabId = "brand" | "homepage" | "products" | "categories" | "pages";
+type TabId = "brand" | "homepage" | "products" | "categories" | "pages" | "data";
 
 const TABS: { id: TabId; label: string; icon: string }[] = [
   { id: "homepage", label: "עמוד הבית", icon: "🏠" },
   { id: "products", label: "מוצרים", icon: "📦" },
   { id: "categories", label: "קטגוריות", icon: "🗂️" },
   { id: "pages", label: "עמודי תוכן", icon: "📄" },
+  { id: "data", label: "ייבוא/ייצוא", icon: "📊" },
   { id: "brand", label: "מותג ופרטים", icon: "⚙️" },
 ];
 
@@ -47,7 +50,7 @@ function BrandMark({ subtitle }: { subtitle?: string }) {
       </svg>
       <span className="flex flex-col leading-none">
         <span className="text-[0.95rem] font-black italic tracking-tight text-white">
-          חשמל חנקין
+          {site.name}
         </span>
         <span className="mt-0.5 text-[0.58rem] font-bold uppercase tracking-[0.22em] text-brand-gold">
           {subtitle || "ניהול האתר"}
@@ -310,6 +313,7 @@ export default function AdminApp() {
         {tab === "products" ? <ProductsTab onToast={onToast} /> : null}
         {tab === "categories" ? <CategoriesTab onToast={onToast} /> : null}
         {tab === "pages" ? <PagesTab onToast={onToast} /> : null}
+        {tab === "data" ? <ImportExport onToast={onToast} /> : null}
       </main>
 
       <Toast toast={toast} />

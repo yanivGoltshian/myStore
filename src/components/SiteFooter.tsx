@@ -11,6 +11,7 @@ const useful = [
 const legal = [
   { label: "הצהרת נגישות", href: "/accessibility/" },
   { label: "תקנון האתר", href: "/terms/" },
+  { label: "ביטולים והחזרות", href: "/returns/" },
   { label: "מדיניות פרטיות", href: "/privacy/" },
 ];
 
@@ -41,6 +42,12 @@ export default function SiteFooter() {
               <span aria-hidden>🕒</span>
               <span>{site.hours}</span>
             </li>
+            {site.vatId ? (
+              <li className="flex items-center gap-2">
+                <span aria-hidden>🧾</span>
+                <span>עוסק מורשה {site.vatId}</span>
+              </li>
+            ) : null}
           </ul>
           <a
             href={site.facebook}

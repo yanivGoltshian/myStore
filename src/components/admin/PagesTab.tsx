@@ -6,17 +6,19 @@ import { apiGet, apiSend } from "./lib";
 import { Button, Field, TextArea } from "./ui";
 
 type PageKey = keyof ContentPages;
-type LegalPageKey = "privacy" | "terms" | "accessibility";
+type LegalPageKey = "privacy" | "terms" | "returns" | "accessibility";
 
 const LEGAL_PAGES: { slug: LegalPageKey; label: string; hint: string }[] = [
   { slug: "privacy", label: "מדיניות פרטיות", hint: "הטקסט המשפטי שמופיע בעמוד /privacy" },
   { slug: "terms", label: "תקנון האתר", hint: "תנאי השימוש והרכישה שמופיעים בעמוד /terms" },
+  { slug: "returns", label: "ביטולים והחזרות", hint: "מדיניות הביטולים וההחזרות שמופיעה בעמוד /returns" },
   { slug: "accessibility", label: "הצהרת נגישות", hint: "נוסח הצהרת הנגישות שמופיע בעמוד /accessibility" },
 ];
 
 const PAGE_LABELS: Record<PageKey, string> = {
   privacy: "מדיניות פרטיות",
   terms: "תקנון האתר",
+  returns: "ביטולים והחזרות",
   accessibility: "הצהרת נגישות",
   about: "אודות",
   contact: "צור קשר",

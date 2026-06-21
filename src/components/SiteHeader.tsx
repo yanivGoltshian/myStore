@@ -52,7 +52,7 @@ export default function SiteHeader() {
               </a>
             ))}
           </div>
-          <span className="hidden italic tracking-wide text-ink/70 sm:block">
+          <span className="hidden italic tracking-wide text-muted sm:block">
             איכות ושירות <span className="font-bold not-italic text-brand-red">משנת 1986</span>
           </span>
           <a href={telLink} className="flex items-center gap-1.5 font-bold text-brand-red">

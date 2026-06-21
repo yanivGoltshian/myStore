@@ -10,7 +10,7 @@
   --color-brand-gold: #d4af37;
   --color-ink: #444444;
   --color-heading: #555555;
-  --color-muted: #777777;
+  --color-muted: #6f6f6f;              /* AA: 5.0:1 on #fff, 4.65:1 on #f5f6f8 */
   --color-soft: #f5f6f8;
   --color-line: #e3e6ea;
 

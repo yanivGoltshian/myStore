@@ -2,7 +2,7 @@ import { app } from "@azure/functions";
 import { uploadImage } from "../lib/store.mjs";
 import { json, requireAdmin, readBody } from "../lib/http.mjs";
 
-// Image upload. Body: { kind:"product"|"banner", base64, contentType, id?, filename? }
+// Image upload. Body: { kind:"product"|"banner"|"brand"|"favicon"|"lighting", base64, contentType, id?, filename? }
 app.http("upload", {
   methods: ["POST"],
   authLevel: "anonymous",

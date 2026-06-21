@@ -43,6 +43,20 @@ export default function LegalLayout({
                   ))}
                 </ul>
               ) : null}
+              {s.links?.length ? (
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {s.links.map((l, j) => (
+                    <Link
+                      key={j}
+                      href={l.href}
+                      className="inline-flex items-center gap-1 rounded-md border-2 border-brand-red px-4 py-2 text-sm font-bold text-brand-red hover:bg-brand-red hover:text-white"
+                    >
+                      {l.label}
+                      <span aria-hidden>←</span>
+                    </Link>
+                  ))}
+                </div>
+              ) : null}
             </section>
           ))}
 
