@@ -131,6 +131,24 @@ export type Site = {
   favicon?: string;
 };
 
+export type Coupon = {
+  id: number;
+  code: string;
+  title: string;
+  type: "percent" | "fixed";
+  value: number;
+  scope: "all" | "category" | "products";
+  categoryId?: number;
+  productIds?: number[];
+  minSubtotal?: number;
+  startsAt?: string;
+  endsAt?: string;
+  active: boolean;
+  visibility: "public" | "hidden";
+  stackable?: boolean;
+  terms?: string;
+};
+
 export type LegalSection = {
   heading: string;
   paragraphs?: string[];

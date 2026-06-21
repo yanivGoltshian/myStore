@@ -12,16 +12,25 @@ import BrandTab from "./BrandTab";
 import HomepageTab from "./HomepageTab";
 import ProductsTab from "./ProductsTab";
 import CategoriesTab from "./CategoriesTab";
+import CouponsTab from "./CouponsTab";
 import PagesTab from "./PagesTab";
 import ImportExport from "./ImportExport";
 import { site } from "@/lib/data";
 
-type TabId = "brand" | "homepage" | "products" | "categories" | "pages" | "data";
+type TabId =
+  | "brand"
+  | "homepage"
+  | "products"
+  | "categories"
+  | "coupons"
+  | "pages"
+  | "data";
 
 const TABS: { id: TabId; label: string; icon: string }[] = [
   { id: "homepage", label: "עמוד הבית", icon: "🏠" },
   { id: "products", label: "מוצרים", icon: "📦" },
   { id: "categories", label: "קטגוריות", icon: "🗂️" },
+  { id: "coupons", label: "קופונים", icon: "🎟️" },
   { id: "pages", label: "עמודי תוכן", icon: "📄" },
   { id: "data", label: "ייבוא/ייצוא", icon: "📊" },
   { id: "brand", label: "מותג ופרטים", icon: "⚙️" },
@@ -312,6 +321,7 @@ export default function AdminApp() {
         {tab === "homepage" ? <HomepageTab onToast={onToast} /> : null}
         {tab === "products" ? <ProductsTab onToast={onToast} /> : null}
         {tab === "categories" ? <CategoriesTab onToast={onToast} /> : null}
+        {tab === "coupons" ? <CouponsTab onToast={onToast} /> : null}
         {tab === "pages" ? <PagesTab onToast={onToast} /> : null}
         {tab === "data" ? <ImportExport onToast={onToast} /> : null}
       </main>

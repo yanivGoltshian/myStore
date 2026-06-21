@@ -1,5 +1,6 @@
 import Hero from "@/components/Hero";
 import CategoryStrip from "@/components/CategoryStrip";
+import CouponBanner from "@/components/CouponBanner";
 import DealsCube from "@/components/DealsCube";
 import PromoTiles from "@/components/PromoTiles";
 import ValueProps from "@/components/ValueProps";
@@ -11,6 +12,8 @@ export default function Home() {
   return (
     <>
       <Hero />
+
+      <CouponBanner />
 
       <CategoryStrip />
       {homepage.dealsCube?.enabled && (homepage.dealsCube.faces?.length ?? 0) > 0 && (
