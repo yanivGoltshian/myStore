@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>חשמל חנקין — פרסומת</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html, body {
+    width: 100%;
+    height: 100%;
+  }
+
+  body {
+    font-family: 'Heebo', 'Assistant', 'Rubik', 'Arial Hebrew', 'Segoe UI', system-ui, -apple-system, sans-serif;
+    overflow: hidden;
+    background: #862421;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .ad-container {
+    width: 1080px;
+    height: 1920px;
+    position: relative;
+    overflow: hidden;
+    background: #862421;
+    flex: 0 0 auto;
+    transform-origin: center center;
+    transform: scale(0.24);
+  }
+
+  /* ===== SCENES ===== */
+  .scene {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    animation-fill-mode: forwards;
+  }
+
+  /* Scene 1: Logo reveal (0s–4s) */
+  .scene-1 {
+    background: linear-gradient(135deg, #862421 0%, #4a1210 100%);
+    animation: fadeInOut 4s ease-in-out 0s forwards;
+  }
+
+  .scene-1 .logo-text {
+    font-size: 120px;
+    font-weight: 900;
+    color: #fff;
+    text-shadow: 0 8px 30px rgba(0,0,0,0.4);
+    animation: scaleIn 1s ease-out 0.3s both;
+  }
+
+  .scene-1 .since {
+    font-size: 48px;
+    color: rgba(255,255,255,0.85);
+    margin-top: 20px;
+    animation: slideUp 0.8s ease-out 0.8s both;
+  }
+
+  .scene-1 .tagline {
+    font-size: 42px;
+    font-weight: 300;
+    color: rgba(255,255,255,0.9);
+    margin-top: 40px;
+    animation: slideUp 0.8s ease-out 1.2s both;
+  }
+
+  /* Scene 2: Products showcase (4s–9s) */
+  .scene-2 {
+    background: #f8f5f2;
+    animation: fadeInOut 5s ease-in-out 4s forwards;
+  }
+
+  .scene-2 .title {
+    font-size: 72px;
+    font-weight: 900;
+    color: #862421;
+    margin-bottom: 60px;
+    animation: slideDown 0.6s ease-out 4.3s both;
+  }
+
+  .products-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 40px;
+    padding: 0 80px;
+    width: 100%;
+  }
+
+  .product-card {
+    background: #fff;
+    border-radius: 30px;
+    padding: 40px 30px 35px;
+    text-align: center;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+    opacity: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .product-card:nth-child(1) { animation: popIn 0.5s ease-out 4.6s both; }
+  .product-card:nth-child(2) { animation: popIn 0.5s ease-out 4.9s both; }
+  .product-card:nth-child(3) { animation: popIn 0.5s ease-out 5.2s both; }
+  .product-card:nth-child(4) { animation: popIn 0.5s ease-out 5.5s both; }
+  .product-card:nth-child(5) { animation: popIn 0.5s ease-out 5.8s both; }
+  .product-card:nth-child(6) { animation: popIn 0.5s ease-out 6.1s both; }
+
+  .product-card .product-img {
+    width: 140px;
+    height: 140px;
+    object-fit: contain;
+    margin-bottom: 24px;
+  }
+
+  .product-card .label {
+    font-size: 36px;
+    font-weight: 700;
+    color: #333;
+  }
+
+  /* Scene 3: Why us / Benefits (9s–14s) */
+  .scene-3 {
+    background: linear-gradient(180deg, #fff 0%, #f0e8e8 100%);
+    animation: fadeInOut 5s ease-in-out 9s forwards;
+  }
+
+  .scene-3 .title {
+    font-size: 72px;
+    font-weight: 900;
+    color: #862421;
+    margin-bottom: 80px;
+    animation: slideDown 0.6s ease-out 9.3s both;
+  }
+
+  .benefits {
+    display: flex;
+    flex-direction: column;
+    gap: 50px;
+    padding: 0 100px;
+    width: 100%;
+  }
+
+  .benefit {
+    display: flex;
+    align-items: center;
+    gap: 30px;
+    font-size: 48px;
+    font-weight: 700;
+    color: #333;
+    opacity: 0;
+  }
+
+  .benefit:nth-child(1) { animation: slideRight 0.5s ease-out 9.6s both; }
+  .benefit:nth-child(2) { animation: slideRight 0.5s ease-out 10.1s both; }
+  .benefit:nth-child(3) { animation: slideRight 0.5s ease-out 10.6s both; }
+  .benefit:nth-child(4) { animation: slideRight 0.5s ease-out 11.1s both; }
+
+  .benefit .check {
+    width: 70px;
+    height: 70px;
+    background: #862421;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    color: #fff;
+    font-size: 36px;
+    flex-shrink: 0;
+  }
+
+  /* Scene 4: Location + CTA (14s–20s) */
+  .scene-4 {
+    background: linear-gradient(135deg, #862421 0%, #5c1815 50%, #862421 100%);
+    animation: fadeIn 1s ease-in 14s forwards;
+  }
+
+  .scene-4 .logo-final {
+    font-size: 100px;
+    font-weight: 900;
+    color: #fff;
+    margin-bottom: 60px;
+    animation: scaleIn 0.6s ease-out 14.3s both;
+  }
+
+  .scene-4 .info-box {
+    background: rgba(255,255,255,0.12);
+    border: 2px solid rgba(255,255,255,0.3);
+    border-radius: 30px;
+    padding: 60px 80px;
+    text-align: center;
+    opacity: 0;
+    animation: slideUp 0.6s ease-out 14.8s both;
+  }
+
+  .scene-4 .address {
+    font-size: 52px;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 20px;
+  }
+
+  .scene-4 .phone {
+    font-size: 72px;
+    font-weight: 900;
+    color: #fff;
+    direction: ltr;
+    margin-top: 30px;
+    animation: pulse 1.5s ease-in-out 16s infinite;
+  }
+
+  .scene-4 .hours {
+    font-size: 36px;
+    color: rgba(255,255,255,0.8);
+    margin-top: 30px;
+  }
+
+  .scene-4 .cta {
+    margin-top: 80px;
+    font-size: 56px;
+    font-weight: 900;
+    color: #fff;
+    background: rgba(255,255,255,0.15);
+    border: 3px solid #fff;
+    border-radius: 100px;
+    padding: 30px 80px;
+    opacity: 0;
+    animation: popIn 0.5s ease-out 15.5s both;
+  }
+
+  /* Decorative particles */
+  .particles {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+
+  .particle {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    background: rgba(255,255,255,0.3);
+    border-radius: 50%;
+    animation: float 6s ease-in-out infinite;
+  }
+
+  .particle:nth-child(1) { top: 10%; right: 15%; animation-delay: 0s; }
+  .particle:nth-child(2) { top: 30%; right: 80%; animation-delay: 1s; width: 12px; height: 12px; }
+  .particle:nth-child(3) { top: 60%; right: 25%; animation-delay: 2s; }
+  .particle:nth-child(4) { top: 80%; right: 70%; animation-delay: 3s; width: 6px; height: 6px; }
+  .particle:nth-child(5) { top: 45%; right: 50%; animation-delay: 4s; width: 10px; height: 10px; }
+
+  /* Progress bar */
+  .progress-bar {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 8px;
+    background: rgba(255,255,255,0.6);
+    animation: progress 20s linear 0s forwards;
+    z-index: 100;
+  }
+
+  /* ===== KEYFRAMES ===== */
+  @keyframes fadeInOut {
+    0% { opacity: 0; }
+    10% { opacity: 1; }
+    85% { opacity: 1; }
+    100% { opacity: 0; }
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  @keyframes scaleIn {
+    from { opacity: 0; transform: scale(0.5); }
+    to { opacity: 1; transform: scale(1); }
+  }
+
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(50px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes slideDown {
+    from { opacity: 0; transform: translateY(-50px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes slideRight {
+    from { opacity: 0; transform: translateX(80px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+
+  @keyframes popIn {
+    from { opacity: 0; transform: scale(0.3); }
+    to { opacity: 1; transform: scale(1); }
+  }
+
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0) rotate(0deg); opacity: 0.3; }
+    50% { transform: translateY(-30px) rotate(180deg); opacity: 0.6; }
+  }
+
+  @keyframes progress {
+    from { width: 0%; }
+    to { width: 100%; }
+  }
+</style>
+</head>
+<body>
+
+<div class="ad-container">
+
+  <!-- Scene 1: Logo Reveal (0s–4s) -->
+  <div class="scene scene-1">
+    <div class="particles">
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+    </div>
+    <div class="logo-text">חשמל חנקין</div>
+    <div class="since">משנת 1986</div>
+    <div class="tagline">איכות · שירות · מחירים</div>
+  </div>
+
+  <!-- Scene 2: Products (4s–9s) -->
+  <div class="scene scene-2">
+    <div class="title">כל מה שצריך לבית</div>
+    <div class="products-grid">
+      <div class="product-card">
+        <img class="product-img" src="/images/products/37035.jpg" alt="מטבח">
+        <div class="label">מטבח</div>
+      </div>
+      <div class="product-card">
+        <img class="product-img" src="/images/products/37983.jpg" alt="קיץ">
+        <div class="label">קיץ</div>
+      </div>
+      <div class="product-card">
+        <img class="product-img" src="/images/products/34717.jpg" alt="חורף">
+        <div class="label">חורף</div>
+      </div>
+      <div class="product-card">
+        <img class="product-img" src="/images/products/30955.jpg" alt="טיפוח">
+        <div class="label">טיפוח</div>
+      </div>
+      <div class="product-card">
+        <img class="product-img" src="/images/products/36189.jpg" alt="ניקיון">
+        <div class="label">ניקיון</div>
+      </div>
+      <div class="product-card">
+        <img class="product-img" src="/images/products/35091.jpg" alt="אביזרי חשמל">
+        <div class="label">חשמלאי</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scene 3: Benefits (9s–14s) -->
+  <div class="scene scene-3">
+    <div class="title">למה חשמל חנקין?</div>
+    <div class="benefits">
+      <div class="benefit">
+        <span class="check">✓</span>
+        <span>אחריות מלאה על כל מוצר</span>
+      </div>
+      <div class="benefit">
+        <span class="check">✓</span>
+        <span>שירות אישי וחם</span>
+      </div>
+      <div class="benefit">
+        <span class="check">✓</span>
+        <span>מחירים משתלמים</span>
+      </div>
+      <div class="benefit">
+        <span class="check">✓</span>
+        <span>חשמלאי מוסמך בשירות הלקוח</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scene 4: CTA (14s–20s) -->
+  <div class="scene scene-4">
+    <div class="particles">
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+    </div>
+    <div class="logo-final">חשמל חנקין</div>
+    <div class="info-box">
+      <div class="address">יהושע חנקין 71, חולון</div>
+      <div class="hours">א׳–ה׳ 09:30–14:00 | 16:30–19:30 | שישי 09:30–14:00</div>
+      <div class="phone">03-5562520</div>
+    </div>
+    <div class="cta">בואו לבקר!</div>
+  </div>
+
+  <div class="progress-bar"></div>
+</div>
+
+<script>
+  (function () {
+    function container() { return document.querySelector('.ad-container'); }
+
+    // Fit the fixed 1080x1920 stage inside whatever box the iframe gives us
+    // (CONTAIN — the whole vertical ad stays visible; crimson body blends the margins).
+    function applyScale() {
+      var c = container();
+      if (!c) return;
+      var s = Math.min(window.innerWidth / 1080, window.innerHeight / 1920);
+      c.style.transform = 'scale(' + s + ')';
+    }
+
+    applyScale();
+    window.addEventListener('resize', applyScale);
+
+    // Loop the 20s timeline: cloning the node restarts all CSS animations.
+    setInterval(function () {
+      var c = container();
+      if (!c) return;
+      var fresh = c.cloneNode(true);
+      c.parentNode.replaceChild(fresh, c);
+      applyScale();
+    }, 20000);
+  })();
+</script>
+
+</body>
+</html>
