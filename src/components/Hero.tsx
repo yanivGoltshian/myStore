@@ -20,7 +20,7 @@ export default function Hero() {
 
       {/* Desktop — side-by-side: banner pinned right + animated ad pinned left, equal height, no gaps */}
       <section className="relative hidden overflow-hidden lg:block">
-        <div className="mx-auto flex max-w-7xl items-stretch">
+        <div className="flex w-full items-stretch">
           {/* Banner (renders on the right in RTL) — natural 3:1 ratio drives the row height */}
           <Link
             href={href}
@@ -37,7 +37,7 @@ export default function Hero() {
           </Link>
 
           {/* Animated ad (renders on the left in RTL) — fixed 248px, stretches to match the banner height */}
-          <div className="relative w-[248px] shrink-0 overflow-hidden bg-[#862421]">
+          <div className="relative w-[333px] shrink-0 overflow-hidden bg-[#862421]">
             <iframe
               src="/hero/electro-hankin-ad/"
               title={alt}
