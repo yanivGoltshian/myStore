@@ -6,6 +6,7 @@ import PromoTiles from "@/components/PromoTiles";
 import ValueProps from "@/components/ValueProps";
 import ProductCarousel from "@/components/ProductCarousel";
 import ShareBar from "@/components/ShareBar";
+import FaqSection from "@/components/FaqSection";
 import { homepage, getProductsByCategory, site } from "@/lib/data";
 
 export default function Home() {
@@ -38,6 +39,8 @@ export default function Home() {
           />
         );
       })}
+
+      <FaqSection />
 
       <section className="container-x mt-14">
         <div className="share-band">

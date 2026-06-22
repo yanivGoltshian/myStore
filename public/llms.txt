@@ -1,0 +1,35 @@
+# חשמל חנקין (Electro Hankin)
+
+> חנות מוצרי חשמל ומכשירי חשמל לבית ולמטבח בחולון, ישראל. מכירה אישית בטלפון ובוואטסאפ (ללא תשלום אונליין), אחריות יבואן רשמי, מחירים משתלמים ושירות של חנות משפחתית. כולל מחלקת תאורה רחבה.
+
+חשמל חנקין הוא עסק משפחתי המוכר מגוון רחב של מוצרי חשמל לבית ולמטבח, מוצרי עונה (קיץ וחורף), מוצרי טיפוח, מוצרי ניקיון, גרילים, מוצרים לבנים וגופי תאורה. ההזמנה מתבצעת דרך עגלת הקנייה ושליחת ההזמנה בוואטסאפ או בטלפון, והתשלום מתואם אישית מול הלקוח. פרטי אשראי אינם נמסרים באתר.
+
+## פרטי העסק
+- שם: חשמל חנקין / Electro Hankin
+- כתובת: יהושע חנקין 71, חולון, ישראל
+- טלפון: 03-5562520
+- וואטסאפ: 052-250-3151
+- שעות פתיחה: ימים א׳–ה׳ 09:30–14:00 ו־16:30–19:30 (ביום ג׳ אחר הצהריים סגור), יום ו׳ 09:30–14:00, בשבת סגור
+- אחריות: יבואן רשמי על כל המוצרים
+- אזור שירות: חנות בחולון + משלוחים לכל הארץ
+
+## קטגוריות מרכזיות
+- [מוצרים למטבח](https://electro-hankin.vercel.app/category/120/)
+- [מוצרי חורף](https://electro-hankin.vercel.app/category/15/)
+- [מוצרי קיץ](https://electro-hankin.vercel.app/category/112/)
+- [מוצרי טיפוח](https://electro-hankin.vercel.app/category/140/)
+- [ניקיון הבית](https://electro-hankin.vercel.app/category/136/)
+- [גרילים](https://electro-hankin.vercel.app/category/695/)
+- [אביזרי חשמל](https://electro-hankin.vercel.app/category/746/)
+- [מוצרים לבנים](https://electro-hankin.vercel.app/category/779/)
+- [תאורה](https://electro-hankin.vercel.app/lighting/)
+
+## מידע ועמודים
+- [דף הבית](https://electro-hankin.vercel.app/)
+- [מבצעים](https://electro-hankin.vercel.app/deals/)
+- [אודות](https://electro-hankin.vercel.app/about/)
+- [צור קשר](https://electro-hankin.vercel.app/contact/)
+- [ביטולים והחזרות](https://electro-hankin.vercel.app/returns/)
+- [תקנון האתר](https://electro-hankin.vercel.app/terms/)
+- [מדיניות פרטיות](https://electro-hankin.vercel.app/privacy/)
+- [הצהרת נגישות](https://electro-hankin.vercel.app/accessibility/)

@@ -135,7 +135,7 @@ function StructuredData() {
     "@context": "https://schema.org",
     "@graph": [
       {
-        "@type": ["Store", "LocalBusiness", "Organization"],
+        "@type": ["Store", "LocalBusiness", "Organization", "ElectronicsStore"],
         "@id": `${site.url}/#store`,
         name: site.name,
         alternateName: site.nameEn,
@@ -145,6 +145,12 @@ function StructuredData() {
         description,
         telephone: site.phone,
         priceRange: "₪₪",
+        currenciesAccepted: "ILS",
+        paymentAccepted: "מזומן, כרטיס אשראי",
+        areaServed: { "@type": "Country", name: "Israel" },
+        hasMap: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+          site.address.full,
+        )}`,
         address: {
           "@type": "PostalAddress",
           streetAddress: site.address.street,
@@ -165,7 +171,7 @@ function StructuredData() {
           areaServed: "IL",
           availableLanguage: ["he"],
         },
-        sameAs: [site.facebook],
+        sameAs: [site.facebook, site.instagram].filter(Boolean),
       },
       {
         "@type": "WebSite",

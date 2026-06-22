@@ -66,8 +66,26 @@ export default async function CategoryPage({
   const products = getProductsByCategory(id);
   const subs = categories.filter((c) => c.parent === id);
 
+  const breadcrumbLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "דף הבית", item: `${site.url}/` },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: category.name,
+        item: `${site.url}/category/${category.id}/`,
+      },
+    ],
+  };
+
   return (
     <div className="bg-soft pb-16">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}
+      />
       <div className="stars-bg text-white">
         <div className="container-x py-8">
           <nav className="mb-2 text-[0.72rem] text-white/70">

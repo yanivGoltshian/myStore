@@ -69,6 +69,7 @@ export default async function ProductPage({
     description: stripHtml(product.description).slice(0, 300) || product.name,
     sku: String(product.id),
     ...(product.model ? { mpn: product.model } : {}),
+    ...(primaryCat ? { category: primaryCat.name } : {}),
     ...(product.price > 0
       ? {
           offers: {
@@ -86,11 +87,39 @@ export default async function ProductPage({
       : {}),
   };
 
+  const breadcrumbLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "דף הבית", item: `${site.url}/` },
+      ...(primaryCat
+        ? [
+            {
+              "@type": "ListItem",
+              position: 2,
+              name: primaryCat.name,
+              item: `${site.url}/category/${primaryCat.id}/`,
+            },
+          ]
+        : []),
+      {
+        "@type": "ListItem",
+        position: primaryCat ? 3 : 2,
+        name: product.name,
+        item: `${site.url}/product/${product.id}/`,
+      },
+    ],
+  };
+
   return (
     <div className="pb-16">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(productLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}
       />
       <div className="bg-soft">
         <div className="container-x py-3 text-[0.72rem] text-muted">
