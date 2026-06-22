@@ -8,6 +8,15 @@ import ProductCarousel from "@/components/ProductCarousel";
 import ShareBar from "@/components/ShareBar";
 import CustomerVoices from "@/components/CustomerVoices";
 import { homepage, getProductsByCategory, site } from "@/lib/data";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: {
+    absolute: `${site.name} | חנות מוצרי חשמל בחולון`,
+  },
+  description: `${site.name} — חנות מוצרי חשמל ומכשירי חשמל לבית ולמטבח בחולון, פעילה משנת 1986. מבחר גדול של מוצרי מטבח, קיץ, חורף, תאורה, ניקיון וטיפוח במחירים משתלמים, באחריות מלאה ובשירות אישי של חשמלאי מקצועי. ${site.address.full}. טל׳ ${site.phone}. משרתים את חולון, בת ים, ראשון לציון ואזור המרכז.`,
+  alternates: { canonical: "/" },
+};
 
 export default function Home() {
   return (

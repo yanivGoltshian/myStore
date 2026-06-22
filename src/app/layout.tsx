@@ -131,6 +131,13 @@ export const viewport: Viewport = {
 };
 
 function StructuredData() {
+  // Reviews shown on the homepage (CustomerVoices) — backs the aggregateRating
+  // so the rating markup corresponds to real reviews visible on the page.
+  const reviews = (site.reviews ?? []).filter((r) => r && r.text);
+  const ratingAvg = reviews.length
+    ? reviews.reduce((sum, r) => sum + Number(r.rating ?? 5), 0) / reviews.length
+    : 0;
+
   const ld = {
     "@context": "https://schema.org",
     "@graph": [
@@ -147,7 +154,14 @@ function StructuredData() {
         priceRange: "₪₪",
         currenciesAccepted: "ILS",
         paymentAccepted: "מזומן, כרטיס אשראי",
-        areaServed: { "@type": "Country", name: "Israel" },
+        areaServed: ["חולון", "בת ים", "ראשון לציון", "תל אביב-יפו", "אזור", "רמת גן"].map(
+          (name) => ({ "@type": "City", name }),
+        ),
+        geo: {
+          "@type": "GeoCoordinates",
+          latitude: 32.0197,
+          longitude: 34.7789,
+        },
         hasMap: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
           site.address.full,
         )}`,
@@ -172,6 +186,28 @@ function StructuredData() {
           availableLanguage: ["he"],
         },
         sameAs: [site.facebook, site.instagram].filter(Boolean),
+        ...(reviews.length
+          ? {
+              aggregateRating: {
+                "@type": "AggregateRating",
+                ratingValue: Number(ratingAvg.toFixed(1)),
+                reviewCount: reviews.length,
+                bestRating: 5,
+                worstRating: 1,
+              },
+              review: reviews.map((r) => ({
+                "@type": "Review",
+                author: { "@type": "Person", name: r.author },
+                reviewRating: {
+                  "@type": "Rating",
+                  ratingValue: Number(r.rating ?? 5),
+                  bestRating: 5,
+                  worstRating: 1,
+                },
+                reviewBody: r.text,
+              })),
+            }
+          : {}),
       },
       {
         "@type": "WebSite",
