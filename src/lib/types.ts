@@ -123,6 +123,7 @@ export type Site = {
   email: string;
   facebook: string;
   instagram: string;
+  googleReviewUrl?: string;
   address: SiteAddress;
   hours: string;
   openingHours: OpeningHours[];
