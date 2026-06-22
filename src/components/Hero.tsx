@@ -18,10 +18,10 @@ export default function Hero() {
         </Link>
       </section>
 
-      {/* Desktop — side-by-side: still banner pinned right + animated ad pinned left */}
-      <section className="relative hidden overflow-hidden bg-gradient-to-br from-[#8d2724] via-[#7a1f1c] to-[#5c1714] lg:block">
+      {/* Desktop — side-by-side: banner pinned right + animated ad pinned left, equal height, no gaps */}
+      <section className="relative hidden overflow-hidden lg:block">
         <div className="mx-auto flex max-w-7xl items-stretch">
-          {/* Banner (renders on the right in RTL) — drives the row height at its natural ratio */}
+          {/* Banner (renders on the right in RTL) — natural 3:1 ratio drives the row height */}
           <Link
             href={href}
             aria-label={alt}
@@ -36,8 +36,8 @@ export default function Hero() {
             />
           </Link>
 
-          {/* Animated ad "screen" (renders on the left in RTL) — stretches to the banner height */}
-          <div className="relative w-[300px] shrink-0 overflow-hidden ring-1 ring-white/10 xl:w-[340px]">
+          {/* Animated ad (renders on the left in RTL) — fixed 248px, stretches to match the banner height */}
+          <div className="relative w-[248px] shrink-0 overflow-hidden bg-[#862421]">
             <iframe
               src="/hero/electro-hankin-ad/"
               title={alt}
@@ -45,9 +45,6 @@ export default function Hero() {
               scrolling="no"
               className="absolute inset-0 h-full w-full border-0"
             />
-            {/* feather the inner edge into the crimson field + subtle vignette */}
-            <div className="pointer-events-none absolute inset-y-0 right-0 w-16 bg-gradient-to-l from-[#5c1714] to-transparent" />
-            <div className="pointer-events-none absolute inset-0 shadow-[inset_0_0_70px_rgba(0,0,0,0.35)]" />
           </div>
         </div>
       </section>
