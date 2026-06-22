@@ -130,6 +130,14 @@ export type Site = {
   theme?: { primary: string };
   logo?: { image: string; alt: string };
   favicon?: string;
+  reviews?: Review[];
+};
+
+export type Review = {
+  author: string;
+  text: string;
+  rating?: number;
+  source?: string;
 };
 
 export type Coupon = {

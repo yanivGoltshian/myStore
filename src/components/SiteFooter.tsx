@@ -7,6 +7,7 @@ const useful = [
   { label: "אודותינו", href: "/about/" },
   { label: "צור קשר", href: "/contact/" },
   { label: "מבצעים", href: "/deals/" },
+  { label: "שאלות נפוצות", href: "/faq/" },
 ];
 
 const legal = [
