@@ -346,9 +346,9 @@
     "id": 34130,
     "name": "תקע כוח / MP-100",
     "model": "MP-100",
-    "price": 0,
-    "regularPrice": 0,
-    "salePrice": 0,
+    "price": 5,
+    "regularPrice": 5,
+    "salePrice": 5,
     "onSale": false,
     "image": "/images/products/34130.jpg",
     "categoryIds": [
