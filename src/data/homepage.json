@@ -59,7 +59,7 @@
   ],
   "dealsCube": {
     "enabled": true,
-    "intervalMs": 5000,
+    "intervalMs": 2000,
     "faces": [
       {
         "id": "deal-34827",
