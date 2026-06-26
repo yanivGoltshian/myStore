@@ -313,9 +313,9 @@
     "id": 34139,
     "name": "מאוורר מגדל מפוח / ATL-91",
     "model": "ATL-91",
-    "price": 319,
-    "regularPrice": 229,
-    "salePrice": 319,
+    "price": 229,
+    "regularPrice": 319,
+    "salePrice": 229,
     "onSale": true,
     "image": "/images/products/34139.jpg",
     "categoryIds": [
