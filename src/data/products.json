@@ -330,10 +330,10 @@
     "id": 34133,
     "name": "טוסטר קופץ 2 פרוסות / ATL-017",
     "model": "ATL-017",
-    "price": 89,
+    "price": 49,
     "regularPrice": 89,
-    "salePrice": 89,
-    "onSale": false,
+    "salePrice": 49,
+    "onSale": true,
     "image": "/images/products/34133.jpg",
     "categoryIds": [
       755,
