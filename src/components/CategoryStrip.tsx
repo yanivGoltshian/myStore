@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { nav, getProductsByCategory } from "@/lib/data";
+import { visibleNav, getProductsByCategory } from "@/lib/data";
 
 // Uniform mono-line icons per category (classic, consistent look — no emoji)
 const ICONS: Record<string, ReactNode> = {
@@ -122,7 +122,7 @@ export default function CategoryStrip() {
         <h2 className="whitespace-nowrap text-lg font-bold text-heading">הקטגוריות שלנו</h2>
       </div>
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-6">
-        {nav.map((c) => {
+        {visibleNav.map((c) => {
           const thumb = c.thumb ?? getProductsByCategory(c.id).find((p) => p.image)?.image;
           return (
             <Link

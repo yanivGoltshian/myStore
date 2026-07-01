@@ -33,6 +33,7 @@ export type NavItem = {
   subs: NavSub[];
   href?: string;
   thumb?: string;
+  hidden?: boolean;
 };
 
 export type PromoTile = {

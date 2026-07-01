@@ -19,20 +19,16 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${base}/accessibility/`, lastModified: now, changeFrequency: "yearly", priority: 0.3 },
   ];
 
-  const categoryRoutes: MetadataRoute.Sitemap = categories.map((c) => {
-    const path =
-      c.id === 9000
-        ? "/lighting/"
-        : c.parent === 9000
-          ? `/lighting/c/${c.id - 9000}/`
-          : `/category/${c.id}/`;
-    return {
-      url: `${base}${path}`,
+  const categoryRoutes: MetadataRoute.Sitemap = categories
+    // Lighting (id 9000 + its subcategories, parent 9000) is an unlisted sub-catalog:
+    // reachable by direct link only, so keep it out of the sitemap.
+    .filter((c) => c.id !== 9000 && c.parent !== 9000)
+    .map((c) => ({
+      url: `${base}/category/${c.id}/`,
       lastModified: now,
       changeFrequency: "weekly",
       priority: 0.7,
-    };
-  });
+    }));
 
   const productRoutes: MetadataRoute.Sitemap = products.map((p) => ({
     url: `${base}/product/${p.id}/`,

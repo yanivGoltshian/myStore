@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { nav, site, waLink, telLink, wazeLink } from "@/lib/data";
+import { visibleNav, site, waLink, telLink, wazeLink } from "@/lib/data";
 import NewsletterSignup from "./NewsletterSignup";
 
 const useful = [
@@ -94,7 +94,7 @@ export default function SiteFooter() {
         <div>
           <h4 className="mb-3 border-b border-white/25 pb-2 text-sm font-bold">קטגוריות ראשיות</h4>
           <ul className="space-y-1.5">
-            {nav.slice(0, 7).map((c) => (
+            {visibleNav.slice(0, 7).map((c) => (
               <li key={c.id}>
                 <Link href={c.href ?? `/category/${c.id}/`} className="text-[0.82rem] text-white/85 hover:text-brand-gold">
                   {c.name}

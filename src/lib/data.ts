@@ -10,6 +10,10 @@ import type { Product, Category, NavItem, Homepage, Site, ContentPages } from ".
 export const products = productsData as Product[];
 export const categories = categoriesData as Category[];
 export const nav = navData as NavItem[];
+// Categories shown in the main-site menus (header, footer, homepage strip).
+// Entries flagged `hidden` (e.g. תאורה / lighting) stay reachable by direct link
+// but are omitted from every on-site listing.
+export const visibleNav = nav.filter((c) => !c.hidden);
 export const homepage = homepageData as Homepage;
 export const site = siteData as Site;
 export const pages = pagesData as ContentPages;

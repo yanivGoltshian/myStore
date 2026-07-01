@@ -5,7 +5,7 @@ import Link from "next/link";
 import Logo from "./Logo";
 import SearchAutocomplete from "./SearchAutocomplete";
 import { useCart } from "@/lib/cart";
-import { nav, site, waLink, telLink, wazeLink } from "@/lib/data";
+import { visibleNav, site, waLink, telLink, wazeLink } from "@/lib/data";
 
 const socials = [
   {
@@ -109,7 +109,7 @@ export default function SiteHeader() {
             <SearchAutocomplete variant="mobile" onNavigate={() => setMobileOpen(false)} />
           </div>
           <ul className="container-x pb-4">
-            {nav.map((cat) => (
+            {visibleNav.map((cat) => (
               <li key={cat.id} className="border-b">
                 <div className="flex items-center justify-between">
                   <Link

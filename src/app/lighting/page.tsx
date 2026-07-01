@@ -8,6 +8,7 @@ export const metadata: Metadata = {
   description:
     "מבחר ענק של גופי תאורה — נברשות, צמודי תקרה, מנורות קיר, ספוטים, תאורת חוץ ועוד. מחירים מומלצים לצרכן.",
   alternates: { canonical: "/lighting/" },
+  robots: { index: false, follow: true },
   openGraph: {
     title: `תאורה | ${site.name}`,
     description: "מבחר ענק של גופי תאורה לבית ולגינה — נברשות, צמודי תקרה, תאורת חוץ ועוד.",

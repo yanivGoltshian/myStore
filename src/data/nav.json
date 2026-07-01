@@ -372,6 +372,7 @@
   "slug": "lighting",
   "icon": "💡",
   "count": 7689,
+  "hidden": true,
   "href": "/lighting/",
   "thumb": "/images/lighting/taura-cover.jpg",
   "subs": [

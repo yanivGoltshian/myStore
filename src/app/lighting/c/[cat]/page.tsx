@@ -21,6 +21,7 @@ export async function generateMetadata({
     title: `${cat.name} | תאורה`,
     description: desc,
     alternates: { canonical: `/lighting/c/${cat.id}/` },
+    robots: { index: false, follow: true },
     openGraph: {
       title: `${cat.name} | תאורה | ${site.name}`,
       description: desc,
