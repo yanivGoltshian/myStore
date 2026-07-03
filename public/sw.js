@@ -1,7 +1,7 @@
 /* Service worker for חשמל חנקין PWA.
    Network-first for page navigations (fresh prices/content),
    cache-first for static assets (images, _next, icons). */
-const CACHE = "hankin-v3";
+const CACHE = "hankin-v4";
 const OFFLINE_FALLBACK = "/";
 const PRECACHE = ["/", "/manifest.webmanifest", "/icon-192.png", "/icon-512.png"];
 
@@ -37,6 +37,13 @@ self.addEventListener("fetch", (event) => {
   // fresh. Letting the SW fall through to cache-first here served stale
   // /api/homepage, /api/products and /api/categories for the whole cache life.
   if (url.pathname.startsWith("/api/")) return;
+
+  // Admin panel must always be fresh. Next.js <Link> prefetches request the
+  // admin doc with a non-"navigate" mode, which would otherwise fall into the
+  // cache-first branch below and pin a stale admin bundle for the whole cache
+  // life (this is what hid the category image-upload UI after a deploy).
+  // Bypass the SW entirely for /admin so the browser always fetches live.
+  if (url.pathname === "/admin" || url.pathname.startsWith("/admin/")) return;
 
   // Network-first for navigations so content stays fresh.
   if (req.mode === "navigate") {
