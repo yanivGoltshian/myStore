@@ -573,10 +573,10 @@
     "id": 12232,
     "name": "מנגל חשמלי נירוסטה ATL-6003 / TURBO GRILL",
     "model": "ATL-6003",
-    "price": 139,
+    "price": 99,
     "regularPrice": 139,
-    "salePrice": 139,
-    "onSale": false,
+    "salePrice": 99,
+    "onSale": true,
     "image": "/images/products/12232.jpg",
     "categoryIds": [
       695,
