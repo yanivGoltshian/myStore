@@ -989,10 +989,10 @@
     "id": 2879,
     "name": "טוסטר סנדביץ' נירוסטה / ATL-269",
     "model": "ATL-269",
-    "price": 95,
+    "price": 75,
     "regularPrice": 95,
-    "salePrice": 95,
-    "onSale": false,
+    "salePrice": 75,
+    "onSale": true,
     "image": "/images/products/2879.jpg",
     "categoryIds": [
       750,
