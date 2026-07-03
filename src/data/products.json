@@ -53,10 +53,10 @@
     "id": 36227,
     "name": "מיקרוגל 20 ליטר מכני לבן / ATL-1320W",
     "model": "ATL-1320W",
-    "price": 329,
+    "price": 299,
     "regularPrice": 329,
-    "salePrice": 329,
-    "onSale": false,
+    "salePrice": 299,
+    "onSale": true,
     "image": "/images/products/36227.jpg",
     "categoryIds": [
       120,
