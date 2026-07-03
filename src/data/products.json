@@ -442,10 +442,10 @@
     "id": 33234,
     "name": "מאוורר קמפינג סולרי / ATL-1608",
     "model": "ATL-1608",
-    "price": 129,
+    "price": 89,
     "regularPrice": 129,
-    "salePrice": 129,
-    "onSale": false,
+    "salePrice": 89,
+    "onSale": true,
     "image": "/images/products/33234.jpg",
     "categoryIds": [
       768,
