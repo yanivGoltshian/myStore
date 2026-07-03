@@ -799,5 +799,14 @@
     "count": 4,
     "icon": "",
     "isTop": false
+  },
+  {
+    "id": 9022,
+    "name": "גופי תאורה",
+    "slug": "גופי-תאורה",
+    "parent": 0,
+    "count": 0,
+    "icon": "💡",
+    "isTop": true
   }
 ]
