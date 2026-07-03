@@ -98,37 +98,44 @@ const ICONS: Record<string, ReactNode> = {
   ),
 };
 
-function CategoryIcon({ id, fallbackStr }: { id: number; fallbackStr?: string }) {
-  if (ICONS[String(id)]) {
-    return (
-      <svg
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth={1.5}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        className="h-9 w-9"
-        aria-hidden
-      >
-        {ICONS[String(id)]}
-      </svg>
-    );
-  }
-  
-  if (fallbackStr && fallbackStr !== "📦") {
-    // Attempt to make the emoji somewhat match the brand color
-    return (
-      <span
-        className="flex h-9 w-9 items-center justify-center text-3xl leading-none grayscale"
-        aria-hidden
-        title={fallbackStr}
-      >
-        {fallbackStr}
-      </span>
-    );
-  }
+// Map common emojis (what the admin free-text icon field accepts) to the same
+// red line-art icons above, so admin-created categories match the brand style
+// (red outlines) instead of showing a mismatched grayscale emoji.
+const EMOJI_TO_ID: Record<string, string> = {
+  "💡": "9000", // bulb → lighting
+  "🔦": "9000",
+  "🍳": "120", // chef hat → kitchen
+  "🍽️": "120",
+  "🥘": "120",
+  "☀️": "112", // sun → summer
+  "🏖️": "112",
+  "❄️": "15", // snowflake → winter
+  "🌨️": "15",
+  "💇": "140", // scissors → grooming
+  "✂️": "140",
+  "💅": "140",
+  "🧴": "136", // spray → cleaning
+  "🧹": "136",
+  "🧽": "136",
+  "🔌": "746", // plug → electrical accessories
+  "🔋": "746",
+  "🎁": "754", // gift → treats
+  "🍬": "754",
+  "🍭": "754",
+  "🧺": "779", // washing machine → white goods
+  "👕": "779",
+  "🫧": "779",
+  "🔥": "695", // grill
+  "🍖": "695",
+  "🍗": "695",
+  "👑": "377", // crown → platinum
+};
 
+function CategoryIcon({ id, fallbackStr }: { id: number; fallbackStr?: string }) {
+  const key =
+    (ICONS[String(id)] ? String(id) : null) ??
+    (fallbackStr ? EMOJI_TO_ID[fallbackStr] ?? null : null);
+  const node = key ? ICONS[key] : ICONS.default;
   return (
     <svg
       viewBox="0 0 24 24"
@@ -140,7 +147,7 @@ function CategoryIcon({ id, fallbackStr }: { id: number; fallbackStr?: string })
       className="h-9 w-9"
       aria-hidden
     >
-      {ICONS.default}
+      {node}
     </svg>
   );
 }

@@ -27,6 +27,11 @@
 
 html {
   scroll-behavior: smooth;
+  /* Guard against any single component (e.g. the 3D deals cube) leaking past the
+     viewport and causing a horizontal page scroll / phantom side "margins" on mobile.
+     `clip` (not `hidden`) avoids creating a scroll container, so the sticky header
+     and vertical scrolling are unaffected. */
+  overflow-x: clip;
 }
 
 body {

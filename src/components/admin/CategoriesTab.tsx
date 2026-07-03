@@ -21,6 +21,9 @@ export default function CategoriesTab({
   const [filter, setFilter] = useState("");
   const [uploadCatId, setUploadCatId] = useState<number | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
+  const [draftFile, setDraftFile] = useState<File | null>(null);
+  const [draftPreview, setDraftPreview] = useState<string>("");
+  const draftFileRef = useRef<HTMLInputElement>(null);
 
   async function load() {
     setLoading(true);
@@ -73,19 +76,47 @@ export default function CategoriesTab({
     }
     setSaving(true);
     try {
-      await apiSend<Category>("/api/categories", "POST", {
+      const created = await apiSend<Category>("/api/categories", "POST", {
         name: draft.name.trim(),
         parent: draft.parent || 0,
         icon: draft.icon.trim() || "📦",
       });
+      if (draftFile && created?.id) {
+        try {
+          const path = await uploadImage("category", draftFile, { id: created.id });
+          await apiSend<Category>(`/api/categories/${created.id}`, "PUT", { thumb: path });
+        } catch (e) {
+          onToast("הקטגוריה נוצרה אך העלאת התמונה נכשלה: " + (e as Error).message, false);
+        }
+      }
       onToast("הקטגוריה נוצרה — האתר יתעדכן בעוד דקה־שתיים", true);
       setDraft({ name: "", parent: 0, icon: "📦" });
+      clearDraftImage();
       await load();
     } catch (e) {
       onToast((e as Error).message, false);
     } finally {
       setSaving(false);
     }
+  }
+
+  function onDraftFile(e: React.ChangeEvent<HTMLInputElement>) {
+    const f = e.target.files?.[0];
+    if (!f) return;
+    setDraftFile(f);
+    setDraftPreview((prev) => {
+      if (prev) URL.revokeObjectURL(prev);
+      return URL.createObjectURL(f);
+    });
+  }
+
+  function clearDraftImage() {
+    setDraftFile(null);
+    setDraftPreview((prev) => {
+      if (prev) URL.revokeObjectURL(prev);
+      return "";
+    });
+    if (draftFileRef.current) draftFileRef.current.value = "";
   }
 
   async function rename(c: Category) {
@@ -197,9 +228,9 @@ export default function CategoriesTab({
                   setUploadCatId(c.id);
                   fileRef.current?.click();
                 }}
-                className="rounded px-2 py-1 text-xs font-bold text-gray-500 hover:bg-gray-100 hover:text-heading"
+                className="rounded px-2 py-1 text-xs font-bold text-brand-red hover:bg-brand-red/10"
               >
-                {c.thumb ? "החלף תמונה" : "הוסף תמונה"}
+                {c.thumb ? "🖼️ החלף תמונה" : "🖼️ הוסף תמונה"}
               </button>
               <button
                 onClick={() => {
@@ -267,9 +298,43 @@ export default function CategoriesTab({
             </Button>
           </div>
         </div>
+        <div className="mt-3 flex flex-wrap items-center gap-3">
+          <input
+            type="file"
+            ref={draftFileRef}
+            className="hidden"
+            accept="image/*"
+            onChange={onDraftFile}
+          />
+          <button
+            type="button"
+            onClick={() => draftFileRef.current?.click()}
+            className="inline-flex items-center gap-2 rounded-lg border border-dashed border-brand-red/50 bg-brand-red/5 px-3 py-2 text-sm font-bold text-brand-red hover:bg-brand-red/10"
+          >
+            <span className="text-lg leading-none">🖼️</span>
+            {draftPreview ? "החלפת תמונת קטגוריה" : "העלאת תמונת קטגוריה (אופציונלי)"}
+          </button>
+          {draftPreview ? (
+            <span className="inline-flex items-center gap-2">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={draftPreview}
+                alt="תצוגה מקדימה"
+                className="h-12 w-12 rounded border border-line bg-white object-contain"
+              />
+              <button
+                type="button"
+                onClick={clearDraftImage}
+                className="text-xs font-bold text-gray-400 hover:text-red-600"
+              >
+                הסרה
+              </button>
+            </span>
+          ) : null}
+        </div>
         <p className="mt-2 text-xs text-gray-400">
           קטגוריה ראשית מופיעה בתפריט העליון של האתר. תת-קטגוריה מופיעה תחת הקטגוריה הראשית
-          שבחרת.
+          שבחרת. אם לא תעלו תמונה, האתר יציג אוטומטית תמונה של אחד המוצרים בקטגוריה.
         </p>
       </div>
 

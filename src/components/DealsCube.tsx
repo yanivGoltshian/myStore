@@ -166,7 +166,7 @@ export default function DealsCube({ faces, intervalMs = 4500 }: Props) {
       <div className="relative mx-auto max-w-3xl">
         <div
           ref={sceneRef}
-          className="relative h-[300px] touch-pan-y sm:h-[360px] lg:h-[400px]"
+          className="relative h-[300px] touch-pan-y overflow-hidden sm:h-[360px] sm:overflow-visible lg:h-[400px]"
           style={{ perspective: single ? undefined : "1500px" }}
           onMouseEnter={() => setPaused(true)}
           onMouseLeave={() => setPaused(false)}
