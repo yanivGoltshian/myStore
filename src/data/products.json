@@ -845,10 +845,10 @@
     "id": 1968,
     "name": "כירת חשמלית יחיד לבן / ALT-103W",
     "model": "ALT-103W",
-    "price": 109,
+    "price": 99,
     "regularPrice": 109,
-    "salePrice": 109,
-    "onSale": false,
+    "salePrice": 99,
+    "onSale": true,
     "image": "/images/products/1968.jpg",
     "categoryIds": [
       783,
