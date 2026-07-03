@@ -242,7 +242,7 @@ export default function RootLayout({
         } as React.CSSProperties
       }
     >
-      <body>
+      <body className="overflow-x-hidden">
         <ScrollToTop />
         <PWARegister />
         <StructuredData />

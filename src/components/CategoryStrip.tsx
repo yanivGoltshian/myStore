@@ -98,7 +98,37 @@ const ICONS: Record<string, ReactNode> = {
   ),
 };
 
-function CategoryIcon({ id }: { id: number }) {
+function CategoryIcon({ id, fallbackStr }: { id: number; fallbackStr?: string }) {
+  if (ICONS[String(id)]) {
+    return (
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth={1.5}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        className="h-9 w-9"
+        aria-hidden
+      >
+        {ICONS[String(id)]}
+      </svg>
+    );
+  }
+  
+  if (fallbackStr && fallbackStr !== "📦") {
+    // Attempt to make the emoji somewhat match the brand color
+    return (
+      <span
+        className="flex h-9 w-9 items-center justify-center text-3xl leading-none grayscale"
+        aria-hidden
+        title={fallbackStr}
+      >
+        {fallbackStr}
+      </span>
+    );
+  }
+
   return (
     <svg
       viewBox="0 0 24 24"
@@ -110,7 +140,7 @@ function CategoryIcon({ id }: { id: number }) {
       className="h-9 w-9"
       aria-hidden
     >
-      {ICONS[String(id)] ?? ICONS.default}
+      {ICONS.default}
     </svg>
   );
 }
@@ -131,7 +161,7 @@ export default function CategoryStrip() {
               className="card-hover group flex flex-col items-center rounded-xl border bg-white p-4 text-center shadow-card"
             >
               <span className="grid h-11 w-11 place-items-center text-brand-red">
-                <CategoryIcon id={c.id} />
+                <CategoryIcon id={c.id} fallbackStr={c.icon} />
               </span>
               <span className="mt-2 flex min-h-[2.6em] items-center justify-center text-[0.92rem] font-bold leading-tight text-heading">
                 {c.name}

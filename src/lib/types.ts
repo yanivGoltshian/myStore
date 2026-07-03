@@ -19,6 +19,7 @@ export type Category = {
   parent: number;
   count: number;
   icon: string;
+  thumb?: string;
   isTop: boolean;
 };
 

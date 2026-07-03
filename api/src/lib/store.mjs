@@ -269,13 +269,16 @@ export async function createCategory(input) {
     icon,
     isTop,
   };
+  if (input.thumb) cat.thumb = String(input.thumb);
   categories.push(cat);
   await be.writeJSON(PATHS.categories, categories, `admin: create category ${name}`);
 
   // nav.json — add a top line, or a sub under an existing top line.
   const nav = (await be.readJSON(PATHS.nav).catch(() => [])) || [];
   if (isTop) {
-    nav.push({ id, name, slug: cat.slug, icon, count: 0, subs: [] });
+    const navItem = { id, name, slug: cat.slug, icon, count: 0, subs: [] };
+    if (cat.thumb) navItem.thumb = cat.thumb;
+    nav.push(navItem);
   } else {
     const top = nav.find((t) => toNumber(t.id) === parent);
     if (top) {
@@ -308,6 +311,10 @@ export async function updateCategory(id, patch) {
   if (!cat) return null;
   if (patch.name != null) cat.name = String(patch.name).trim() || cat.name;
   if (patch.icon != null) cat.icon = String(patch.icon);
+  if (patch.thumb !== undefined) {
+    if (patch.thumb) cat.thumb = String(patch.thumb);
+    else delete cat.thumb;
+  }
   if (patch.slug != null) cat.slug = slugifyCategory(patch.slug, cat.id);
   await be.writeJSON(PATHS.categories, categories, `admin: update category ${cat.id}`);
 
@@ -316,6 +323,10 @@ export async function updateCategory(id, patch) {
     if (toNumber(top.id) === toNumber(cat.id)) {
       top.name = cat.name;
       if (patch.icon != null) top.icon = cat.icon;
+      if (patch.thumb !== undefined) {
+        if (patch.thumb) top.thumb = String(patch.thumb);
+        else delete top.thumb;
+      }
       if (patch.slug != null) top.slug = cat.slug;
     }
     if (Array.isArray(top.subs)) {
@@ -628,6 +639,11 @@ export async function uploadImage(payload) {
     const fname = `favicon-${Date.now()}.${ext}`;
     publicPath = `/images/brand/${fname}`;
     repoPath = `${BRAND_DIR}/${fname}`;
+  } else if (kind === "category") {
+    const id = toNumber(payload.id);
+    if (!id) throw new Error("Category upload requires an id.");
+    publicPath = `/images/categories/${id}.${ext}`;
+    repoPath = `public/images/categories/${id}.${ext}`;
   } else if (kind === "lighting") {
     const id = toNumber(payload.id);
     if (!id) throw new Error("Lighting upload requires an id.");

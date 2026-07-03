@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useRef } from "react";
 import type { Category } from "@/lib/types";
-import { apiGet, apiSend } from "./lib";
+import { apiGet, apiSend, uploadImage } from "./lib";
 import { Field, Button } from "./ui";
 
 type NewCat = { name: string; parent: number; icon: string };
@@ -19,6 +19,8 @@ export default function CategoriesTab({
   const [editId, setEditId] = useState<number | null>(null);
   const [editName, setEditName] = useState("");
   const [filter, setFilter] = useState("");
+  const [uploadCatId, setUploadCatId] = useState<number | null>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
 
   async function load() {
     setLoading(true);
@@ -121,6 +123,26 @@ export default function CategoriesTab({
     }
   }
 
+  async function uploadCategoryThumb(c: Category, file: File) {
+    onToast("מעלה תמונה...", true);
+    try {
+      const path = await uploadImage("category", file, { id: c.id });
+      await apiSend<Category>(`/api/categories/${c.id}`, "PUT", { thumb: path });
+      onToast("תמונת הקטגוריה עודכנה", true);
+      await load();
+    } catch (e) {
+      onToast((e as Error).message, false);
+    }
+  }
+
+  function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file || !uploadCatId) return;
+    const cat = cats.find((c) => c.id === uploadCatId);
+    if (cat) uploadCategoryThumb(cat, file);
+    if (fileRef.current) fileRef.current.value = "";
+  }
+
   function Row({ c, isSub }: { c: Category; isSub?: boolean }) {
     const editing = editId === c.id;
     return (
@@ -130,7 +152,11 @@ export default function CategoriesTab({
         }`}
       >
         <div className="flex min-w-0 items-center gap-2">
-          <span className="text-lg">{c.icon || "📦"}</span>
+          {c.thumb ? (
+            <img src={c.thumb} alt="" className="h-8 w-8 object-contain rounded border border-gray-100 bg-white" />
+          ) : (
+            <span className="text-lg w-8 text-center">{c.icon || "📦"}</span>
+          )}
           {editing ? (
             <input
               autoFocus
@@ -168,6 +194,15 @@ export default function CategoriesTab({
             <>
               <button
                 onClick={() => {
+                  setUploadCatId(c.id);
+                  fileRef.current?.click();
+                }}
+                className="rounded px-2 py-1 text-xs font-bold text-gray-500 hover:bg-gray-100 hover:text-heading"
+              >
+                {c.thumb ? "החלף תמונה" : "הוסף תמונה"}
+              </button>
+              <button
+                onClick={() => {
                   setEditId(c.id);
                   setEditName(c.name);
                 }}
@@ -190,6 +225,7 @@ export default function CategoriesTab({
 
   return (
     <div className="space-y-6">
+      <input type="file" ref={fileRef} className="hidden" accept="image/*" onChange={handleFileChange} />
       {/* create */}
       <div className="rounded-2xl border border-line bg-white p-5 shadow-card">
         <h3 className="mb-3 text-base font-extrabold text-heading">קטגוריה חדשה</h3>
