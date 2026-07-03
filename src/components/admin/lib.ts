@@ -113,13 +113,15 @@ export function fileToData(
 // or cold-start) and shrinks the upload payload + the committed asset.
 type ImageSpec = { maxW: number; maxH: number; quality: number };
 
-const IMAGE_SPECS: Record<"product" | "banner" | "lighting", ImageSpec> = {
+const IMAGE_SPECS: Record<"product" | "banner" | "lighting" | "category", ImageSpec> = {
   // Matches the existing 700px product thumbnails (aspect preserved, white bg).
   product: { maxW: 700, maxH: 700, quality: 0.82 },
   // Promo tiles (~600–800px) and the hero (~2000px) all fit under this cap.
   banner: { maxW: 2000, maxH: 2000, quality: 0.85 },
   // Lighting photos use the same 700px white-background normalisation as products.
   lighting: { maxW: 700, maxH: 700, quality: 0.82 },
+  // Category thumbnails: small square icons shown in the category strip.
+  category: { maxW: 400, maxH: 400, quality: 0.85 },
 };
 
 function blobToBase64(blob: Blob): Promise<string> {
@@ -226,7 +228,7 @@ export function adminPreviewSrc(path: string): string {
 }
 
 export async function uploadImage(
-  kind: "product" | "banner" | "lighting",
+  kind: "product" | "banner" | "lighting" | "category",
   file: File,
   opts: Record<string, unknown> = {}
 ): Promise<string> {
