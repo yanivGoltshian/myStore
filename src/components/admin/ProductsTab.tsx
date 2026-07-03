@@ -140,8 +140,8 @@ export default function ProductsTab({
     }
   }
 
-  const loadStore = useCallback(async () => {
-    setLoading(true);
+  const loadStore = useCallback(async (silent = false) => {
+    if (!silent) setLoading(true);
     try {
       const list = await apiGet<ProductList>("/api/products");
       setProducts(list.products.map(toCatalogProduct));
@@ -149,13 +149,13 @@ export default function ProductsTab({
     } catch (e) {
       onToast((e as Error).message, false);
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
   }, [onToast]);
 
   const loadLighting = useCallback(
-    async (subId: number, q: string, nextPage: number) => {
-      setLoading(true);
+    async (subId: number, q: string, nextPage: number, silent = false) => {
+      if (!silent) setLoading(true);
       try {
         const params = new URLSearchParams({
           sub: String(subId),
@@ -169,7 +169,7 @@ export default function ProductsTab({
       } catch (e) {
         onToast((e as Error).message, false);
       } finally {
-        setLoading(false);
+        if (!silent) setLoading(false);
       }
     },
     [onToast]
@@ -376,8 +376,8 @@ export default function ProductsTab({
 
   async function reloadCurrent() {
     await loadCategories();
-    if (lightingMode) await loadLighting(selectedLightingSub, debouncedQuery, page);
-    else await loadStore();
+    if (lightingMode) await loadLighting(selectedLightingSub, debouncedQuery, page, true);
+    else await loadStore(true);
   }
 
   async function save() {
