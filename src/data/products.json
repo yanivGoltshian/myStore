@@ -426,10 +426,10 @@
     "id": 34031,
     "name": "מחבט יתושים / ATL-730",
     "model": "ATL-730",
-    "price": 39,
+    "price": 15,
     "regularPrice": 39,
-    "salePrice": 39,
-    "onSale": false,
+    "salePrice": 15,
+    "onSale": true,
     "image": "/images/products/34031.jpg",
     "categoryIds": [
       112,
