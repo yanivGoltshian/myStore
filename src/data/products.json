@@ -265,9 +265,9 @@
     "id": 35647,
     "name": "מכשיר לניקוי בקיטור / ATL-930",
     "model": "ATL-930",
-    "price": 149,
-    "regularPrice": 149,
-    "salePrice": 149,
+    "price": 0,
+    "regularPrice": 0,
+    "salePrice": 0,
     "onSale": false,
     "image": "/images/products/35647.jpg",
     "categoryIds": [
