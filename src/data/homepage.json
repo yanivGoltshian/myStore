@@ -1,5 +1,5 @@
 {
-  "announcement": "משלוח לכל הארץ · אחריות מלאה · שירות לקוחות 03-5562520",
+  "announcement": "משלוח זמין · אחריות מלאה · שירות לקוחות 03-5562520",
   "topbarPhone": "03-5562520",
   "hero": {
     "image": "/images/banners/hero-electro-hankin.jpg",
@@ -75,8 +75,9 @@
         "productId": 36227,
         "title": "מיקרוגל 20 ליטר מכני לבן / ATL-1320W",
         "image": "/images/products/36227.jpg",
-        "dealPrice": 329,
-        "href": "/product/36227/"
+        "dealPrice": 299,
+        "href": "/product/36227/",
+        "originalPrice": 329
       },
       {
         "id": "deal-37038",
@@ -84,15 +85,26 @@
         "title": "כירה חשמלית קרמית כפולה / PU-52",
         "image": "/images/products/37038.jpg",
         "dealPrice": 289,
-        "href": "/product/37038/"
+        "href": "/product/37038/",
+        "originalPrice": 330
       },
       {
         "id": "deal-35869",
-        "productId": 35869,
-        "title": "מצנן אוויר נייד / ATL-485",
-        "image": "/images/products/35869.jpg",
-        "dealPrice": 239,
-        "href": "/product/35869/"
+        "productId": 34031,
+        "title": "מחבט יתושים / ATL-730",
+        "image": "/images/products/34031.jpg",
+        "dealPrice": 15,
+        "href": "/product/34031/",
+        "originalPrice": 39
+      },
+      {
+        "id": "deal-1783081005369",
+        "title": "קטלן יתושים מעוצב ATL-732 / 6W",
+        "image": "/images/products/2608.jpg",
+        "dealPrice": 48,
+        "href": "/product/2608/",
+        "productId": 2608,
+        "originalPrice": 69
       }
     ]
   }
