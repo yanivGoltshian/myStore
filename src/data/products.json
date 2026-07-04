@@ -1,5 +1,21 @@
 [
   {
+    "id": 38000,
+    "name": "מטן usb   2A",
+    "model": "",
+    "price": 20,
+    "regularPrice": 20,
+    "salePrice": 20,
+    "onSale": false,
+    "image": "",
+    "categoryIds": [
+      746,
+      9023
+    ],
+    "inStock": true,
+    "description": ""
+  },
+  {
     "id": 37999,
     "name": "כבל טעינה C",
     "model": "",
