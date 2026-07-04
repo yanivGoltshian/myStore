@@ -1,5 +1,20 @@
 [
   {
+    "id": 37999,
+    "name": "כבל טעינה C",
+    "model": "",
+    "price": 24,
+    "regularPrice": 24,
+    "salePrice": 24,
+    "onSale": false,
+    "image": "",
+    "categoryIds": [
+      9023
+    ],
+    "inStock": true,
+    "description": "<br>"
+  },
+  {
     "id": 37998,
     "name": "בית מנורה תליה",
     "model": "",
