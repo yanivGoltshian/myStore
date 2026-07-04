@@ -1,5 +1,20 @@
 [
   {
+    "id": 38002,
+    "name": "זוג רמקולם למחשב",
+    "model": "",
+    "price": 49,
+    "regularPrice": 49,
+    "salePrice": 49,
+    "onSale": false,
+    "image": "",
+    "categoryIds": [
+      9023
+    ],
+    "inStock": true,
+    "description": ""
+  },
+  {
     "id": 38001,
     "name": "מטן מהר 30W + כבל טנה",
     "model": "",
