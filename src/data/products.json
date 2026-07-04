@@ -1,5 +1,18 @@
 [
   {
+    "id": 38005,
+    "name": "מבחר ספוטים",
+    "model": "ניתן לעיצוב וצבע לפי הזמנה",
+    "price": 0,
+    "regularPrice": 0,
+    "salePrice": 0,
+    "onSale": false,
+    "image": "",
+    "categoryIds": [],
+    "inStock": true,
+    "description": "מבחר גדול ניתן לפנות לייעוץ והזמנה&nbsp;"
+  },
+  {
     "id": 38004,
     "name": "מנורות תליה בגדלים שונים",
     "model": "20-30-40",
