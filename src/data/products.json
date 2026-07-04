@@ -1,5 +1,20 @@
 [
   {
+    "id": 38004,
+    "name": "מנורות תליה בגדלים שונים",
+    "model": "20-30-40",
+    "price": 0,
+    "regularPrice": 0,
+    "salePrice": 0,
+    "onSale": false,
+    "image": "",
+    "categoryIds": [
+      9022
+    ],
+    "inStock": true,
+    "description": "מחירי הגופים תלוי סוג וגודל 99-299 ₪"
+  },
+  {
     "id": 38003,
     "name": "מקלדת + עכבר אלחוטי",
     "model": "",
