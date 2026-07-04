@@ -4,7 +4,7 @@ import type { PromoTile } from "@/lib/types";
 export default function PromoTiles({ tiles }: { tiles: PromoTile[] }) {
   return (
     <section className="container-x pt-8">
-      <div className="grid grid-cols-3 gap-3 md:grid-cols-6">
+      <div className="grid grid-cols-3 gap-3 md:grid-cols-6" data-reveal-group>
         {tiles.map((t) => (
           <Link key={t.id} href={`/category/${t.categoryId}/`} className="card-hover group block">
             <div className="overflow-hidden rounded-lg">

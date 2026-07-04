@@ -155,10 +155,10 @@ function CategoryIcon({ id, fallbackStr }: { id: number; fallbackStr?: string })
 export default function CategoryStrip() {
   return (
     <section className="container-x pt-12">
-      <div className="section-title mb-6">
+      <div className="section-title mb-6" data-reveal>
         <h2 className="whitespace-nowrap text-lg font-bold text-heading">הקטגוריות שלנו</h2>
       </div>
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-6">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-6" data-reveal-pop>
         {visibleNav.map((c) => {
           const thumb = c.thumb ?? getProductsByCategory(c.id).find((p) => p.image)?.image;
           return (

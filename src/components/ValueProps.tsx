@@ -38,7 +38,7 @@ const items: { title: string; sub: string; icon: ReactNode }[] = [
 export default function ValueProps() {
   return (
     <section className="container-x pt-10">
-      <div className="grid grid-cols-1 divide-y rounded-xl border bg-white shadow-card sm:grid-cols-3 sm:divide-x sm:divide-y-0">
+      <div className="grid grid-cols-1 divide-y rounded-xl border bg-white shadow-card sm:grid-cols-3 sm:divide-x sm:divide-y-0" data-reveal>
         {items.map((it) => (
           <div key={it.title} className="flex items-center justify-center gap-3 px-5 py-4">
             <svg

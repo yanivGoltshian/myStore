@@ -242,3 +242,13 @@ textarea:focus-visible,
   outline-offset: 2px;
   border-radius: 2px;
 }
+
+/* GSAP scroll-reveal initial state — gated behind [data-gsap-anim] which is set
+   only when JS runs AND the user allows motion. No-JS crawlers & reduced-motion
+   users never match this rule, so they always see fully-visible content.
+   GSAP replaces these with inline styles on mount, then removes the attribute. */
+html[data-gsap-anim] [data-reveal],
+html[data-gsap-anim] [data-reveal-group] > *,
+html[data-gsap-anim] [data-reveal-pop] > * {
+  opacity: 0;
+}

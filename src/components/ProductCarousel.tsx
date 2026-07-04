@@ -21,7 +21,7 @@ export default function ProductCarousel({
 
   return (
     <section className="container-x pt-12">
-      <div className="section-title mb-6">
+      <div className="section-title mb-6" data-reveal>
         <Link href={link} className="flex items-center gap-2 text-xl font-extrabold text-brand-red md:text-2xl">
           {icon && <span>{icon}</span>}
           {title}
@@ -29,7 +29,7 @@ export default function ProductCarousel({
       </div>
 
       <div className="relative">
-        <div ref={ref} className="no-scrollbar flex snap-x gap-3 overflow-x-auto pb-2">
+        <div ref={ref} className="no-scrollbar flex snap-x gap-3 overflow-x-auto pb-2" data-reveal-group>
           {products.map((p) => (
             <div key={p.id} className="w-[46%] shrink-0 snap-start border bg-white sm:w-[30%] md:w-[218px]">
               <ProductCard product={p} />

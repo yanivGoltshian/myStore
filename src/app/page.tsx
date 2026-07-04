@@ -50,7 +50,7 @@ export default function Home() {
       })}
 
       <section className="container-x mt-14">
-        <div className="share-band">
+        <div className="share-band" data-reveal>
           <h3 className="text-xl font-extrabold text-brand-red md:text-2xl">
             <span className="text-brand-gold">✦</span> אוהבים את {site.name}? ספרו לחברים
           </h3>
