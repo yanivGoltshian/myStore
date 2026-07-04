@@ -1,5 +1,20 @@
 [
   {
+    "id": 37998,
+    "name": "בית מנורה תליה",
+    "model": "",
+    "price": 10,
+    "regularPrice": 10,
+    "salePrice": 10,
+    "onSale": false,
+    "image": "",
+    "categoryIds": [
+      9022
+    ],
+    "inStock": true,
+    "description": "פנדל E27"
+  },
+  {
     "id": 37997,
     "name": "פלפון צמוד תקרה קוטר 30",
     "model": "בצבעי מסגרת קוטר ועצמה שונים",
