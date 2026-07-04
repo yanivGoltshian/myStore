@@ -1,8 +1,12 @@
+import ReactDOM from "react-dom";
 import Link from "next/link";
 import { homepage } from "@/lib/data";
 
 export default function Hero() {
   const { image, alt, href } = homepage.hero;
+  // Preload the hero banner (the confirmed mobile LCP element) so its download
+  // starts from the document head, before the <img> tag is parsed.
+  ReactDOM.preload(image, { as: "image", fetchPriority: "high" });
   return (
     <>
       {/* Mobile / tablet — original full-width banner, unchanged */}
@@ -41,7 +45,7 @@ export default function Hero() {
             <iframe
               src="/hero/electro-hankin-ad/"
               title={alt}
-              loading="eager"
+              loading="lazy"
               scrolling="no"
               className="absolute inset-0 h-full w-full border-0"
             />
