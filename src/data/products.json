@@ -1,5 +1,20 @@
 [
   {
+    "id": 38006,
+    "name": "נורות פחם/אווירה",
+    "model": "",
+    "price": 0,
+    "regularPrice": 0,
+    "salePrice": 0,
+    "onSale": false,
+    "image": "",
+    "categoryIds": [
+      9022
+    ],
+    "inStock": true,
+    "description": "להשיג בגדלים שונים&nbsp;"
+  },
+  {
     "id": 38005,
     "name": "מבחר ספוטים",
     "model": "ניתן לעיצוב וצבע לפי הזמנה",
