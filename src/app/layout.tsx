@@ -9,6 +9,9 @@ import PWARegister from "@/components/PWARegister";
 import ScrollReveal from "@/components/ScrollReveal";
 import InstallPrompt from "@/components/InstallPrompt";
 import { CartProvider } from "@/lib/cart";
+import { WishlistProvider } from "@/lib/wishlist";
+import { QuickViewProvider } from "@/lib/quickview";
+import QuickViewModal from "@/components/QuickViewModal";
 import { site } from "@/lib/data";
 
 const heebo = Heebo({
@@ -255,13 +258,18 @@ export default function RootLayout({
         <ScrollReveal />
         <StructuredData />
         <CartProvider>
-          <ConditionalChrome
-            header={<SiteHeader />}
-            footer={<SiteFooter />}
-          >
-            {children}
-          </ConditionalChrome>
-          <InstallPrompt />
+          <WishlistProvider>
+            <QuickViewProvider>
+              <ConditionalChrome
+                header={<SiteHeader />}
+                footer={<SiteFooter />}
+              >
+                {children}
+              </ConditionalChrome>
+              <InstallPrompt />
+              <QuickViewModal />
+            </QuickViewProvider>
+          </WishlistProvider>
         </CartProvider>
       </body>
     </html>

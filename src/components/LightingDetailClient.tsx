@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import AddToCartButton from "@/components/AddToCartButton";
+import StickyBuyBar from "@/components/StickyBuyBar";
+import WishlistButton from "@/components/WishlistButton";
 import ShareBar from "@/components/ShareBar";
 import siteData from "@/data/site.json";
 import {
@@ -133,6 +135,7 @@ export default function LightingDetailClient() {
         <div className="rounded-xl border bg-white p-6">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
+            id="ld-fly-origin"
             src={product.image || "/images/placeholder.svg"}
             alt={product.name}
             onError={(e) => {
@@ -161,7 +164,7 @@ export default function LightingDetailClient() {
             )}
           </div>
 
-          <div className="mt-6 flex gap-3">
+          <div id="main-buy-row" className="mt-6 flex gap-3">
             <AddToCartButton
               product={{
                 id: LIGHTING_ID_OFFSET + product.id,
@@ -171,6 +174,7 @@ export default function LightingDetailClient() {
                 image: product.image,
               }}
               phoneRaw={siteData.phoneRaw}
+              originId="ld-fly-origin"
             />
             <a
               href={`tel:${siteData.phoneRaw}`}
@@ -192,6 +196,20 @@ export default function LightingDetailClient() {
               </svg>
               ייעוץ
             </a>
+          </div>
+
+          <div className="mt-3">
+            <WishlistButton
+              variant="chip"
+              product={{
+                id: LIGHTING_ID_OFFSET + product.id,
+                name: product.name,
+                model: product.model,
+                price: product.price,
+                image: product.image,
+              }}
+              className="w-full py-2.5"
+            />
           </div>
 
           <div className="mt-5 border-t pt-5">
@@ -238,6 +256,18 @@ export default function LightingDetailClient() {
           </Link>
         </div>
       )}
+
+      <StickyBuyBar
+        product={{
+          id: LIGHTING_ID_OFFSET + product.id,
+          name: product.name,
+          model: product.model,
+          price: product.price,
+          image: product.image,
+        }}
+        phoneRaw={siteData.phoneRaw}
+        originId="ld-fly-origin"
+      />
     </div>
   );
 }

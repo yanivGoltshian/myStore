@@ -1,4 +1,5 @@
 import Hero from "@/components/Hero";
+import Link from "next/link";
 import CategoryStrip from "@/components/CategoryStrip";
 import CouponBanner from "@/components/CouponBanner";
 import DealsCube from "@/components/DealsCube";
@@ -34,6 +35,29 @@ export default function Home() {
       )}
       <PromoTiles tiles={homepage.promoTiles} />
       <ValueProps />
+
+      <section className="container-x mt-12">
+        <Link
+          href="/finder/"
+          className="finder-teaser group flex flex-col items-center gap-3 rounded-2xl border border-brand-gold/40 bg-white px-6 py-7 text-center shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md sm:flex-row sm:justify-between sm:text-right"
+        >
+          <span className="flex items-center gap-4">
+            <span className="text-4xl">🧭</span>
+            <span>
+              <span className="block text-lg font-extrabold text-heading md:text-xl">
+                לא בטוחים מה לבחור?
+              </span>
+              <span className="mt-1 block text-sm font-light text-muted">
+                ענו על 3 שאלות קצרות ונרכיב לכם המלצה אישית תוך שניות ✨
+              </span>
+            </span>
+          </span>
+          <span className="shrink-0 rounded-full bg-brand-red px-6 py-2.5 text-sm font-bold text-white transition-colors group-hover:bg-brand-red-dark">
+            למצוא מוצר מושלם ←
+          </span>
+        </Link>
+      </section>
+
 
       {homepage.sections.map((s) => {
         const products = getProductsByCategory(s.categoryId).slice(0, s.limit);

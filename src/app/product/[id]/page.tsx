@@ -3,6 +3,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import ProductCarousel from "@/components/ProductCarousel";
 import AddToCartButton from "@/components/AddToCartButton";
+import StickyBuyBar from "@/components/StickyBuyBar";
+import WishlistButton from "@/components/WishlistButton";
 import ShareBar from "@/components/ShareBar";
 import { products, site, getProduct, getCategory, getProductsByCategory, formatPrice } from "@/lib/data";
 
@@ -141,6 +143,7 @@ export default async function ProductPage({
         <div className="rounded-xl border bg-white p-6">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
+            id="pd-fly-origin"
             src={product.image || "/images/placeholder.svg"}
             alt={product.name}
             className="mx-auto aspect-square w-full max-w-md object-contain"
@@ -166,7 +169,7 @@ export default async function ProductPage({
             )}
           </div>
 
-          <div className="mt-6 flex gap-3">
+          <div id="main-buy-row" className="mt-6 flex gap-3">
             <AddToCartButton
               product={{
                 id: product.id,
@@ -176,6 +179,7 @@ export default async function ProductPage({
                 image: product.image,
               }}
               phoneRaw={site.phoneRaw}
+              originId="pd-fly-origin"
             />
             <a
               href={`tel:${site.phoneRaw}`}
@@ -197,6 +201,20 @@ export default async function ProductPage({
               </svg>
               ייעוץ
             </a>
+          </div>
+
+          <div className="mt-3">
+            <WishlistButton
+              variant="chip"
+              product={{
+                id: product.id,
+                name: product.name,
+                model: product.model,
+                price: product.price,
+                image: product.image,
+              }}
+              className="w-full py-2.5"
+            />
           </div>
 
           <div className="mt-5 border-t pt-5">
@@ -235,6 +253,20 @@ export default async function ProductPage({
           products={related}
         />
       )}
+
+      <StickyBuyBar
+        product={{
+          id: product.id,
+          name: product.name,
+          model: product.model,
+          price: product.price,
+          regularPrice: product.regularPrice,
+          onSale: product.onSale,
+          image: product.image,
+        }}
+        phoneRaw={site.phoneRaw}
+        originId="pd-fly-origin"
+      />
     </div>
   );
 }
