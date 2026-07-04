@@ -1,5 +1,20 @@
 [
   {
+    "id": 38001,
+    "name": "מטן מהר 30W + כבל טנה",
+    "model": "",
+    "price": 68,
+    "regularPrice": 68,
+    "salePrice": 68,
+    "onSale": false,
+    "image": "",
+    "categoryIds": [
+      9023
+    ],
+    "inStock": true,
+    "description": ""
+  },
+  {
     "id": 38000,
     "name": "מטן usb   2A",
     "model": "",
