@@ -46,7 +46,7 @@
   },
   {
     "id": 38000,
-    "name": "מטן usb   2A",
+    "name": "מטען usb   2A",
     "model": "",
     "price": 20,
     "regularPrice": 20,
@@ -54,7 +54,6 @@
     "onSale": false,
     "image": "/images/products/38000.jpg",
     "categoryIds": [
-      746,
       9023
     ],
     "inStock": true,
