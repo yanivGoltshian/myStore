@@ -8,6 +8,7 @@ import ValueProps from "@/components/ValueProps";
 import ProductCarousel from "@/components/ProductCarousel";
 import ShareBar from "@/components/ShareBar";
 import CustomerVoices from "@/components/CustomerVoices";
+import { LineIcon } from "@/lib/lineIcons";
 import { homepage, getProductsByCategory, site } from "@/lib/data";
 import type { Metadata } from "next";
 
@@ -42,13 +43,15 @@ export default function Home() {
           className="finder-teaser group flex flex-col items-center gap-3 rounded-2xl border border-brand-gold/40 bg-white px-6 py-7 text-center shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md sm:flex-row sm:justify-between sm:text-right"
         >
           <span className="flex items-center gap-4">
-            <span className="text-4xl">🧭</span>
+            <span className="grid h-14 w-14 shrink-0 place-items-center rounded-full bg-brand-red/10 text-brand-red">
+              <LineIcon name="compass" className="h-8 w-8" />
+            </span>
             <span>
               <span className="block text-lg font-extrabold text-heading md:text-xl">
                 לא בטוחים מה לבחור?
               </span>
               <span className="mt-1 block text-sm font-light text-muted">
-                ענו על 3 שאלות קצרות ונרכיב לכם המלצה אישית תוך שניות ✨
+                ענו על כמה שאלות קצרות ונרכיב לכם המלצה אישית תוך שניות
               </span>
             </span>
           </span>

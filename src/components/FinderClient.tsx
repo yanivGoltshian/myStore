@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import ProductCard from "@/components/ProductCard";
+import { LineIcon } from "@/lib/lineIcons";
 import type { Product } from "@/lib/types";
 
 type IndexProduct = {
@@ -20,31 +21,137 @@ type IndexProduct = {
   groupIcon: string;
 };
 
-type Area = { key: string; label: string; icon: string; cats: number[] };
-type Budget = { key: string; label: string; icon: string; min: number; max: number };
-type Pref = { key: string; label: string; icon: string };
+type Sort = "deals" | "new" | "popular";
+type Criteria = { cats?: number[]; min?: number; max?: number; sort?: Sort };
+type Opt = { key: string; label: string; icon: string; crit: Criteria };
+type Q = { key: string; title: string; cols: string; options: Opt[] };
+type Flow = { key: string; steps: Q[] };
 
-const AREAS: Area[] = [
-  { key: "kitchen", label: "מטבח ובישול", icon: "🍳", cats: [120, 754, 695, 377, 779] },
-  { key: "summer", label: "קירור לקיץ", icon: "❄️", cats: [112] },
-  { key: "winter", label: "חימום לחורף", icon: "🔥", cats: [15] },
-  { key: "care", label: "טיפוח אישי", icon: "💆", cats: [140] },
-  { key: "clean", label: "ניקיון הבית", icon: "🧹", cats: [136] },
-  { key: "electric", label: "אביזרי חשמל", icon: "🔌", cats: [746] },
+// Three interchangeable question flows. A returning visitor is served a
+// different flow each time (see variant rotation below). Every option carries a
+// partial `crit`; the engine merges the chosen options and filters/sorts once.
+const FLOWS: Flow[] = [
+  {
+    key: "classic",
+    steps: [
+      {
+        key: "area",
+        title: "מה מעניין אתכם עכשיו?",
+        cols: "grid-cols-2 sm:grid-cols-3",
+        options: [
+          { key: "kitchen", label: "מטבח ובישול", icon: "kitchen", crit: { cats: [120, 754, 695, 377, 779] } },
+          { key: "cooling", label: "קירור לקיץ", icon: "cooling", crit: { cats: [112] } },
+          { key: "heating", label: "חימום לחורף", icon: "heating", crit: { cats: [15] } },
+          { key: "care", label: "טיפוח אישי", icon: "care", crit: { cats: [140] } },
+          { key: "clean", label: "ניקיון הבית", icon: "clean", crit: { cats: [136] } },
+          { key: "electric", label: "אביזרי חשמל", icon: "electric", crit: { cats: [746] } },
+        ],
+      },
+      {
+        key: "budget",
+        title: "מה טווח התקציב?",
+        cols: "grid-cols-2",
+        options: [
+          { key: "u100", label: "עד ₪100", icon: "coin", crit: { min: 0, max: 100 } },
+          { key: "m", label: "₪100–300", icon: "wallet", crit: { min: 100, max: 300 } },
+          { key: "p300", label: "מעל ₪300", icon: "gem", crit: { min: 300, max: Infinity } },
+          { key: "any", label: "גמיש / הכל", icon: "gauge", crit: { min: 0, max: Infinity } },
+        ],
+      },
+      {
+        key: "pref",
+        title: "מה הכי חשוב לכם?",
+        cols: "grid-cols-1 sm:grid-cols-3",
+        options: [
+          { key: "deals", label: "הכי משתלם", icon: "tag", crit: { sort: "deals" } },
+          { key: "new", label: "החדש ביותר", icon: "sparkle", crit: { sort: "new" } },
+          { key: "popular", label: "מבחר מומלץ", icon: "star", crit: { sort: "popular" } },
+        ],
+      },
+    ],
+  },
+  {
+    key: "rooms",
+    steps: [
+      {
+        key: "room",
+        title: "לאיזה חלק בבית מחפשים?",
+        cols: "grid-cols-2 sm:grid-cols-3",
+        options: [
+          { key: "kitchen", label: "מטבח וארוחות", icon: "kitchen", crit: { cats: [120, 695, 754, 377] } },
+          { key: "laundry", label: "כביסה ולבנים", icon: "white", crit: { cats: [779] } },
+          { key: "bath", label: "טיפוח ואמבטיה", icon: "bath", crit: { cats: [140] } },
+          { key: "climate", label: "אקלים בבית", icon: "sun", crit: { cats: [112, 15] } },
+          { key: "clean", label: "ניקיון וסדר", icon: "clean", crit: { cats: [136] } },
+          { key: "electric", label: "חשמל ואביזרים", icon: "electric", crit: { cats: [746] } },
+        ],
+      },
+      {
+        key: "occasion",
+        title: "מה מטרת הקנייה?",
+        cols: "grid-cols-1 sm:grid-cols-3",
+        options: [
+          { key: "gift", label: "מתנה למישהו", icon: "gift", crit: { sort: "popular" } },
+          { key: "upgrade", label: "שדרוג לעצמי", icon: "upgrade", crit: { sort: "new" } },
+          { key: "basic", label: "חידוש בסיסי", icon: "refresh", crit: { sort: "deals" } },
+        ],
+      },
+      {
+        key: "style",
+        title: "איזה סגנון מתאים לכם?",
+        cols: "grid-cols-2",
+        options: [
+          { key: "save", label: "חסכוני", icon: "coin", crit: { min: 0, max: 150 } },
+          { key: "balanced", label: "מאוזן", icon: "wallet", crit: { min: 150, max: 400 } },
+          { key: "premium", label: "פרימיום", icon: "gem", crit: { min: 400, max: Infinity } },
+          { key: "flex", label: "גמיש", icon: "gauge", crit: { min: 0, max: Infinity } },
+        ],
+      },
+    ],
+  },
+  {
+    key: "priority",
+    steps: [
+      {
+        key: "urgent",
+        title: "מה הכי דחוף לכם עכשיו?",
+        cols: "grid-cols-2 sm:grid-cols-3",
+        options: [
+          { key: "cool", label: "לקרר את הבית", icon: "cooling", crit: { cats: [112] } },
+          { key: "heat", label: "לחמם את הבית", icon: "heating", crit: { cats: [15] } },
+          { key: "cook", label: "לבשל ולארח", icon: "kitchen", crit: { cats: [120, 695] } },
+          { key: "cleanup", label: "לנקות ולסדר", icon: "clean", crit: { cats: [136] } },
+          { key: "groom", label: "טיפוח יומיומי", icon: "care", crit: { cats: [140] } },
+          { key: "laundry", label: "כביסה ולבנים", icon: "white", crit: { cats: [779] } },
+        ],
+      },
+      {
+        key: "invest",
+        title: "כמה תרצו להשקיע?",
+        cols: "grid-cols-2",
+        options: [
+          { key: "min", label: "מינימלי", icon: "coin", crit: { min: 0, max: 120 } },
+          { key: "mid", label: "בינוני", icon: "wallet", crit: { min: 120, max: 350 } },
+          { key: "max", label: "לא מתפשרים", icon: "gem", crit: { min: 350, max: Infinity } },
+          { key: "depends", label: "תלוי במוצר", icon: "gauge", crit: { min: 0, max: Infinity } },
+        ],
+      },
+      {
+        key: "prefer",
+        title: "מה תעדיפו לראות?",
+        cols: "grid-cols-1 sm:grid-cols-3",
+        options: [
+          { key: "new", label: "הכי חדש", icon: "sparkle", crit: { sort: "new" } },
+          { key: "popular", label: "הכי נמכר", icon: "star", crit: { sort: "popular" } },
+          { key: "deals", label: "הכי משתלם", icon: "tag", crit: { sort: "deals" } },
+        ],
+      },
+    ],
+  },
 ];
 
-const BUDGETS: Budget[] = [
-  { key: "u100", label: "עד ₪100", icon: "🪙", min: 0, max: 100 },
-  { key: "m", label: "₪100–300", icon: "💵", min: 100, max: 300 },
-  { key: "p300", label: "מעל ₪300", icon: "💳", min: 300, max: Infinity },
-  { key: "any", label: "גמיש / הכל", icon: "🎯", min: 0, max: Infinity },
-];
-
-const PREFS: Pref[] = [
-  { key: "deals", label: "הכי משתלם", icon: "💰" },
-  { key: "new", label: "החדש ביותר", icon: "✨" },
-  { key: "popular", label: "מבחר מומלץ", icon: "🔥" },
-];
+const VARIANT_KEY = "hankin-finder-v";
+const RESULT_LIMIT = 12;
 
 function toProduct(p: IndexProduct): Product {
   return {
@@ -62,16 +169,18 @@ function toProduct(p: IndexProduct): Product {
   };
 }
 
-const RESULT_LIMIT = 12;
-
 export default function FinderClient() {
   const [all, setAll] = useState<IndexProduct[] | null>(null);
   const [loadError, setLoadError] = useState(false);
-  const [step, setStep] = useState(0); // 0=area, 1=budget, 2=pref, 3=results
-  const [area, setArea] = useState<Area | null>(null);
-  const [budget, setBudget] = useState<Budget | null>(null);
-  const [pref, setPref] = useState<Pref | null>(null);
+  const [variant, setVariant] = useState(0);
+  const [step, setStep] = useState(0);
+  const [answers, setAnswers] = useState<(Opt | null)[]>([]);
+  const rootRef = useRef<HTMLDivElement>(null);
 
+  const flow = FLOWS[variant % FLOWS.length];
+  const stepsCount = flow.steps.length;
+
+  // Load catalog once.
   useEffect(() => {
     let alive = true;
     fetch("/search-index.json")
@@ -87,55 +196,115 @@ export default function FinderClient() {
     };
   }, []);
 
-  const result = useMemo(() => {
-    if (!all || !area || !budget || !pref) return { list: [] as Product[], relaxed: false, total: 0 };
-    const inArea = all.filter((p) => area.cats.includes(p.groupId) && p.price > 0);
-    let scoped = inArea.filter((p) => p.price >= budget.min && p.price <= budget.max);
-    let relaxed = false;
-    if (scoped.length === 0) {
-      scoped = inArea;
-      relaxed = budget.key !== "any";
+  // Serve a returning visitor a different flow: read the stored index on mount.
+  useEffect(() => {
+    try {
+      const n = parseInt(localStorage.getItem(VARIANT_KEY) || "", 10);
+      if (!Number.isNaN(n)) setVariant(n);
+    } catch {
+      /* ignore */
     }
+  }, []);
+
+  // Once results are reached, remember to advance the flow for next time.
+  useEffect(() => {
+    if (step === stepsCount) {
+      try {
+        localStorage.setItem(VARIANT_KEY, String(variant + 1));
+      } catch {
+        /* ignore */
+      }
+    }
+  }, [step, stepsCount, variant]);
+
+  const { list, relaxed, total, catOpt } = useMemo(() => {
+    const empty = { list: [] as Product[], relaxed: false, total: 0, catOpt: null as Opt | null };
+    if (!all || step !== stepsCount) return empty;
+    const chosen = flow.steps.map((_, i) => answers[i]).filter(Boolean) as Opt[];
+    if (chosen.length < stepsCount) return empty;
+
+    const crit: Criteria = {};
+    for (const o of chosen) {
+      if (o.crit.cats) crit.cats = crit.cats ? Array.from(new Set([...crit.cats, ...o.crit.cats])) : [...o.crit.cats];
+      if (o.crit.min != null) crit.min = o.crit.min;
+      if (o.crit.max != null) crit.max = o.crit.max;
+      if (o.crit.sort) crit.sort = o.crit.sort;
+    }
+
+    const inArea = all.filter((p) => p.price > 0 && (!crit.cats || crit.cats.includes(p.groupId)));
+    const min = crit.min ?? 0;
+    const max = crit.max ?? Infinity;
+    let scoped = inArea.filter((p) => p.price >= min && p.price <= max);
+    let didRelax = false;
+    if (scoped.length === 0 && (min > 0 || max !== Infinity)) {
+      scoped = inArea;
+      didRelax = true;
+    }
+
+    const sortKey = crit.sort ?? "popular";
     const sorted = [...scoped].sort((a, b) => {
       const stock = Number(b.inStock !== false) - Number(a.inStock !== false);
       if (stock !== 0) return stock;
-      if (pref.key === "deals") {
+      if (sortKey === "deals") {
         const sale = Number(b.onSale) - Number(a.onSale);
         if (sale !== 0) return sale;
         return a.price - b.price;
       }
-      // new + popular → newest id first
-      return b.id - a.id;
+      return b.id - a.id; // new + popular → newest id first
     });
-    return { list: sorted.slice(0, RESULT_LIMIT).map(toProduct), relaxed, total: scoped.length };
-  }, [all, area, budget, pref]);
 
-  function restart() {
-    setArea(null);
-    setBudget(null);
-    setPref(null);
-    setStep(0);
+    return {
+      list: sorted.slice(0, RESULT_LIMIT).map(toProduct),
+      relaxed: didRelax,
+      total: scoped.length,
+      catOpt: chosen.find((o) => o.crit.cats) ?? null,
+    };
+  }, [all, answers, step, stepsCount, flow]);
+
+  function pick(i: number, opt: Opt) {
+    const next = [...answers];
+    next[i] = opt;
+    setAnswers(next);
+    setStep(i + 1);
   }
 
-  const totalSteps = 3;
+  function scrollToTop() {
+    if (typeof window === "undefined") return;
+    const reduce = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+    // Wait for the re-render (results grid removed → page shrinks) before scrolling,
+    // otherwise the browser leaves us clamped at the old page bottom.
+    requestAnimationFrame(() => {
+      const top = rootRef.current
+        ? rootRef.current.getBoundingClientRect().top + window.scrollY - 80
+        : 0;
+      window.scrollTo({ top: Math.max(0, top), behavior: reduce ? "auto" : "smooth" });
+    });
+  }
+
+  function restart() {
+    setAnswers([]);
+    setStep(0);
+    setVariant((v) => v + 1);
+    scrollToTop();
+  }
 
   return (
-    <div className="container-x py-8">
+    <div ref={rootRef} className="container-x py-8">
       {/* header */}
       <div className="mx-auto max-w-2xl text-center">
-        <span className="text-3xl">🧭</span>
-        <h1 className="mt-2 text-2xl font-extrabold text-heading md:text-3xl">
-          מצאו את המוצר המושלם
-        </h1>
+        <span className="mx-auto grid h-14 w-14 place-items-center rounded-full bg-brand-red/10 text-brand-red">
+          <LineIcon name="compass" className="h-7 w-7" />
+        </span>
+        <h1 className="mt-3 text-2xl font-extrabold text-heading md:text-3xl">מצאו את המוצר המושלם</h1>
         <p className="mt-2 text-sm text-muted md:text-base">
           כמה שאלות קצרות ונרכיב לכם המלצה אישית מתוך מאות מוצרים.
         </p>
       </div>
 
       {/* progress */}
-      {step < 3 && (
+      {step < stepsCount && (
         <div className="mx-auto mt-6 flex max-w-md items-center justify-center gap-2">
-          {Array.from({ length: totalSteps }).map((_, i) => (
+          {Array.from({ length: stepsCount }).map((_, i) => (
             <span
               key={i}
               className={`h-1.5 flex-1 rounded-full transition-colors ${
@@ -147,68 +316,24 @@ export default function FinderClient() {
       )}
 
       <div className="mx-auto mt-8 max-w-3xl">
-        {/* STEP 0 — area */}
-        {step === 0 && (
-          <Question title="מה מעניין אתכם עכשיו?">
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-              {AREAS.map((a) => (
+        {step < stepsCount ? (
+          <Question
+            title={flow.steps[step].title}
+            onBack={step > 0 ? () => setStep(step - 1) : undefined}
+          >
+            <div className={`grid gap-3 ${flow.steps[step].cols}`}>
+              {flow.steps[step].options.map((opt) => (
                 <TileButton
-                  key={a.key}
-                  icon={a.icon}
-                  label={a.label}
-                  active={area?.key === a.key}
-                  onClick={() => {
-                    setArea(a);
-                    setStep(1);
-                  }}
+                  key={opt.key}
+                  icon={opt.icon}
+                  label={opt.label}
+                  active={answers[step]?.key === opt.key}
+                  onClick={() => pick(step, opt)}
                 />
               ))}
             </div>
           </Question>
-        )}
-
-        {/* STEP 1 — budget */}
-        {step === 1 && (
-          <Question title="מה טווח התקציב?" onBack={() => setStep(0)}>
-            <div className="grid grid-cols-2 gap-3">
-              {BUDGETS.map((b) => (
-                <TileButton
-                  key={b.key}
-                  icon={b.icon}
-                  label={b.label}
-                  active={budget?.key === b.key}
-                  onClick={() => {
-                    setBudget(b);
-                    setStep(2);
-                  }}
-                />
-              ))}
-            </div>
-          </Question>
-        )}
-
-        {/* STEP 2 — preference */}
-        {step === 2 && (
-          <Question title="מה הכי חשוב לכם?" onBack={() => setStep(1)}>
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-              {PREFS.map((p) => (
-                <TileButton
-                  key={p.key}
-                  icon={p.icon}
-                  label={p.label}
-                  active={pref?.key === p.key}
-                  onClick={() => {
-                    setPref(p);
-                    setStep(3);
-                  }}
-                />
-              ))}
-            </div>
-          </Question>
-        )}
-
-        {/* STEP 3 — results */}
-        {step === 3 && (
+        ) : (
           <div>
             {loadError ? (
               <p className="py-10 text-center text-sm text-muted">
@@ -216,23 +341,27 @@ export default function FinderClient() {
               </p>
             ) : !all ? (
               <p className="py-10 text-center text-sm text-muted">טוען המלצות…</p>
-            ) : result.list.length === 0 ? (
+            ) : list.length === 0 ? (
               <div className="py-10 text-center">
                 <p className="text-sm text-muted">לא מצאנו התאמה מדויקת. ננסה שוב?</p>
                 <button
                   onClick={restart}
-                  className="mt-4 rounded-md bg-brand-red px-5 py-2.5 text-sm font-bold text-white hover:bg-brand-red-dark"
+                  className="mt-4 inline-flex items-center gap-2 rounded-md bg-brand-red px-5 py-2.5 text-sm font-bold text-white hover:bg-brand-red-dark"
                 >
-                  🔄 להתחיל מחדש
+                  <LineIcon name="refresh" className="h-4 w-4" />
+                  להתחיל מחדש
                 </button>
               </div>
             ) : (
               <>
-                <div className="text-center">
-                  <p className="text-lg font-extrabold text-heading">
-                    🎯 מצאנו {result.total} מוצרים בשבילכם
+                <div className="flex flex-col items-center text-center">
+                  <span className="grid h-11 w-11 place-items-center rounded-full bg-brand-red/10 text-brand-red">
+                    <LineIcon name="check" className="h-6 w-6" />
+                  </span>
+                  <p className="mt-2 text-lg font-extrabold text-heading">
+                    מצאנו {total} מוצרים בשבילכם
                   </p>
-                  {result.relaxed && (
+                  {relaxed && (
                     <p className="mt-1 text-xs text-muted">
                       הרחבנו מעט את טווח התקציב כדי להראות לכם את ההתאמות הקרובות ביותר.
                     </p>
@@ -240,25 +369,26 @@ export default function FinderClient() {
                 </div>
 
                 <div className="mt-6 grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4">
-                  {result.list.map((p) => (
+                  {list.map((p) => (
                     <ProductCard key={p.id} product={p} />
                   ))}
                 </div>
 
                 <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-                  {area && (
+                  {catOpt && catOpt.crit.cats && (
                     <Link
-                      href={`/category/${area.cats[0]}/`}
+                      href={`/category/${catOpt.crit.cats[0]}/`}
                       className="rounded-md border-2 border-brand-red px-5 py-2.5 text-sm font-bold text-brand-red hover:bg-brand-red hover:text-white"
                     >
-                      לכל המוצרים ב{area.label} ←
+                      לכל המוצרים ב{catOpt.label} ←
                     </Link>
                   )}
                   <button
                     onClick={restart}
-                    className="rounded-md bg-brand-red px-5 py-2.5 text-sm font-bold text-white hover:bg-brand-red-dark"
+                    className="inline-flex items-center gap-2 rounded-md bg-brand-red px-5 py-2.5 text-sm font-bold text-white hover:bg-brand-red-dark"
                   >
-                    🔄 התאמה חדשה
+                    <LineIcon name="refresh" className="h-4 w-4" />
+                    התאמה חדשה
                   </button>
                 </div>
               </>
@@ -312,11 +442,17 @@ function TileButton({
   return (
     <button
       onClick={onClick}
-      className={`flex min-h-[6rem] flex-col items-center justify-center gap-2 rounded-xl border bg-white p-4 text-center transition-all hover:-translate-y-0.5 hover:border-brand-red hover:shadow-md ${
+      className={`flex min-h-[6.5rem] flex-col items-center justify-center gap-2.5 rounded-xl border bg-white p-4 text-center transition-all hover:-translate-y-0.5 hover:border-brand-red hover:shadow-md ${
         active ? "border-brand-red shadow-md ring-1 ring-brand-red" : "border-black/10"
       }`}
     >
-      <span className="text-3xl">{icon}</span>
+      <span
+        className={`grid h-12 w-12 place-items-center rounded-full text-brand-red transition-colors ${
+          active ? "bg-brand-red/15" : "bg-brand-red/10"
+        }`}
+      >
+        <LineIcon name={icon} className="h-7 w-7" />
+      </span>
       <span className="text-sm font-bold text-heading">{label}</span>
     </button>
   );
