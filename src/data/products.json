@@ -1,5 +1,20 @@
 [
   {
+    "id": 38007,
+    "name": "ספוטים צמודי תקרה",
+    "model": "",
+    "price": 0,
+    "regularPrice": 0,
+    "salePrice": 0,
+    "onSale": false,
+    "image": "",
+    "categoryIds": [
+      9022
+    ],
+    "inStock": true,
+    "description": "ניתן להשיג על פס באורכים שונים, וגם עם בסיס עגול&nbsp;"
+  },
+  {
     "id": 38006,
     "name": "נורות פחם/אווירה",
     "model": "",
