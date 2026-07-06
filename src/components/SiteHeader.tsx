@@ -121,13 +121,6 @@ export default function SiteHeader() {
         </div>
       </div>
 
-      {/* Persistent mobile search (phones only; md+ already shows the in-header search) */}
-      <div className="border-b bg-white md:hidden">
-        <div className="container-x py-2.5">
-          <SearchAutocomplete variant="desktop" />
-        </div>
-      </div>
-
       {/* Mobile menu */}
       {mobileOpen && (
         <div className="max-h-[80vh] overflow-y-auto border-b bg-white lg:hidden">

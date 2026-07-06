@@ -8,6 +8,7 @@ import ValueProps from "@/components/ValueProps";
 import ProductCarousel from "@/components/ProductCarousel";
 import ShareBar from "@/components/ShareBar";
 import CustomerVoices from "@/components/CustomerVoices";
+import SearchAutocomplete from "@/components/SearchAutocomplete";
 import { LineIcon } from "@/lib/lineIcons";
 import { homepage, getProductsByCategory, site } from "@/lib/data";
 import type { Metadata } from "next";
@@ -24,6 +25,11 @@ export default function Home() {
   return (
     <>
       <Hero />
+
+      {/* Mobile search — part of the homepage content, not sticky (desktop uses the header search) */}
+      <section className="container-x mt-4 md:hidden">
+        <SearchAutocomplete variant="desktop" />
+      </section>
 
       <CouponBanner />
 
