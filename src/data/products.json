@@ -3998,10 +3998,10 @@
     "id": 33364,
     "name": "מכונת אספרסו קפסולות לבנה / ATL-5009W",
     "model": "ATL-5009W",
-    "price": 349,
+    "price": 299,
     "regularPrice": 349,
-    "salePrice": 349,
-    "onSale": false,
+    "salePrice": 299,
+    "onSale": true,
     "image": "/images/products/33364.jpg",
     "categoryIds": [
       120
