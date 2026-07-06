@@ -1904,11 +1904,11 @@
   {
     "id": 35078,
     "name": "מיקסר יד נירוסטה + בסיס / ATL-206",
-    "model": "ATL-206",
-    "price": 129,
+    "model": "ATL-206 -300w",
+    "price": 99,
     "regularPrice": 129,
-    "salePrice": 129,
-    "onSale": false,
+    "salePrice": 99,
+    "onSale": true,
     "image": "/images/products/35078.jpg",
     "categoryIds": [
       120,
