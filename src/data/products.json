@@ -6857,10 +6857,10 @@
   {
     "id": 4033,
     "name": "מאוורר \"16 עמוד + טיימר / ATL-906",
-    "model": "ATL-906",
-    "price": 169,
-    "regularPrice": 169,
-    "salePrice": 169,
+    "model": "ATL-906 ועצמתי w60",
+    "price": 149,
+    "regularPrice": 149,
+    "salePrice": 149,
     "onSale": false,
     "image": "/images/products/4033.jpg",
     "categoryIds": [
