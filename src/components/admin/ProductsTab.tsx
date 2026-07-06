@@ -18,6 +18,7 @@ import FallbackImage from "@/components/FallbackImage";
 const LIGHTING_TOP_ID = 9000;
 const LIGHTING_CATEGORY_OFFSET = 9000;
 const LIGHTING_PAGE_SIZE = 60;
+const STORE_PAGE_SIZE = 120;
 
 type ProductSource = "store" | "lighting";
 type AdminCategory = Category;
@@ -123,6 +124,7 @@ export default function ProductsTab({
   const [lineFilter, setLineFilter] = useState<{ id: number; name: string } | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const searchRef = useRef<HTMLDivElement>(null);
+  const gridRef = useRef<HTMLDivElement>(null);
 
   const catById = useMemo(() => new Map(cats.map((c) => [c.id, c])), [cats]);
   const selectedCat = useMemo(
@@ -298,6 +300,14 @@ export default function ProductsTab({
     setPage(1);
   }
 
+  function changePage(next: number) {
+    setPage(next);
+    // Explicit page navigation (store mode) jumps back to the top of the grid.
+    // Lighting keeps its existing behaviour; save/reload never calls this, so the
+    // post-save scroll-preservation fix stays intact.
+    if (!lightingMode) gridRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
   const filtered = useMemo(() => {
     if (lightingMode) return products;
     if (lineFilter) {
@@ -316,7 +326,19 @@ export default function ProductsTab({
     );
   }, [products, query, lineFilter, descendantsOf, lightingMode]);
 
-  const shown = lightingMode ? filtered : filtered.slice(0, 120);
+  const totalPages = lightingMode
+    ? Math.max(1, Math.ceil(serverCount / LIGHTING_PAGE_SIZE))
+    : Math.max(1, Math.ceil(filtered.length / STORE_PAGE_SIZE));
+  const safePage = Math.min(page, totalPages);
+  const shown = lightingMode
+    ? filtered
+    : filtered.slice((safePage - 1) * STORE_PAGE_SIZE, safePage * STORE_PAGE_SIZE);
+
+  // Keep `page` in range when the result set shrinks (e.g. after a delete or a
+  // narrower filter) so navigation never lands on an empty page.
+  useEffect(() => {
+    if (page > totalPages) setPage(totalPages);
+  }, [page, totalPages]);
 
   const tops = useMemo(
     () => cats.filter((c) => !c.parent).sort((a, b) => a.name.localeCompare(b.name, "he")),
@@ -461,7 +483,6 @@ export default function ProductsTab({
     : cats
   ).filter((c) => !isLightingCategory(c));
 
-  const totalPages = lightingMode ? Math.max(1, Math.ceil(serverCount / LIGHTING_PAGE_SIZE)) : 1;
   const countText = lightingMode
     ? `${serverCount.toLocaleString("he-IL")} מוצרים${selectedCat ? ` ב${selectedCat.name}` : ""}`
     : `${filtered.length} מתוך ${products.length} מוצרים`;
@@ -617,7 +638,7 @@ export default function ProductsTab({
         </Card>
       ) : (
         <>
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+          <div ref={gridRef} className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
             {shown.map((p) => (
               <article key={`${p.source}-${p.id}`} className="card-hover group flex flex-col overflow-hidden rounded-2xl border border-line bg-white shadow-card">
                 <button onClick={() => openEdit(p)} className="flex flex-1 flex-col p-2.5 text-right" title="לחצו לעריכת המוצר">
@@ -641,15 +662,15 @@ export default function ProductsTab({
               </article>
             ))}
           </div>
-          {lightingMode && totalPages > 1 ? (
+          {totalPages > 1 ? (
             <div className="flex items-center justify-center gap-3 pt-1">
-              <Button variant="ghost" onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page <= 1}>← הקודם</Button>
-              <span className="text-sm font-semibold text-muted">עמוד {page.toLocaleString("he-IL")} מתוך {totalPages.toLocaleString("he-IL")}</span>
-              <Button variant="ghost" onClick={() => setPage((p) => Math.min(totalPages, p + 1))} disabled={page >= totalPages}>הבא →</Button>
+              <Button variant="ghost" onClick={() => changePage(Math.max(1, safePage - 1))} disabled={safePage <= 1}>← הקודם</Button>
+              <span className="text-sm font-semibold text-muted">עמוד {safePage.toLocaleString("he-IL")} מתוך {totalPages.toLocaleString("he-IL")}</span>
+              <Button variant="ghost" onClick={() => changePage(Math.min(totalPages, safePage + 1))} disabled={safePage >= totalPages}>הבא →</Button>
             </div>
           ) : null}
-          {!lightingMode && filtered.length > shown.length ? (
-            <p className="mt-3 text-center text-xs text-muted">מציג {shown.length} מתוך {filtered.length} — צמצמו בחיפוש או בקטגוריה כדי לראות עוד</p>
+          {!lightingMode && filtered.length > 0 ? (
+            <p className="mt-3 text-center text-xs text-muted">סה"כ {filtered.length.toLocaleString("he-IL")} מוצרים</p>
           ) : null}
         </>
       )}
