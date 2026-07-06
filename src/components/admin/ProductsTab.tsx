@@ -125,6 +125,7 @@ export default function ProductsTab({
   const fileRef = useRef<HTMLInputElement>(null);
   const searchRef = useRef<HTMLDivElement>(null);
   const gridRef = useRef<HTMLDivElement>(null);
+  const modalPushedRef = useRef(false);
 
   const catById = useMemo(() => new Map(cats.map((c) => [c.id, c])), [cats]);
   const selectedCat = useMemo(
@@ -375,7 +376,30 @@ export default function ProductsTab({
     setDraft(null);
     setFile(null);
     setPreview("");
+    // If opening the editor pushed a history entry (so the phone/browser Back
+    // button closes it instead of leaving /admin), consume that entry now.
+    if (modalPushedRef.current) {
+      modalPushedRef.current = false;
+      window.history.back();
+    }
   }
+
+  // Mobile Back button (Android nav / browser back) should close the open
+  // product editor, same as the ✕ / ביטול buttons, instead of exiting /admin.
+  const editorOpen = draft !== null;
+  useEffect(() => {
+    if (!editorOpen) return;
+    window.history.pushState({ adminModal: "product-editor" }, "");
+    modalPushedRef.current = true;
+    const onPop = () => {
+      modalPushedRef.current = false;
+      close();
+    };
+    window.addEventListener("popstate", onPop);
+    return () => window.removeEventListener("popstate", onPop);
+    // close is a stable function declaration; depend only on the open-state so
+    // editor keystrokes (setDraft) never push a new history entry.
+  }, [editorOpen]);
 
   function pickFile(f: File | undefined) {
     if (!f) return;
