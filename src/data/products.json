@@ -1776,16 +1776,16 @@
     "id": 35503,
     "name": "קומקום נירוסטה נשלף / PU-42",
     "model": "PU-42",
-    "price": 99,
+    "price": 49,
     "regularPrice": 99,
-    "salePrice": 99,
-    "onSale": false,
+    "salePrice": 49,
+    "onSale": true,
     "image": "/images/products/35503.jpg",
     "categoryIds": [
       377,
       120
     ],
-    "inStock": false,
+    "inStock": true,
     "description": "נפח מיכל : 1.7 ליטר הספק : 1600W מידות: קוטר של בסיס: 15.5 ס‘‘מ גובה עם בסיס: 24 ס‘‘מ אורך של כבל: 57 ס‘‘מ מידות אריזה: רוחב: 18.8 ס‘‘מ עומק: 18 ס‘‘מ גובה: 22.5 ס‘‘מ דגם : PU-42 ברקוד : 7290020071767"
   },
   {
