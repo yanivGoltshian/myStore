@@ -183,10 +183,10 @@
     "id": 37983,
     "name": "מאוורר \"16 עמוד 5 כנפיים בסיס עגול / ATL-904",
     "model": "ATL-904",
-    "price": 119,
+    "price": 99,
     "regularPrice": 119,
-    "salePrice": 119,
-    "onSale": false,
+    "salePrice": 99,
+    "onSale": true,
     "image": "/images/products/37983.jpg",
     "categoryIds": [
       146,
