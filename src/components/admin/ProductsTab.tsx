@@ -120,11 +120,12 @@ export default function ProductsTab({
   const [catFilter, setCatFilter] = useState("");
   const [page, setPage] = useState(1);
   const [serverCount, setServerCount] = useState(0);
+  const [storeLimit, setStoreLimit] = useState(STORE_PAGE_SIZE);
   const [open, setOpen] = useState(false);
   const [lineFilter, setLineFilter] = useState<{ id: number; name: string } | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const searchRef = useRef<HTMLDivElement>(null);
-  const gridRef = useRef<HTMLDivElement>(null);
+  const sentinelRef = useRef<HTMLDivElement>(null);
   const modalPushedRef = useRef(false);
 
   const catById = useMemo(() => new Map(cats.map((c) => [c.id, c])), [cats]);
@@ -187,6 +188,7 @@ export default function ProductsTab({
     const t = setTimeout(() => {
       setDebouncedQuery(query.trim());
       setPage(1);
+      setStoreLimit(STORE_PAGE_SIZE);
     }, 300);
     return () => clearTimeout(t);
   }, [query]);
@@ -299,14 +301,7 @@ export default function ProductsTab({
     setQuery("");
     setOpen(false);
     setPage(1);
-  }
-
-  function changePage(next: number) {
-    setPage(next);
-    // Explicit page navigation (store mode) jumps back to the top of the grid.
-    // Lighting keeps its existing behaviour; save/reload never calls this, so the
-    // post-save scroll-preservation fix stays intact.
-    if (!lightingMode) gridRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    setStoreLimit(STORE_PAGE_SIZE);
   }
 
   const filtered = useMemo(() => {
@@ -329,17 +324,31 @@ export default function ProductsTab({
 
   const totalPages = lightingMode
     ? Math.max(1, Math.ceil(serverCount / LIGHTING_PAGE_SIZE))
-    : Math.max(1, Math.ceil(filtered.length / STORE_PAGE_SIZE));
-  const safePage = Math.min(page, totalPages);
-  const shown = lightingMode
-    ? filtered
-    : filtered.slice((safePage - 1) * STORE_PAGE_SIZE, safePage * STORE_PAGE_SIZE);
+    : 1;
+  const shown = lightingMode ? filtered : filtered.slice(0, storeLimit);
+  const hasMore = !lightingMode && storeLimit < filtered.length;
 
-  // Keep `page` in range when the result set shrinks (e.g. after a delete or a
-  // narrower filter) so navigation never lands on an empty page.
+  // Infinite scroll for the store list. Every store product is already loaded in
+  // memory, so as the sentinel below the grid nears the viewport we reveal the
+  // next chunk. The generous rootMargin loads rows ahead of the user, so the
+  // scroll stays smooth with no stops. `storeLimit` resets only on an explicit
+  // filter or search change; a silent save/reload never touches it, so the
+  // post-save scroll-preservation fix (commit 5d4d583) stays intact.
   useEffect(() => {
-    if (page > totalPages) setPage(totalPages);
-  }, [page, totalPages]);
+    if (!hasMore) return;
+    const node = sentinelRef.current;
+    if (!node) return;
+    const io = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting) {
+          setStoreLimit((n) => Math.min(n + STORE_PAGE_SIZE, filtered.length));
+        }
+      },
+      { rootMargin: "1000px 0px" }
+    );
+    io.observe(node);
+    return () => io.disconnect();
+  }, [hasMore, filtered.length]);
 
   const tops = useMemo(
     () => cats.filter((c) => !c.parent).sort((a, b) => a.name.localeCompare(b.name, "he")),
@@ -590,6 +599,7 @@ export default function ProductsTab({
               onClick={() => {
                 setLineFilter(null);
                 setPage(1);
+                setStoreLimit(STORE_PAGE_SIZE);
               }}
               className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-2 text-sm font-bold transition ${
                 !lineFilter ? "border-brand-red bg-brand-red text-white" : "border-line bg-white text-heading hover:border-brand-red/40"
@@ -662,7 +672,7 @@ export default function ProductsTab({
         </Card>
       ) : (
         <>
-          <div ref={gridRef} className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
             {shown.map((p) => (
               <article key={`${p.source}-${p.id}`} className="card-hover group flex flex-col overflow-hidden rounded-2xl border border-line bg-white shadow-card">
                 <button onClick={() => openEdit(p)} className="flex flex-1 flex-col p-2.5 text-right" title="לחצו לעריכת המוצר">
@@ -686,15 +696,24 @@ export default function ProductsTab({
               </article>
             ))}
           </div>
-          {totalPages > 1 ? (
+          {lightingMode && totalPages > 1 ? (
             <div className="flex items-center justify-center gap-3 pt-1">
-              <Button variant="ghost" onClick={() => changePage(Math.max(1, safePage - 1))} disabled={safePage <= 1}>← הקודם</Button>
-              <span className="text-sm font-semibold text-muted">עמוד {safePage.toLocaleString("he-IL")} מתוך {totalPages.toLocaleString("he-IL")}</span>
-              <Button variant="ghost" onClick={() => changePage(Math.min(totalPages, safePage + 1))} disabled={safePage >= totalPages}>הבא →</Button>
+              <Button variant="ghost" onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page <= 1}>← הקודם</Button>
+              <span className="text-sm font-semibold text-muted">עמוד {page.toLocaleString("he-IL")} מתוך {totalPages.toLocaleString("he-IL")}</span>
+              <Button variant="ghost" onClick={() => setPage((p) => Math.min(totalPages, p + 1))} disabled={page >= totalPages}>הבא →</Button>
             </div>
           ) : null}
-          {!lightingMode && filtered.length > 0 ? (
-            <p className="mt-3 text-center text-xs text-muted">סה"כ {filtered.length.toLocaleString("he-IL")} מוצרים</p>
+          {!lightingMode ? (
+            <>
+              <div ref={sentinelRef} aria-hidden="true" className="h-px w-full" />
+              {filtered.length > 0 ? (
+                <p className="mt-3 text-center text-xs text-muted">
+                  {hasMore
+                    ? `מוצגים ${shown.length.toLocaleString("he-IL")} מתוך ${filtered.length.toLocaleString("he-IL")} מוצרים`
+                    : `סה"כ ${filtered.length.toLocaleString("he-IL")} מוצרים`}
+                </p>
+              ) : null}
+            </>
           ) : null}
         </>
       )}
