@@ -5965,9 +5965,9 @@
     "name": "מאוורר עמוד \"16 / ATL-905",
     "model": "ATL-905",
     "price": 89,
-    "regularPrice": 89,
+    "regularPrice": 119,
     "salePrice": 89,
-    "onSale": false,
+    "onSale": true,
     "image": "/images/products/23054.jpg",
     "categoryIds": [
       146,
