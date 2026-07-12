@@ -502,9 +502,9 @@
     "name": "מצנן אוויר נייד 4 ב-1 +שלט ותאורת ATL-488 / LED",
     "model": "ATL-488",
     "price": 379,
-    "regularPrice": 379,
+    "regularPrice": 299,
     "salePrice": 379,
-    "onSale": false,
+    "onSale": true,
     "image": "/images/products/37250.jpg",
     "categoryIds": [
       146,
