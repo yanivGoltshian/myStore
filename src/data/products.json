@@ -236,10 +236,10 @@
     "id": 37977,
     "name": "מאוורר אובלי בטיחותי + שלט ותאורת ATL-1930 / BLADELESS FAN 3D LED",
     "model": "ATL-1930",
-    "price": 199,
+    "price": 160,
     "regularPrice": 199,
-    "salePrice": 199,
-    "onSale": false,
+    "salePrice": 160,
+    "onSale": true,
     "image": "/images/products/37977.jpg",
     "categoryIds": [
       768,
