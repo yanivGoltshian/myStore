@@ -1,5 +1,20 @@
 [
   {
+    "id": 38010,
+    "name": "תיקון מכשירי חשמל דייסון",
+    "model": "",
+    "price": 0,
+    "regularPrice": 0,
+    "salePrice": 0,
+    "onSale": false,
+    "image": "",
+    "categoryIds": [
+      9024
+    ],
+    "inStock": true,
+    "description": ""
+  },
+  {
     "id": 38009,
     "name": "קומקום חשמלי פיליפס",
     "model": "H - 938/3",
