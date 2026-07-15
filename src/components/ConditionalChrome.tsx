@@ -19,7 +19,9 @@ export default function ConditionalChrome({
   return (
     <>
       {header}
-      <main>{children}</main>
+      <main id="main-content" tabIndex={-1}>
+        {children}
+      </main>
       {footer}
     </>
   );

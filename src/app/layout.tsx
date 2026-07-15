@@ -8,6 +8,7 @@ import ScrollToTop from "@/components/ScrollToTop";
 import PWARegister from "@/components/PWARegister";
 import ScrollReveal from "@/components/ScrollReveal";
 import InstallPrompt from "@/components/InstallPrompt";
+import AccessibilityWidget from "@/components/AccessibilityWidget";
 import { CartProvider } from "@/lib/cart";
 import { WishlistProvider } from "@/lib/wishlist";
 import { QuickViewProvider } from "@/lib/quickview";
@@ -247,6 +248,9 @@ export default function RootLayout({
       }
     >
       <body className="overflow-x-hidden">
+        <a href="#main-content" className="skip-link">
+          דלג לתוכן
+        </a>
         <script
           dangerouslySetInnerHTML={{
             __html:
@@ -268,6 +272,7 @@ export default function RootLayout({
               </ConditionalChrome>
               <InstallPrompt />
               <QuickViewModal />
+              <AccessibilityWidget />
             </QuickViewProvider>
           </WishlistProvider>
         </CartProvider>

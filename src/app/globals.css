@@ -332,3 +332,190 @@ html[data-gsap-anim] [data-reveal-group] > *,
 html[data-gsap-anim] [data-reveal-pop] > * {
   opacity: 0;
 }
+
+/* ==========================================================================
+   Accessibility: skip-to-content link
+   ========================================================================== */
+
+/* Visually-hidden helper (kept available for future use) */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Skip link — hidden until it receives keyboard focus, then slides into view */
+.skip-link {
+  position: fixed;
+  inset-inline-start: 1rem;
+  top: -120px;
+  z-index: 100;
+  padding: 0.65rem 1.1rem;
+  border-radius: 0.55rem;
+  background: var(--color-brand-blue);
+  color: #fff;
+  font-weight: 800;
+  font-size: 0.9rem;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+  transition: top 0.15s ease;
+}
+.skip-link:focus {
+  top: 1rem;
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .skip-link { transition: none; }
+}
+
+/* ==========================================================================
+   Accessibility widget (a11y toolbar)
+   ========================================================================== */
+
+/* Floating toggle button — bottom inline-start corner (physical bottom-right
+   in RTL), which keeps clear of the mobile sticky buy-bar CTA (inline-end). */
+.a11y-fab {
+  position: fixed;
+  inset-inline-start: 1rem;
+  bottom: calc(1rem + env(safe-area-inset-bottom, 0px));
+  z-index: 40;
+  width: 3rem;
+  height: 3rem;
+}
+
+/* Lift the toggle above the mobile sticky buy-bar while it is showing, so the
+   two never overlap. Zero-JS, no cross-component edit. */
+@media (max-width: 1023px) {
+  body:has(.sticky-buy-bar.is-visible) .a11y-fab {
+    bottom: calc(1rem + 4.5rem + env(safe-area-inset-bottom, 0px));
+  }
+}
+
+/* Lift the toggle above the one-time install banner while it is showing, so the
+   full-width banner container never covers or intercepts the toggle. The banner
+   card is ~94px tall; clearing it keeps the toggle operable on mobile and
+   desktop. Zero-JS, no cross-component edit. */
+body:has(.inset-x-0.bottom-0.z-\[60\]) .a11y-fab {
+  bottom: calc(1rem + 6.5rem + env(safe-area-inset-bottom, 0px));
+}
+
+.a11y-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  background: rgba(17, 17, 17, 0.35);
+}
+
+.a11y-panel {
+  position: fixed;
+  inset-inline-start: 1rem;
+  bottom: calc(4.5rem + env(safe-area-inset-bottom, 0px));
+  z-index: 80;
+  width: min(21rem, calc(100vw - 2rem));
+  max-height: min(75vh, 34rem);
+  overflow-y: auto;
+  padding: 1rem;
+  border: 1px solid var(--color-line);
+  border-radius: 1rem;
+  background: #fff;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.28);
+  animation: fadeUp 0.18s ease both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .a11y-panel { animation: none; }
+}
+
+/* --- Text-size: handled via document.documentElement.style.fontSize --- */
+
+/* --- High-contrast palette (real class-based palette, not a filter) --- */
+html.a11y-contrast body {
+  background: #000 !important;
+  color: #fff !important;
+}
+html.a11y-contrast .bg-white,
+html.a11y-contrast [class*="bg-white"],
+html.a11y-contrast .bg-soft,
+html.a11y-contrast .stars-bg,
+html.a11y-contrast header,
+html.a11y-contrast header > div,
+html.a11y-contrast footer,
+html.a11y-contrast section,
+html.a11y-contrast .share-band,
+html.a11y-contrast .a11y-panel {
+  background-color: #000 !important;
+  background-image: none !important;
+}
+html.a11y-contrast * {
+  color: #fff !important;
+  border-color: #fff !important;
+}
+html.a11y-contrast .text-muted { color: #e6e6e6 !important; }
+html.a11y-contrast a,
+html.a11y-contrast a * {
+  color: #ffe600 !important;
+}
+html.a11y-contrast a {
+  text-decoration: underline !important;
+  text-underline-offset: 2px;
+}
+html.a11y-contrast .bg-brand-red,
+html.a11y-contrast .bg-brand-blue,
+html.a11y-contrast .bg-brand-blue-dark {
+  background-color: #000 !important;
+  color: #fff !important;
+  border: 2px solid #fff !important;
+}
+html.a11y-contrast .a11y-backdrop {
+  background: rgba(0, 0, 0, 0.65) !important;
+}
+html.a11y-contrast :focus-visible {
+  outline: 3px solid #ffe600 !important;
+  outline-offset: 2px !important;
+}
+
+/* --- Stop animations (same effect as prefers-reduced-motion) --- */
+html.a11y-no-motion *,
+html.a11y-no-motion *::before,
+html.a11y-no-motion *::after {
+  animation: none !important;
+  transition: none !important;
+  scroll-behavior: auto !important;
+}
+html.a11y-no-motion { scroll-behavior: auto !important; }
+/* Neutralize GSAP / hero reveal end-state so nothing stays hidden */
+html.a11y-no-motion [data-reveal],
+html.a11y-no-motion [data-reveal-group] > *,
+html.a11y-no-motion [data-reveal-pop] > * {
+  opacity: 1 !important;
+  transform: none !important;
+}
+
+/* --- Highlight links (underline + visible box + soft background) --- */
+html.a11y-highlight-links a {
+  text-decoration: underline !important;
+  text-underline-offset: 2px;
+  outline: 2px solid var(--color-brand-blue);
+  outline-offset: 1px;
+  background-color: rgba(212, 175, 55, 0.22);
+  border-radius: 2px;
+}
+
+/* --- Readable font (system, legible, Hebrew-capable) --- */
+html.a11y-readable-font,
+html.a11y-readable-font body,
+html.a11y-readable-font * {
+  font-family: Arial, "Segoe UI", Tahoma, Verdana, sans-serif !important;
+}
+
+/* --- Increased line + text spacing (aligns with WCAG 1.4.12) --- */
+html.a11y-line-spacing * {
+  line-height: 1.8 !important;
+  letter-spacing: 0.06em !important;
+  word-spacing: 0.12em !important;
+}
