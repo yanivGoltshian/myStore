@@ -238,9 +238,9 @@ export default function AccessibilityWidget() {
         aria-label="תפריט נגישות"
         aria-expanded={open}
         aria-controls="a11y-panel"
-        className="a11y-fab grid place-items-center rounded-full bg-brand-blue text-white shadow-[0_6px_20px_rgba(0,0,0,0.28)] ring-2 ring-white transition-colors hover:bg-brand-blue-dark"
+        className="a11y-fab grid place-items-center rounded-full bg-brand-blue text-white shadow-[0_4px_14px_rgba(0,0,0,0.22)] transition hover:bg-brand-blue-dark"
       >
-        <AccessIcon className="h-7 w-7" />
+        <AccessIcon className="h-6 w-6" />
       </button>
 
       {open && (
