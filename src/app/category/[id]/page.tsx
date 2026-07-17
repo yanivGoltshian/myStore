@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import ProductGrid from "@/components/ProductGrid";
+import CategoryShareButton from "@/components/CategoryShareButton";
 import { categories, site, getCategory, getProductsByCategory } from "@/lib/data";
 
 type LightingCategory = {
@@ -96,6 +97,7 @@ export default async function CategoryPage({
           <h1 className="flex items-center gap-2 text-2xl font-extrabold md:text-3xl">
             <span>{category.icon}</span>
             {category.name}
+            <CategoryShareButton shareUrl={`${site.deployUrl}/category/${category.id}/`} />
           </h1>
           <p className="mt-1 text-[0.8rem] text-white/75">{products.length} מוצרים</p>
         </div>
