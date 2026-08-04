@@ -8268,10 +8268,10 @@
     "id": 2682,
     "name": "מיקרוגל 20 ליטר דיגיטלי דלת מראה / P80D20EL-DK",
     "model": "P80D20EL-DK",
-    "price": 429,
+    "price": 390,
     "regularPrice": 429,
-    "salePrice": 429,
-    "onSale": false,
+    "salePrice": 390,
+    "onSale": true,
     "image": "/images/products/2682.jpg",
     "categoryIds": [
       120,
