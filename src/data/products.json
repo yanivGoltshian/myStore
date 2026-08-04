@@ -8284,10 +8284,10 @@
     "id": 2650,
     "name": "מיקרוגל 25 ליטר דיגיטלי דלת מראה / P90D25EP-H3",
     "model": "P90D25EP-H3",
-    "price": 549,
+    "price": 390,
     "regularPrice": 549,
-    "salePrice": 549,
-    "onSale": false,
+    "salePrice": 390,
+    "onSale": true,
     "image": "/images/products/2650.jpg",
     "categoryIds": [
       120,
