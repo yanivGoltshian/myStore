@@ -1196,10 +1196,10 @@
     "id": 36240,
     "name": "מיקרוגל 21 ליטר מכני לבן / ATL-1325W",
     "model": "ATL-1325W",
-    "price": 379,
+    "price": 299,
     "regularPrice": 379,
-    "salePrice": 379,
-    "onSale": false,
+    "salePrice": 299,
+    "onSale": true,
     "image": "/images/products/36240.jpg",
     "categoryIds": [
       120,
