@@ -4195,10 +4195,10 @@
     "id": 33130,
     "name": "מקציף חלב VALERIANO שחור / ATL-8844B",
     "model": "ATL-8844B",
-    "price": 189,
+    "price": 169,
     "regularPrice": 189,
-    "salePrice": 189,
-    "onSale": false,
+    "salePrice": 169,
+    "onSale": true,
     "image": "/images/products/33130.jpg",
     "categoryIds": [
       120
