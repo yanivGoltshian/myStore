@@ -5519,10 +5519,10 @@
     "id": 29104,
     "name": "מקציף חלב VALERIANO קרם / ATL-8844C",
     "model": "ATL-8844C",
-    "price": 189,
+    "price": 169,
     "regularPrice": 189,
-    "salePrice": 189,
-    "onSale": false,
+    "salePrice": 169,
+    "onSale": true,
     "image": "/images/products/29104.jpg",
     "categoryIds": [
       120
