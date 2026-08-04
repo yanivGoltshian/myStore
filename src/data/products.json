@@ -955,10 +955,10 @@
     "id": 36335,
     "name": "מכונת ניקוי שואבת שוטפת / ATL-2330",
     "model": "ATL-2330",
-    "price": 479,
+    "price": 379,
     "regularPrice": 479,
-    "salePrice": 479,
-    "onSale": false,
+    "salePrice": 379,
+    "onSale": true,
     "image": "/images/products/36335.jpg",
     "categoryIds": [
       146,
