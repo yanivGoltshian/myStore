@@ -3794,10 +3794,10 @@
     "id": 33577,
     "name": "בלנדר זכוכית SALVADOR שחור / ATL-5860B",
     "model": "ATL-5860B",
-    "price": 219,
+    "price": 199,
     "regularPrice": 219,
-    "salePrice": 219,
-    "onSale": false,
+    "salePrice": 199,
+    "onSale": true,
     "image": "/images/products/33577.jpg",
     "categoryIds": [
       130,
