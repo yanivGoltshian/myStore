@@ -5756,10 +5756,10 @@
     "id": 27848,
     "name": "מיקסר יד עם מיכל / ATL-205",
     "model": "ATL-205",
-    "price": 99,
+    "price": 79,
     "regularPrice": 99,
-    "salePrice": 99,
-    "onSale": false,
+    "salePrice": 79,
+    "onSale": true,
     "image": "/images/products/27848.jpg",
     "categoryIds": [
       120,
