@@ -6755,9 +6755,9 @@
     "id": 7849,
     "name": "כירה חשמלית יחיד נירוסטה / ATL-103S",
     "model": "ATL-103S",
-    "price": 119,
-    "regularPrice": 119,
-    "salePrice": 119,
+    "price": 99,
+    "regularPrice": 99,
+    "salePrice": 99,
     "onSale": false,
     "image": "/images/products/7849.jpg",
     "categoryIds": [
