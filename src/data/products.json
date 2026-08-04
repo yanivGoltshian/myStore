@@ -1746,10 +1746,10 @@
     "id": 35638,
     "name": "מכשיר להכנת וופל בלגי ATL-243 / x5",
     "model": "ATL-243",
-    "price": 119,
+    "price": 89,
     "regularPrice": 119,
-    "salePrice": 119,
-    "onSale": false,
+    "salePrice": 89,
+    "onSale": true,
     "image": "/images/products/35638.jpg",
     "categoryIds": [
       785,
