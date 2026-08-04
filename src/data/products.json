@@ -8410,10 +8410,10 @@
     "id": 2608,
     "name": "קטלן יתושים מעוצב ATL-732 / 6W",
     "model": "ATL-732",
-    "price": 69,
+    "price": 50,
     "regularPrice": 69,
-    "salePrice": 69,
-    "onSale": false,
+    "salePrice": 50,
+    "onSale": true,
     "image": "/images/products/2608.jpg",
     "categoryIds": [
       112,
