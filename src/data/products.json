@@ -7437,16 +7437,16 @@
     "id": 3414,
     "name": "מאוורר רוטורי מתכוונן / ATL-016",
     "model": "ATL-016",
-    "price": 199,
+    "price": 149,
     "regularPrice": 199,
-    "salePrice": 199,
-    "onSale": false,
+    "salePrice": 149,
+    "onSale": true,
     "image": "/images/products/3414.jpg",
     "categoryIds": [
       769,
       112
     ],
-    "inStock": false,
+    "inStock": true,
     "description": "הספק : 100W מידות: גובה : 54 ס\"מ עומק : 20 ס\"מ רוחב : 40 ס\"מ. קוטר רשת : 36 ס\"מ. אורך כבל ההזנה : 175 ס\"מ. דגם : ATL-016 ברקוד : 7290010483648"
   },
   {
