@@ -7819,10 +7819,10 @@
     "id": 3135,
     "name": "מיחם נירוסטה 40 כוסות / ATL-88",
     "model": "ATL-88",
-    "price": 249,
+    "price": 199,
     "regularPrice": 249,
-    "salePrice": 249,
-    "onSale": false,
+    "salePrice": 199,
+    "onSale": true,
     "image": "/images/products/3135.jpg",
     "categoryIds": [
       120,
