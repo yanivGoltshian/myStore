@@ -3510,10 +3510,10 @@
     "id": 34103,
     "name": "טוסטר לחיצה \"לאס וגאס\" שחור / ATL-268B",
     "model": "ATL-268B",
-    "price": 139,
+    "price": 99,
     "regularPrice": 139,
-    "salePrice": 139,
-    "onSale": false,
+    "salePrice": 99,
+    "onSale": true,
     "image": "/images/products/34103.jpg",
     "categoryIds": [
       750,
