@@ -8043,10 +8043,10 @@
     "id": 2821,
     "name": "טוסטר אובן 40 ליטר / ATL-6640",
     "model": "ATL-6640",
-    "price": 419,
+    "price": 329,
     "regularPrice": 419,
-    "salePrice": 419,
-    "onSale": false,
+    "salePrice": 329,
+    "onSale": true,
     "image": "/images/products/2821.jpg",
     "categoryIds": [
       167,
