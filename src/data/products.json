@@ -1778,10 +1778,10 @@
     "id": 35509,
     "name": "מכונת ניקוי שואבת שוטפת / ATL-2320",
     "model": "ATL-2320",
-    "price": 329,
+    "price": 279,
     "regularPrice": 329,
-    "salePrice": 329,
-    "onSale": false,
+    "salePrice": 279,
+    "onSale": true,
     "image": "/images/products/35509.jpg",
     "categoryIds": [
       146,
