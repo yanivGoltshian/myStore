@@ -4566,10 +4566,10 @@
     "id": 32701,
     "name": "טוסטר אובן 21 ליטר לבן / ATL-6621W",
     "model": "ATL-6621W",
-    "price": 259,
+    "price": 220,
     "regularPrice": 259,
-    "salePrice": 259,
-    "onSale": false,
+    "salePrice": 220,
+    "onSale": true,
     "image": "/images/products/32701.jpg",
     "categoryIds": [
       146,
