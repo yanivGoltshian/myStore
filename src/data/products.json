@@ -3190,9 +3190,9 @@
     "id": 34128,
     "name": "שעון שבת טיימר / MPS-01",
     "model": "MPS-01",
-    "price": 0,
-    "regularPrice": 0,
-    "salePrice": 0,
+    "price": 19,
+    "regularPrice": 19,
+    "salePrice": 19,
     "onSale": false,
     "image": "/images/products/34128.jpg",
     "categoryIds": [
