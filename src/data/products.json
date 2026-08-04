@@ -6898,10 +6898,10 @@
     "id": 4150,
     "name": "טוסטר לחיצה \"לאס וגאס\" לבן / ATL-268W",
     "model": "ATL-268W",
-    "price": 139,
+    "price": 99,
     "regularPrice": 139,
-    "salePrice": 139,
-    "onSale": false,
+    "salePrice": 99,
+    "onSale": true,
     "image": "/images/products/4150.jpg",
     "categoryIds": [
       750,
