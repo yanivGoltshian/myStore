@@ -2383,9 +2383,9 @@
     "id": 34757,
     "name": "שעון שבת/טיימר 48 שעות / MPS-03",
     "model": "MPS-03",
-    "price": 0,
-    "regularPrice": 0,
-    "salePrice": 0,
+    "price": 19,
+    "regularPrice": 19,
+    "salePrice": 19,
     "onSale": false,
     "image": "/images/products/34757.jpg",
     "categoryIds": [
