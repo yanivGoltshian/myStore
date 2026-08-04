@@ -6368,10 +6368,10 @@
     "id": 13704,
     "name": "מחמם מים מיידי למקלחת ATL-5500 / 5.5KW",
     "model": "ATL-5500",
-    "price": 349,
+    "price": 259,
     "regularPrice": 349,
-    "salePrice": 349,
-    "onSale": false,
+    "salePrice": 259,
+    "onSale": true,
     "image": "/images/products/13704.jpg",
     "categoryIds": [
       15,
