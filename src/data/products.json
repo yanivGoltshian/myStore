@@ -3606,12 +3606,14 @@
     "id": 34021,
     "name": "מקציף חלב מהודר Alessandro לבן / ATL-8855W",
     "model": "ATL-8855W",
-    "price": 149,
+    "price": 99,
     "regularPrice": 149,
-    "salePrice": 149,
-    "onSale": false,
+    "salePrice": 99,
+    "onSale": true,
     "image": "/images/products/34021.jpg",
-    "categoryIds": [],
+    "categoryIds": [
+      165
+    ],
     "inStock": false,
     "description": "כפתור הפעלה המואר בזמן הפעולה. גוף חימום עוצמתי 500W לפעולה מהירה. מיכל פנימי המכיל טפלון NON-STICK איכותי. מכסה שגוף לצפייה בהליך ההכנה. בסיס מסתובב 360 מעלות לשליפה נוחה. קל, נוח וידידותי לשימוש ולניקוי. KGC KOSHER – מוצר למהדרין – מאושר – לשימוש פטור מטבילה ומהגעלה. הספק: 500W דגם: ATL-8855W ברקוד: 7290019406525"
   },
