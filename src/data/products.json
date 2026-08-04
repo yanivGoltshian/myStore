@@ -4972,14 +4972,15 @@
     "id": 30990,
     "name": "משקל אדם זכוכית שחורה ATL-8610 / ELEGANT",
     "model": "ATL-8610",
-    "price": 89,
+    "price": 59,
     "regularPrice": 89,
-    "salePrice": 89,
-    "onSale": false,
+    "salePrice": 59,
+    "onSale": true,
     "image": "/images/products/30990.jpg",
     "categoryIds": [
       140,
-      753
+      753,
+      146
     ],
     "inStock": true,
     "description": "דגם: ATL-8610 ברקוד: 7290018657393"
