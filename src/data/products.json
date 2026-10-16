@@ -3450,10 +3450,10 @@
     "id": 34108,
     "name": "קוצץ ומעבד מזון מהיר / ATL-635",
     "model": "ATL-635",
-    "price": 99,
+    "price": 79,
     "regularPrice": 99,
-    "salePrice": 99,
-    "onSale": false,
+    "salePrice": 79,
+    "onSale": true,
     "image": "/images/products/34108.jpg",
     "categoryIds": [
       120,
