@@ -664,10 +664,10 @@
     "id": 36945,
     "name": "קומקום נשלף אקסקלוסיבי ATL-783C / PREMIERE Sahara Cream Style",
     "model": "ATL-783C",
-    "price": 199,
+    "price": 149,
     "regularPrice": 199,
-    "salePrice": 199,
-    "onSale": false,
+    "salePrice": 149,
+    "onSale": true,
     "image": "/images/products/36945.jpg",
     "categoryIds": [
       120,
