@@ -6,7 +6,14 @@
     "alt": "חשמל חנקין — חנות מוצרי חשמל ביתיים ושירותי חשמלאי בבית הלקוח",
     "href": "/category/146/"
   },
-  "promoTiles": [],
+  "promoTiles": [
+    {
+      "id": "t-1795092660868",
+      "title": "אריח חדשתנור חימום אינפרא לאמבטיה / ATL-2000",
+      "image": "",
+      "categoryId": 15
+    }
+  ],
   "sections": [
     {
       "id": "s-summer",
@@ -87,24 +94,6 @@
         "dealPrice": 289,
         "href": "/product/37038/",
         "originalPrice": 330
-      },
-      {
-        "id": "deal-35869",
-        "productId": 34031,
-        "title": "מחבט יתושים / ATL-730",
-        "image": "/images/products/34031.jpg",
-        "dealPrice": 15,
-        "href": "/product/34031/",
-        "originalPrice": 39
-      },
-      {
-        "id": "deal-1783081005369",
-        "title": "קטלן יתושים מעוצב ATL-732 / 6W",
-        "image": "/images/products/2608.jpg",
-        "dealPrice": 48,
-        "href": "/product/2608/",
-        "productId": 2608,
-        "originalPrice": 69
       },
       {
         "id": "deal-1783522924358",
