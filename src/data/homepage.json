@@ -102,6 +102,21 @@
         "dealPrice": 239,
         "href": "",
         "originalPrice": 299
+      },
+      {
+        "id": "deal-1795106362401",
+        "title": "מבצע חדש",
+        "image": "",
+        "dealPrice": 125,
+        "href": "https://electro-hankin.vercel.app/product/34729/",
+        "originalPrice": 159
+      },
+      {
+        "id": "deal-1795106364297",
+        "title": "מבצע חדש",
+        "image": "",
+        "dealPrice": 0,
+        "href": ""
       }
     ]
   }
