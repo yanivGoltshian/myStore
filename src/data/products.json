@@ -7052,17 +7052,17 @@
     "id": 3880,
     "name": "סדין חימום חשמלי זוגי / ATL-403",
     "model": "ATL-403",
-    "price": 169,
+    "price": 149,
     "regularPrice": 169,
-    "salePrice": 169,
-    "onSale": false,
+    "salePrice": 149,
+    "onSale": true,
     "image": "/images/products/3880.jpg",
     "categoryIds": [
       15,
       682,
       109
     ],
-    "inStock": false,
+    "inStock": true,
     "description": "מתחמם במהירות וחסכוני בתצרוכת החשמל מפסק הפעלה בטיחותי הכולל בחירת דרגות חום שונות. הספק : 120W מידות : רוחב : 138 ס\"מ אורך : 160 ס\"מ דגם : ATL-403 ברקוד: 7290011879099"
   },
   {
