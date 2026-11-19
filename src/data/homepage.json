@@ -6,14 +6,7 @@
     "alt": "חשמל חנקין — חנות מוצרי חשמל ביתיים ושירותי חשמלאי בבית הלקוח",
     "href": "/category/146/"
   },
-  "promoTiles": [
-    {
-      "id": "t-1795092660868",
-      "title": "אריח חדשתנור חימום אינפרא לאמבטיה / ATL-2000",
-      "image": "",
-      "categoryId": 15
-    }
-  ],
+  "promoTiles": [],
   "sections": [
     {
       "id": "s-summer",
@@ -105,18 +98,12 @@
       },
       {
         "id": "deal-1795106362401",
-        "title": "מבצע חדש",
-        "image": "",
+        "title": "תנור חימום אינפרא לאמבטיה / ATL-2000",
+        "image": "/images/products/34729.jpg",
         "dealPrice": 125,
-        "href": "https://electro-hankin.vercel.app/product/34729/",
-        "originalPrice": 159
-      },
-      {
-        "id": "deal-1795106364297",
-        "title": "מבצע חדש",
-        "image": "",
-        "dealPrice": 0,
-        "href": ""
+        "href": "/product/34729/",
+        "originalPrice": 159,
+        "productId": 34729
       }
     ]
   }
